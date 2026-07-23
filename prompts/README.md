@@ -5,9 +5,16 @@ exciting idea into architecture or code before originality and feasibility are e
 Persisted workflow state lives in
 [`.thoughts/decisions/CURRENT.md`](../.thoughts/decisions/CURRENT.md).
 
-1. [Refresh reality and generate candidates](./01-refresh-reality-and-ideas.md)
+1. [Research winners and generate only feasible candidates](./00-feasibility-first-winner-research.md)
 2. [Adversarially choose one concept](./02-adversarial-selection.md)
 3. [Verify the chosen concept's critical path](./03-critical-path-verification.md)
 
-The first two prompts are safe to run now. Run the third only after the user explicitly selects a
-concept or asks the agent to validate the current front-runner.
+Prompt 0 is the only current discovery prompt. It makes feasibility a veto, records the user's
+rejected directions, and requires comparable-winner research before generating anything. Stop
+after Prompt 0 so the user can inspect the evidence and survivors.
+
+[`01-refresh-reality-and-ideas.md`](./01-refresh-reality-and-ideas.md) is preserved only as
+historical context and must not be run. Run Prompt 2 only when the user asks to compare or select
+one or more survivors. If Prompt 0 returns `NONE SURVIVE`, repeat discovery with new evidence rather
+than running Prompt 2. Run Prompt 3 only after the user explicitly selects a concept or asks the
+agent to validate a surviving front-runner.

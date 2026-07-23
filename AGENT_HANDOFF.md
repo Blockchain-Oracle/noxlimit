@@ -3,18 +3,22 @@
 ## Mission
 
 Use this repository to select an original, buildable iExec WTF Hackathon product. Do not assume the
-organizer's wallet, DeFi, or treasury suggestions are mandatory. Do not inherit QuietRound as a
-decision. Treat **SLA Lock** as the leading hypothesis that must survive adversarial comparison.
+organizer's wallet, DeFi, or treasury suggestions are mandatory. There is currently no front-runner.
+Do not inherit QuietRound, SLA Lock, Proofline, AgentDispute, or any historical idea as a decision.
+Start with [`prompts/00-feasibility-first-winner-research.md`](./prompts/00-feasibility-first-winner-research.md).
 
-The outcome of the next agent pass should be a cited decision memo with:
+The outcome of the next agent pass should be a cited evidence and candidate report with:
 
-1. a refreshed collision scan;
-2. six to ten product candidates;
-3. a ranked top three;
-4. one recommended concept with explicit kill criteria;
-5. the smallest technical feasibility question that must be answered before planning.
+1. patterns from comparable privacy, ZK, FHE, confidential-computing, and protocol-integration
+   hackathon winners;
+2. current shipping-product and user-workflow evidence;
+3. a refreshed collision scan;
+4. a candidate graveyard with exact reasons each tempting idea failed;
+5. no more than five candidates that pass every feasibility gate;
+6. up to three recommendations, or an explicit `NONE SURVIVE` verdict.
 
-Stop before product specification, architecture, implementation planning, or code.
+Recommendations are not selections. Stop for user review before Prompt 2, product specification,
+architecture, implementation planning, or code.
 
 ## Canonical facts to inherit
 
@@ -58,9 +62,8 @@ The public GitHub scan found 20 July-created Nox repositories. Crowded lanes inc
 - private DeFi strategy agents;
 - confidential donations/treasury.
 
-No repository or code-search hit was found for Nox with ERC-8183, ERC-8004, agent-job SLA
-evaluation, or service-quality escrow. The DoraHacks list is private, so absence from GitHub is not
-proof of absence.
+The DoraHacks list is private, so absence from the dated public GitHub scan is not proof of an
+opportunity or of competitor absence.
 
 ## Nox reality that constrains every idea
 
@@ -82,37 +85,17 @@ The reusable product spine is:
 
 `direct encrypted input → replay guard → persisted encrypted state → arithmetic/compare/select → reveal one minimal result → proof-gated real action`
 
-## Current front-runner
+## Product direction reset
 
-**SLA Lock — confidential SLA enforcement for agent commerce**
+The user rejected the previous ideas because they started from confidentiality and forced a product
+around it. In particular, do not revive agent evaluators/disputes, community notes, polling,
+governance, shares, policy, benchmarks, certifications, ratings, wallets, token factories, or a new
+chain/platform. Do not propose products that depend on panels, institutions, legal enforcement,
+fake participants, synthetic telemetry, or multi-role demo choreography.
 
-It is like ERC-8183 agent-job escrow with an evaluator that can decide from sensitive operational
-telemetry without publishing that telemetry. In the proposed, not-yet-verified flow, approved
-monitors encrypt latency, cost, error rate, completion, and quality measurements. Nox evaluates the
-policy and reveals only pass/fail. The proof-bound evaluator then completes or rejects the unchanged
-ERC-8183 job, releasing payment or refund. An optional ERC-8004 validation record would make the
-result composable with agent reputation.
-
-Why it currently leads:
-
-- Draft ERC-8183 was created in February 2026 for agent-job escrow and explicitly allows a
-  smart-contract evaluator that aggregates off-chain signals.
-- ERC-8004 explicitly includes TEE validation and currently models public metrics such as quality,
-  uptime, response time, success rate, revenue, and trading yield.
-- x402 and agent-service discovery make the user and market legible.
-- Nox controls a real economic transition rather than hiding a decorative field.
-- The judge path can be one sponsored “run a real agent job” action—no second wallet or manual faucet.
-- It avoids every previous-winner lane and the visible current clusters.
-
-Kill it if any of these becomes true:
-
-- the agent telemetry is invented or self-reported rather than signed by a credible monitor;
-- the ERC-8183 evaluator cannot complete/reject an unchanged job on Ethereum Sepolia;
-- the organizer does not accept an integration with an unmodified draft ERC reference
-  implementation as the required open-source protocol integration;
-- the judge path requires local setup, multiple wallets, or manual funding;
-- the Nox proof is not bound to one stored job evaluation and one terminal action;
-- a hidden current submission already implements the same confidential agent-SLA evaluator.
+Feasibility is now a veto. The search must begin with comparable winners and current products that
+people already use. Only then test whether a small, exact Nox computation is indispensable to one
+self-serve product action. Zero survivors is a valid research result.
 
 ## Required reading
 

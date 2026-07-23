@@ -1,5 +1,9 @@
 # Prompt 1: Refresh Reality and Generate Ideas
 
+> **Superseded. Do not run this prompt.** It predates the user's feasibility reset and contains
+> rejected directions. Start with
+> [`00-feasibility-first-winner-research.md`](./00-feasibility-first-winner-research.md).
+
 You are inheriting an iExec WTF Hackathon research repository. Your task is to refresh current
 reality and produce a ranked product-idea menu. Do not write a product spec, implementation plan,
 architecture, stories, or code.

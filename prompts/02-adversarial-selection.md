@@ -31,14 +31,9 @@ For each top-three idea, try to kill it on:
 11. scope too large for the remaining time;
 12. product theater: many pages but no user who would return.
 
-Pay special attention to the current front-runner, SLA Lock:
-
-- Can a credible monitor sign real telemetry?
-- Can a Nox evaluator contract control exactly one ERC-8183 terminal action?
-- Can an unchanged ERC-8183 implementation run on Ethereum Sepolia?
-- Is pass/fail disclosure sufficient and honest?
-- Can a sponsored one-action experience stay real?
-- Has a new competitor entered this lane?
+Feasibility is a veto, not one factor to average against novelty. Apply every exclusion and hard
+gate from `prompts/00-feasibility-first-winner-research.md`. Do not revive SLA Lock, Proofline,
+QuietRound, or another rejected direction under a new name.
 
 Output a decision memo with:
 

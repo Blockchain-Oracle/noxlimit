@@ -1,5 +1,12 @@
 # iExec-Nox wiki log
 
+## 2026-07-23 — feasibility-first product reset
+
+- Retired every historical front-runner; no product is currently selected or leading.
+- Recorded the user's rejected product families as exclusions rather than candidates to rename.
+- Added a winner-pattern and shipping-product research prompt that makes feasibility a veto.
+- Preserved old idea reports as historical collision and rejection evidence only.
+
 ## 2026-07-23 — winner and opportunity audit
 
 - Verified the previous VIBE winner ranking: Diam first, RWAOS second, and DarkOdds third.

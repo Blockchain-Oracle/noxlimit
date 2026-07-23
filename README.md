@@ -5,8 +5,9 @@ product. It contains source-pinned Nox implementation research, a verified audit
 three winners, a live competitor scan, a revised product-idea menu, and prompts that another coding
 agent can inherit without restarting discovery.
 
-**Current state:** idea discovery is complete enough to choose a direction, but no product has been
-selected or implemented. **SLA Lock** is the current front-runner, not a locked decision.
+**Current state:** the previous idea menu failed the user's feasibility bar. No product has been
+selected or implemented, and there is no current front-runner. The next pass must begin with
+comparable-winner and shipping-product research, using feasibility as a veto.
 
 ## WTF in one minute
 
@@ -29,36 +30,35 @@ The most important product test is:
 “Try in 30 seconds” means the value should be understandable without a faucet hunt, local setup, or
 multiple wallets. Nox computation is asynchronous, so it is not an honest hard latency promise.
 
-## What changed in the second audit
+## What changed in the feasibility reset
 
-The earlier research recommended **QuietRound**, a confidential rubric and Allo payout product.
-After inspecting the actual previous winners and the current July build landscape, that concept is
-now a backup:
+The historical research produced QuietRound, SLA Lock, Proofline, and related policy, evaluation,
+polling, and multi-party concepts. The user rejected that entire direction because it started from
+confidentiality and forced a product around it.
 
-- grant/funding adjacency creates avoidable reuse risk;
-- a multi-reviewer round is weak as a zero-friction first experience;
-- its Allo integration adds a compiler/interface gate;
-- private voting is an immediate judge objection.
+The repository now records these as exclusions rather than front-runners. It also excludes wallets,
+confidential-token factories, new chains/platforms, shares, regulatory workflows, benchmarks,
+ratings, and any product that needs panels, institutions, fake participants, or multi-role demo
+choreography.
 
-The new front-runner is **SLA Lock**, a proposed iExec Nox evaluator for ERC-8183 agent-job escrow.
-The intended flow evaluates private latency, cost, failure-rate, and quality telemetry, reveals only
-pass/fail, then uses the verified result to release or refund a real escrow. This flow is not yet
-implementation-verified. It occupies none of the prior winner lanes and had no visible
-Nox/ERC-8183 competitor in the dated GitHub scan.
+The replacement discovery workflow studies comparable privacy, ZK, FHE, confidential-computing,
+and protocol-integration winners before generating candidates. An idea survives only if one builder
+can ship a self-serve, real-data, unchanged-protocol integration with a reason for a user to return.
+Nox is tested last; confidentiality alone is not a product.
 
 ## Read order for an agent
 
-1. [Agent handoff](./AGENT_HANDOFF.md)
-2. [Winner and opportunity research](./.thoughts/research/2026-07-23-iexec-wtf-winners-and-opportunity-space.md)
-3. [Revised product idea menu](./.thoughts/ideas/2026-07-23-iexec-wtf-product-ideas.md)
-4. [Current product decision](./.thoughts/decisions/CURRENT.md)
+1. [Feasibility-first research prompt](./prompts/00-feasibility-first-winner-research.md)
+2. [Agent handoff](./AGENT_HANDOFF.md)
+3. [Current product decision](./.thoughts/decisions/CURRENT.md)
+4. [Winner and opportunity research](./.thoughts/research/2026-07-23-iexec-wtf-winners-and-opportunity-space.md)
 5. [Nox domain wiki](./.thoughts/wiki/index.md)
 6. [Known contradictions](./.thoughts/wiki/nox-known-contradictions.md)
 7. [Source manifest](./.thoughts/sources/source-manifest.md)
-8. [Agent prompts](./prompts/README.md)
+8. [Prompt sequence](./prompts/README.md)
 
-The 2026-07-22 QuietRound documents remain useful technical evidence, but their old recommendation
-is superseded by the 2026-07-23 winner and opportunity audit.
+The historical idea files remain useful only as collision and rejection evidence. Their
+recommendations are superseded by the current decision record.
 
 ## Previous winners: explicit exclusion zones
 

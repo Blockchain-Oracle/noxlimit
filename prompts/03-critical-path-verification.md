@@ -16,10 +16,6 @@ Verify the smallest complete path:
 
 `encryptInput → direct fromExternal → replay guard → confidential update/computation → allowThis → Nox.allowPublicDecryption → asynchronous resolution → publicDecrypt → on-chain proof verification → one-shot real downstream action`
 
-For SLA Lock, the downstream action is:
-
-`stored evaluation handle → verified pass/fail proof → evaluator calls complete/reject on one unchanged ERC-8183 job → escrow releases/refunds`
-
 Required evidence:
 
 - exact package versions and source SHAs;
