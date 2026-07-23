@@ -5,9 +5,10 @@ product. It contains source-pinned Nox implementation research, a verified audit
 three winners, a live competitor scan, a revised product-idea menu, and prompts that another coding
 agent can inherit without restarting discovery.
 
-**Current state:** the previous idea menu failed the user's feasibility bar. No product has been
-selected or implemented, and there is no current front-runner. The next pass must begin with
-comparable-winner and shipping-product research, using feasibility as a veto.
+**Current state:** no product has been selected or implemented, and there is no current
+front-runner. The corrected docs-first discovery is complete. It recovered the official product
+cards and ten-category use-case catalog, investigated nine concrete candidates, and found no idea
+that passed every product, collision, released-contract, scope, and tryability gate.
 
 ## WTF in one minute
 
@@ -30,6 +31,25 @@ The most important product test is:
 “Try in 30 seconds” means the value should be understandable without a faucet hunt, local setup, or
 multiple wallets. Nox computation is asynchronous, so it is not an honest hard latency promise.
 
+## What the Nox docs actually open up
+
+The current source explicitly names Payments & Payroll, DeFi & Lending, Vaults & Yields, OTC &
+Trading, Prediction Markets, RWA & Real Estate, Fundraising/VC, Identity, NFT, and Invoicing. It
+also contains detailed concept pages for encrypted vault strategies, DeFi capital allocation, and
+RWA issuance.
+
+The evidence is not uniform:
+
+- Confidential Tokens and Encrypted Positions have source-linked demos.
+- Piggy Bank, ERC-7984 token/wrapper/swap, and Hardhat are executable building blocks.
+- Encrypted Strategy, Capital Allocator, and RWA are detailed concepts without linked
+  implementations.
+- Prediction Markets, Identity, NFT, Fundraising/VC, and Invoicing are category endorsements.
+
+See the [docs-first correction](./.thoughts/research/2026-07-23-nox-docs-first-correction.md) and
+[product/use-case map](./.thoughts/wiki/nox-use-case-map.md). Do not read `llms-full.txt` alone; it
+drops the Vue-rendered catalog.
+
 ## What changed in the feasibility reset
 
 The historical research produced QuietRound, SLA Lock, Proofline, and related policy, evaluation,
@@ -41,21 +61,33 @@ confidential-token factories, new chains/platforms, shares, regulatory workflows
 ratings, and any product that needs panels, institutions, fake participants, or multi-role demo
 choreography.
 
-The replacement discovery workflow studies comparable privacy, ZK, FHE, confidential-computing,
-and protocol-integration winners before generating candidates. An idea survives only if one builder
-can ship a self-serve, real-data, unchanged-protocol integration with a reason for a user to return.
-Nox is tested last; confidentiality alone is not a product.
+The replacement discovery workflow combines the recovered docs catalog with comparable-winner,
+shipping-product, and collision research. It evaluates both allowed paths: an unchanged-protocol
+integration or a standalone innovative Nox product. A standalone product does not need a
+third-party protocol call, but it still needs a complete real state transition, one-builder scope,
+and a reason for a user to return. Nox is tested last; confidentiality alone is not a product.
+
+The strongest corrected near-misses were Private Quote-to-Pay and a Confidential Closed-Loop Gift
+Card. Quote-to-Pay fails a released optimized ERC-7984 callback permission assumption, directly
+collides with PaySec, and has a poor fresh-user path. The gift card is mechanically possible but a
+merchant database preserves the same user outcome, while Sigill and FHE2P already occupy private
+gift-card checkout. See the
+[docs-first candidate report](./.thoughts/ideas/2026-07-23-nox-docs-first-candidates.md).
 
 ## Read order for an agent
 
-1. [Feasibility-first research prompt](./prompts/00-feasibility-first-winner-research.md)
+1. [Docs-first product-discovery prompt](./prompts/00-docs-first-product-discovery.md)
 2. [Agent handoff](./AGENT_HANDOFF.md)
 3. [Current product decision](./.thoughts/decisions/CURRENT.md)
-4. [Winner and opportunity research](./.thoughts/research/2026-07-23-iexec-wtf-winners-and-opportunity-space.md)
-5. [Nox domain wiki](./.thoughts/wiki/index.md)
-6. [Known contradictions](./.thoughts/wiki/nox-known-contradictions.md)
-7. [Source manifest](./.thoughts/sources/source-manifest.md)
-8. [Prompt sequence](./prompts/README.md)
+4. [Docs-first correction](./.thoughts/research/2026-07-23-nox-docs-first-correction.md)
+5. [Docs-first product research](./.thoughts/research/2026-07-23-docs-first-product-research.md)
+6. [Docs-first candidate report](./.thoughts/ideas/2026-07-23-nox-docs-first-candidates.md)
+7. [Nox product/use-case map](./.thoughts/wiki/nox-use-case-map.md)
+8. [Winner and opportunity research](./.thoughts/research/2026-07-23-iexec-wtf-winners-and-opportunity-space.md)
+9. [Nox domain wiki](./.thoughts/wiki/index.md)
+10. [Known contradictions](./.thoughts/wiki/nox-known-contradictions.md)
+11. [Source manifest](./.thoughts/sources/source-manifest.md)
+12. [Prompt sequence](./prompts/README.md)
 
 The historical idea files remain useful only as collision and rejection evidence. Their
 recommendations are superseded by the current decision record.
@@ -66,7 +98,10 @@ recommendations are superseded by the current decision record.
 |---|---|---|---|
 | 1st | [Diam](https://dorahacks.io/buidl/43636) | Best Confidential DeFi | OTC, dark pools, sealed RFQs, Vickrey auctions, private trade routing |
 | 2nd | [RWAOS](https://dorahacks.io/buidl/43431) | Best Institutional Architecture | broad RWA operating systems, confidential issuance/cap tables, KYC/disclosure control planes |
-| 3rd | [DarkOdds](https://dorahacks.io/buidl/43656) | Best Confidential Prediction Market | prediction markets, encrypted wagering, private pari-mutuel payouts |
+| 3rd | [DarkOdds](https://dorahacks.io/buidl/43656) | Best Confidential Prediction Market | native market factory, encrypted wagering/pools, resolution, private pari-mutuel payouts |
+
+DarkOdds's Polymarket connection was read-only discovery/display. It did not route Polymarket
+trades. A generic native Nox prediction market is therefore still a direct repeat.
 
 ## Source policy
 

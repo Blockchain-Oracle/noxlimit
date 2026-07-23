@@ -1,6 +1,6 @@
 # Nox integration patterns
 
-Last verified: **2026-07-22**
+Last verified: **2026-07-23**
 
 These patterns are grounded in the released packages, the live Ethereum Sepolia deployment, and
 official Nox product POCs. They are implementation guidance, not proof that QuietRound itself has
@@ -175,6 +175,31 @@ Because current Nox imports require Solidity `^0.8.35` while stable Allo's inher
 `BaseStrategy` graph contains an exact `0.8.19` pragma, implement the required stable `IStrategy`
 surface directly at 0.8.35 rather than inheriting that source graph. This remains an implementation
 spike until a pool creation and proof-gated payout have passed end to end.
+
+## 14. Do not assume optimized ERC-7984 callbacks can compute on the callback amount
+
+`IERC7984Receiver` documents the callback `amount` as accessible to the receiver. In the current
+optimized `ERC7984Base` path, `Nox.transfer` grants its operation results to the token contract.
+The token persists/grants the recipient's new balance, but it does not grant the separate
+`transferred` handle to the receiver before invoking the callback. The raw path does explicitly
+grant `transferred` to `to`.
+
+Consequences:
+
+- a callback can return a constant encrypted boolean;
+- an amount-sensitive receiver cannot assume `Nox.eq`, `safeSub`, `add`, or other operations on the
+  callback amount will pass ACL checks against a shared optimized token;
+- a custom raw wrapper changes the token/deployment surface;
+- a direct application `pay` function can validate the input itself, but pulling cTokens then
+  requires the user to approve the application as an ERC-7984 operator.
+
+Before using `transferAndCall` as a product shortcut, deploy the exact token and receiver on the
+target chain and prove callback-amount computation end to end.
+
+Sources:
+[`ERC7984Base` optimized and raw paths](https://github.com/iExec-Nox/nox-confidential-contracts/blob/e685645986af394ab5507c0c67e611650f4e4d33/contracts/token/ERC7984Base.sol#L355-L489)
+and
+[`IERC7984Receiver`](https://github.com/iExec-Nox/nox-confidential-contracts/blob/e685645986af394ab5507c0c67e611650f4e4d33/contracts/interfaces/IERC7984Receiver.sol#L13-L29).
 
 ## Do not copy these POC mistakes
 

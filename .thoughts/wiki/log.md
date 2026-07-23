@@ -1,5 +1,32 @@
 # iExec-Nox wiki log
 
+## 2026-07-23 — docs-first candidate audit completed
+
+- Investigated nine concrete products across Invoicing/Payments, DeFi/Lending, Vaults/Yield,
+  Identity, NFT, and Prediction Markets.
+- Separately pressure-tested the two initial near-survivors: Private Quote-to-Pay and a
+  Confidential Closed-Loop Gift Card.
+- Rejected Quote-to-Pay after finding a direct PaySec collision, a current optimized ERC-7984
+  callback-amount ACL mismatch, public wrap/relationship leakage, and a failed fresh-user path.
+- Rejected the gift card after verifying ordinary issuer-database equivalence, visible or trusted
+  funding, weak independent-entitlement demand, Sigill/FHE2P collision, and consumer-card policy
+  scope.
+- Recorded the final `NONE SURVIVE` verdict. Product selection, Prompt 2, architecture, and
+  implementation remain blocked pending genuinely new evidence.
+
+## 2026-07-23 — complete documentation and use-case correction
+
+- Read the complete 7,090-line `llms-full.txt` capture, the supplied attachment, and the current
+  documentation source at commit `ce4262e`.
+- Found that `llms-full.txt` silently omits the Vue-rendered Use Cases product cards and ten-category
+  application grid.
+- Added an evidence-tiered product map covering shipping references, executable building blocks,
+  detailed concept pages, and all ten official application categories.
+- Reopened lending, invoicing, identity-shaped, NFT, and other docs-led directions for research
+  while preserving current runtime limits and collision checks.
+- Reverified from contract source and live chain state that DarkOdds was a native Nox prediction
+  market; its Polymarket integration was display-only.
+
 ## 2026-07-23 — feasibility-first product reset
 
 - Retired every historical front-runner; no product is currently selected or leading.

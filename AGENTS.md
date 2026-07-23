@@ -2,13 +2,16 @@
 
 ## Project Snapshot
 
-This repository is the context and decision corpus for an iExec WTF Hackathon product. Idea
-discovery is active; no product has been selected or implemented. SLA Lock is the current
-front-runner hypothesis. QuietRound is a documented backup, not the current recommendation.
+This repository is the context and decision corpus for an iExec WTF Hackathon product. No product
+has been selected or implemented, and there is no current front-runner. The corrected docs-first
+discovery is complete and found no survivor; the prompt remains available for an independent rerun
+or genuinely new evidence.
 
 ## Working Rules
 
 - Read `AGENT_HANDOFF.md` before doing project work.
+- Read `.thoughts/wiki/nox-use-case-map.md` before product discovery. The generated
+  `llms-full.txt` omits the Vue-rendered use-case cards and category grid.
 - Use the newest dated research and idea files; preserve older artifacts as history.
 - Separate verified facts, inferences, and unknowns.
 - Recheck current hackathon rules, packages, chain state, and competitor claims before relying on
@@ -64,11 +67,17 @@ silently guessing from memory.
 - Nox implementation reality lives in `.thoughts/wiki/`.
 - Exact third-party commits live in `.thoughts/sources/source-manifest.md`.
 - Staged agent prompts live in `prompts/`.
+- The current discovery entry point is `prompts/00-docs-first-product-discovery.md`; older Prompt 0
+  and Prompt 1 files are historical.
 
 ## Do Not
 
 - Do not commit `.thoughts/raw/`; it contains local third-party mirrors.
 - Do not republish winner or iExec-Nox source trees.
 - Do not inherit the old QuietRound recommendation without rerunning selection.
+- Do not inherit SLA Lock or either `NONE SURVIVE` verdict without reading the dated evidence. The
+  newest docs-first verdict is current research state, not a selected product.
+- Do not describe DarkOdds as a Polymarket router; it built native Nox markets and used Polymarket
+  only as a read-only display source.
 - Do not use unreleased Nox `main` APIs against current published packages or the live Sepolia ABI.
 - Do not claim mock, seeded, or self-reported data is a real end-to-end product path.

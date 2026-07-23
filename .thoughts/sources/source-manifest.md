@@ -4,6 +4,16 @@ This manifest preserves the exact third-party sources used for the local researc
 trees themselves are intentionally excluded from Git; clone them again from these links when code
 inspection is needed.
 
+## Documentation captures
+
+| Capture | Date | Size | SHA-256 | Note |
+|---|---|---:|---|---|
+| [`https://docs.noxprotocol.io/llms-full.txt`](https://docs.noxprotocol.io/llms-full.txt) | 2026-07-23 | 243,687 bytes / 7,090 lines | `706c4b861dfb79f396cdbe6d1661790ee126bd5ebe7b6390b8e45cd2d3c39f05` | Locally stored under ignored `.thoughts/raw/`; omits Vue-rendered Use Cases cards and category grid |
+| User-supplied Nox documentation attachment | 2026-07-23 | 28,777 bytes / 358 lines | `fd4b6fc2b34ab7d603a2696a8afe53f7a9ad24a2948cd5b1e28f4746dcd13b63` | Table-of-contents/index-style extract, not the complete documentation body |
+
+The current documentation source clone is pinned below at `ce4262e`. For component-rendered pages,
+the source tree is more complete than the generated LLM capture.
+
 ## iExec-Nox organization snapshot
 
 Snapshot created on 2026-07-22 from all 20 public repositories returned by the iExec-Nox
@@ -57,6 +67,52 @@ Cloned on 2026-07-23 from the repository URLs linked by each DoraHacks entry.
 
 The local winner clones were shallow. The commit counts observed locally are therefore not the full
 repository histories.
+
+## Relevant non-winning VIBE source snapshots
+
+These repositories are not treated as winners. Their public source was inspected on 2026-07-23
+because they occupy official docs-led categories and are material collision evidence for new idea
+research.
+
+| Product/category signal | Repository | Observed HEAD |
+|---|---|---|
+| Native confidential lending | [`aydi26/nox-hackathon` (Noxus)](https://github.com/aydi26/nox-hackathon) | [`15c9cd6`](https://github.com/aydi26/nox-hackathon/commit/15c9cd65678d09b5f2456991dd0e5d729a1e1b61) |
+| Confidential NFT registry/marketplace | [`armsves/NoxShadowNFT`](https://github.com/armsves/NoxShadowNFT) | [`c6e6754`](https://github.com/armsves/NoxShadowNFT/commit/c6e675412b8bf9910d7c026eb86e498d77418140) |
+| Confidential invoice factoring | [`uzochukwuV/Noxvault`](https://github.com/uzochukwuV/Noxvault) | [`32c89d2`](https://github.com/uzochukwuV/Noxvault/commit/32c89d20d6d13ff9c77a58bfcaf671b3466d3f05) |
+| Confidential invoices/payment links | [`Bolexzy/paysec`](https://github.com/Bolexzy/paysec) | [`9cd1fd6`](https://github.com/Bolexzy/paysec/commit/9cd1fd6b58bed2597d072dfd410774d810223d10) |
+| Confidential yield aggregator | [`maulana-tech/iEx-ai`](https://github.com/maulana-tech/iEx-ai) | [`55b55fe`](https://github.com/maulana-tech/iEx-ai/commit/55b55fe1bbe45637e7ac0cdf6b39d2fff617d907) |
+| Principal/yield vault | [`TirthC27/yieldShield` (YOLDR)](https://github.com/TirthC27/yieldShield) | [`7f90fc4`](https://github.com/TirthC27/yieldShield/commit/7f90fc4193979490f0addb82af880a0c7df68345) |
+| Confidential crowdfunding | [`Zifeng-Ma/FUNDME`](https://github.com/Zifeng-Ma/FUNDME) | [`22c1b78`](https://github.com/Zifeng-Ma/FUNDME/commit/22c1b7879c01e8383740547e576e48da3445e3ab) |
+| Confidential grants | [`farouk-allani/private-grant`](https://github.com/farouk-allani/private-grant) | [`1541375`](https://github.com/farouk-allani/private-grant/commit/15413755fc6ce70d2c31b2ad284fcc9ce5d14ccf) |
+| RWA impact lending vault | [`StephenSook/GroundVault`](https://github.com/StephenSook/GroundVault) | [`a90925a`](https://github.com/StephenSook/GroundVault/commit/a90925aef7c72b77e12be4003e8b072ade2850a4) |
+| Private-credit deal room | [`karagozemin/Obscura`](https://github.com/karagozemin/Obscura) | [`a4699dc`](https://github.com/karagozemin/Obscura/commit/a4699dc5c748b002768523540994285ad192c855) |
+| Confidential VC fund | [`Asyfdzaky/sea-equity-confidential-vc-fund`](https://github.com/Asyfdzaky/sea-equity-confidential-vc-fund) | [`46f748b`](https://github.com/Asyfdzaky/sea-equity-confidential-vc-fund/commit/46f748b2a8220170ab9408f012737d4257c53c9c) |
+
+These snapshots show category occupancy, not implementation correctness, eligibility, or continued
+operation. Re-audit the exact source and deployment before making a product claim.
+
+## Comparable privacy-product snapshot
+
+| Product/category signal | Repository | Observed HEAD |
+|---|---|---|
+| FHE private gift-card checkout with encrypted product, amount, cUSDC settlement, and Reloadly fulfillment | [`0xshubhs/sigill`](https://github.com/0xshubhs/sigill) | [`082fd91`](https://github.com/0xshubhs/sigill/commit/082fd91d98cb950aee3f8afa44be97afc9a746cd) |
+
+Sigill was cloned on 2026-07-23 under ignored `.thoughts/raw/` to verify the gift-card collision.
+The separate FHE2P, Raise, and UniVoucher evidence in the candidate report is linked to their public
+project or product documentation rather than a local source snapshot.
+
+## Relevant current WTF source snapshot
+
+| Product/category signal | Repository | Observed HEAD |
+|---|---|---|
+| Confidential AI-agent budgets, per-call caps, x402/MCP execution, and live Nox settlement | [`Venkat5599/kairoszks`](https://github.com/Venkat5599/kairoszks) | [`33ef50e`](https://github.com/Venkat5599/kairoszks/commit/33ef50e752fe7e8d74b073cdd8a9a1337f921bcf) |
+| Aave credit, sealed liquidation, and private hedging | [`Xconmax245/Skia`](https://github.com/Xconmax245/Skia) | [`14c75b6`](https://github.com/Xconmax245/Skia/commit/14c75b6f131f39e599688f16cc93c59852a20237) |
+| Confidential strategy agent and vault | [`RaYYeR220/occulta`](https://github.com/RaYYeR220/occulta) | [`386dd88`](https://github.com/RaYYeR220/occulta/commit/386dd886d12d5b234a128f32fbd0f7820b2b7424) |
+
+Kairos was created before July but pushed during the current WTF window, so the
+`created:>=2026-07-01` snapshot below did not return it. It was cloned on 2026-07-23 under ignored
+`.thoughts/raw/` and must be included in metered API, agent-budget, and x402 collision checks. Skia
+and Occulta were pinned because they materially constrain the lending and strategy-vault lanes.
 
 ## Visible July 2026 competitor snapshot
 
