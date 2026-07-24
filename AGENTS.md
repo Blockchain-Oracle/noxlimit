@@ -3,9 +3,9 @@
 ## Project Snapshot
 
 This repository is the context and decision corpus for an iExec WTF Hackathon product. No product
-has been selected or implemented, and there is no current front-runner. The corrected docs-first
-discovery is complete and found no survivor; the prompt remains available for an independent rerun
-or genuinely new evidence.
+has been selected or implemented. The corrected docs-first discovery found no survivor. NoxLimit
+is now the only current hypothesis with status `KEEP AND VERIFY`; it must pass the independent
+audit in `prompts/01-independent-noxlimit-audit.md` and user review before it becomes a survivor.
 
 ## Working Rules
 
@@ -67,8 +67,9 @@ silently guessing from memory.
 - Nox implementation reality lives in `.thoughts/wiki/`.
 - Exact third-party commits live in `.thoughts/sources/source-manifest.md`.
 - Staged agent prompts live in `prompts/`.
-- The current discovery entry point is `prompts/00-docs-first-product-discovery.md`; older Prompt 0
-  and Prompt 1 files are historical.
+- The current independent-audit entry point is `prompts/01-independent-noxlimit-audit.md`.
+  `prompts/00-docs-first-product-discovery.md` remains the discovery rerun; the older
+  `01-refresh-reality-and-ideas.md` is historical.
 
 ## Do Not
 
@@ -77,6 +78,8 @@ silently guessing from memory.
 - Do not inherit the old QuietRound recommendation without rerunning selection.
 - Do not inherit SLA Lock or either `NONE SURVIVE` verdict without reading the dated evidence. The
   newest docs-first verdict is current research state, not a selected product.
+- Do not inherit NoxLimit as selected or feasible. `KEEP AND VERIFY` means only that it warrants an
+  independent audit.
 - Do not describe DarkOdds as a Polymarket router; it built native Nox markets and used Polymarket
   only as a read-only display source.
 - Do not use unreleased Nox `main` APIs against current published packages or the live Sepolia ABI.

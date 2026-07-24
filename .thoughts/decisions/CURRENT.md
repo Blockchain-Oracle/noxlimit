@@ -1,20 +1,28 @@
 # Current Product Decision
 
-- **Status:** Docs-first discovery complete; user review pending
-- **Leading hypothesis:** None
+- **Status:** NoxLimit hypothesis packaged; independent audit pending
+- **Leading hypothesis:** NoxLimit, unselected and not yet a survivor
 - **Survivors:** None
-- **Confidence:** High that no currently researched concept passes every feasibility gate
+- **Confidence:** Moderate that NoxLimit is worth a critical audit; low that its complete released
+  path is feasible until verified
 - **Last decision memo:** None
+- **NoxLimit research:**
+  [`2026-07-24-noxlimit-product-and-market-reality.md`](../research/2026-07-24-noxlimit-product-and-market-reality.md)
+- **NoxLimit hypothesis:**
+  [`2026-07-24-noxlimit-product-hypothesis.md`](../ideas/2026-07-24-noxlimit-product-hypothesis.md)
+- **Independent audit prompt:**
+  [`01-independent-noxlimit-audit.md`](../../prompts/01-independent-noxlimit-audit.md)
 - **Correction audit:**
   [`2026-07-23-nox-docs-first-correction.md`](../research/2026-07-23-nox-docs-first-correction.md)
 - **Product research:**
   [`2026-07-23-docs-first-product-research.md`](../research/2026-07-23-docs-first-product-research.md)
 - **Candidate report:**
   [`2026-07-23-nox-docs-first-candidates.md`](../ideas/2026-07-23-nox-docs-first-candidates.md)
-- **Next workflow:** User or independent agent review; compare any new proposal against both dated
-  graveyards and rerun discovery only when there is new product, competitor, organizer, or
-  executable evidence
-- **Prompt 3 allowed:** No—first persist a Prompt 2 decision memo and update this file
+- **Next workflow:** Run the independent NoxLimit audit, then stop for user review of its
+  `KEEP`, `RESHAPE`, `DROP`, or `NONE SURVIVE` verdict
+- **Prompt 2 allowed:** No—NoxLimit has not passed its independent audit
+- **Prompt 3 allowed:** No—only an audited, user-approved hypothesis may enter a bounded
+  critical-path spike
 
 ## User-locked rejection record
 
@@ -51,5 +59,22 @@ DarkOdds also remains a native prediction-market collision; Polymarket was displ
 lending, NFT, vault, fundraising, RWA, trading, payroll, treasury, swap/routing, and escrow products
 remain crowded or user-excluded.
 
-No Prompt 2 comparison, product specification, architecture, or implementation should begin until
-new evidence produces at least one genuine `FEASIBILITY: PASS`.
+## New hypothesis since the docs-first verdict
+
+NoxLimit is a narrower prediction-market order-management hypothesis, not a reversal of the generic
+market rejection. It proposes a fixed-size private buy limit against an unchanged real
+outcome-share AMM:
+
+`encrypt threshold → persist → compare with the fixed-input quote sampled in the evaluation request
+→ reveal threshold-derived minimum output → consume proof once → execute a
+minimum-output-protected buy`
+
+The current research found current feature-supply and product-investment signals for advanced
+prediction-market orders, but no proof of privacy-specific demand. It also found a plausible
+difference from DarkOdds and unresolved gates: no official Nox production mainnet, no selected
+Sepolia market substrate, asynchronous quote staleness, worker dependence, escrow/custody,
+evaluation leakage, manipulation of seeded liquidity, and fresh-user funding.
+
+`KEEP AND VERIFY` is a research-routing label, not a selection or feasibility pass. No Prompt 2
+comparison, product specification, architecture, or implementation should begin until the
+independent audit produces new evidence and the user reviews it.

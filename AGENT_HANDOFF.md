@@ -3,18 +3,21 @@
 ## Mission
 
 Use this repository to select an original, buildable iExec WTF Hackathon product. Do not assume the
-organizer's wallet, DeFi, or treasury suggestions are mandatory. There is currently no front-runner.
+organizer's wallet, DeFi, or treasury suggestions are mandatory. No product is selected. NoxLimit
+is the only current leading hypothesis, with status `KEEP AND VERIFY`; it is not yet a survivor.
 Do not inherit QuietRound, SLA Lock, Proofline, AgentDispute, or any historical idea as a decision.
 Start with the
 [current decision](./.thoughts/decisions/CURRENT.md) and
-[docs-first candidate report](./.thoughts/ideas/2026-07-23-nox-docs-first-candidates.md).
+[NoxLimit product hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md).
 
 The corrected docs-first discovery is complete and currently returns `NONE SURVIVE`. It read the
 component-rendered use-case catalog, allowed standalone products, researched nine candidates across
 six major lanes, and adversarially killed its two initial near-survivors. Preserve both graveyards.
 Use [`prompts/00-docs-first-product-discovery.md`](./prompts/00-docs-first-product-discovery.md) for
 an independent rerun or when new evidence appears; do not treat its existence as evidence that
-discovery is still unfinished.
+discovery is still unfinished. Use
+[`prompts/01-independent-noxlimit-audit.md`](./prompts/01-independent-noxlimit-audit.md) for the
+current independent pass.
 
 An independent or future discovery pass should produce a cited evidence and candidate report with:
 
@@ -29,7 +32,7 @@ An independent or future discovery pass should produce a cited evidence and cand
 Recommendations are not selections. Stop for user review before Prompt 2, product specification,
 architecture, implementation planning, or code.
 
-### Current corrected verdict
+### Current decision state
 
 No product has been selected. The two strongest docs-first near-misses failed:
 
@@ -42,8 +45,21 @@ No product has been selected. The two strongest docs-first near-misses failed:
   into a payment network; Sigill and FHE2P already occupy confidential gift-card checkout; real
   consumer cards also restore policy scope.
 
-Generic native prediction markets remain excluded because DarkOdds already built them. Do not
-advance Prompt 2 unless a new candidate passes every hard gate.
+Generic native prediction markets remain excluded because DarkOdds already built them.
+
+New research identified a narrower product-shaped hypothesis:
+
+- **NoxLimit:** one fixed-size confidential buy limit against a real onchain outcome-share AMM. The
+  market and side are public; the resting threshold is confidential; an external worker advances
+  asynchronous Nox evaluation; a replay-safe proof may authorize one real pool buy whose
+  minimum-output bound is enforced again at execution.
+
+Its key distinction is order management over secondary outcome shares, not creation of another
+native prediction market. Current official Nox support was found only on Ethereum Sepolia and
+Arbitrum Sepolia, so there is no present same-chain production-mainnet integration. The market
+substrate, privacy leakage, worker path, escrow/custody, stale-quote safety, liquidity manipulation,
+and fresh-user path remain unverified. Do not advance Prompt 2 or Prompt 3 until the independent
+audit returns and the user reviews it.
 
 ## Canonical facts to inherit
 
@@ -155,8 +171,50 @@ Feasibility is now a veto. The search must begin with comparable winners and cur
 people already use. Only then test whether a small, exact Nox computation is indispensable to one
 self-serve product action. Zero survivors is a valid research result.
 
+## NoxLimit audit boundary
+
+The current product question is not “should we build a prediction market?” It is:
+
+> Does an active outcome-share trader have a valuable need for a confidential resting threshold,
+> and can the current released Nox stack turn that threshold into one safe, browser-off, real pool
+> trade before the deadline?
+
+An onchain outcome-share pool holds redeemable `YES` and `NO` assets and quotes trades from its
+reserves. A prediction oracle resolves which asset wins; the AMM quote separately decides whether
+the order's limit is executable. The first substrate candidates are unchanged Gnosis Conditional
+Tokens/FPMM and Seer outcomes with Uniswap V3. Neither is selected.
+
+The smallest credible version is one curated BTC market, one public fixed order size and side, one
+confidential buy limit, cancellation, expiry, refund, resolution, and redemption. A genuine
+two-threshold stop-limit, hidden side or size, sell orders, multiple markets, LP tooling, a CLOB,
+and a market factory are out of first scope.
+
+The final action must remain:
+
+`encryptInput → fromExternal → persisted handle → confidential comparison with the fixed-input
+quote sampled in the evaluation-request transaction → threshold-derived public minimum output →
+replay-safe one-shot minimum-output-protected outcome-share buy`
+
+The worker may advance the state but must not learn or change the threshold, fill worse than the
+committed limit, redirect proceeds, or steal collateral. It may still delay or censor. If the
+browser must remain open, if repeated evaluation reveals the threshold, or if a normal backend
+preserves the user outcome with acceptable trust, the hypothesis should be reshaped or dropped.
+
+A decrypted `ready` boolean plus a generic slippage setting does not enforce the secret limit after
+Nox's asynchronous delay. The likely exact design must reveal a threshold-derived minimum output at
+fill and bind it to the one-shot AMM call. If that cannot be proven with the current release, exact
+private-limit semantics fail.
+
+FPMM sends ERC-1155 shares to its caller. An order adapter would therefore receive the shares
+before forwarding them to the immutable recipient and must implement the receiver interface. The
+worker gets no token approval. If a submitted proof reveals the minimum output but the AMM buy
+reverts, the order is disclosed/refundable rather than confidential-pending again.
+
 ## Required reading
 
+- [NoxLimit product and market reality](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md)
+- [NoxLimit product hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md)
+- [Independent NoxLimit audit prompt](./prompts/01-independent-noxlimit-audit.md)
 - [Docs-first correction](./.thoughts/research/2026-07-23-nox-docs-first-correction.md)
 - [Docs-first product research](./.thoughts/research/2026-07-23-docs-first-product-research.md)
 - [Docs-first candidate report](./.thoughts/ideas/2026-07-23-nox-docs-first-candidates.md)

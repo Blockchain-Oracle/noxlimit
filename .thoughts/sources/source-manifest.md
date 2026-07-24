@@ -114,6 +114,37 @@ Kairos was created before July but pushed during the current WTF window, so the
 `.thoughts/raw/` and must be included in metered API, agent-budget, and x402 collision checks. Skia
 and Occulta were pinned because they materially constrain the lending and strategy-vault lanes.
 
+## NoxLimit market-substrate and demand sources
+
+These sources were added on 2026-07-24 for an unselected prediction-market advanced-order
+hypothesis. The three exact source pins were also cloned under ignored
+`.thoughts/raw/noxlimit-substrates/` for independent inspection. A source pin is not an architecture
+decision, and those source trees must not be committed or republished.
+
+### Source pins
+
+| Component | Exact source | License/relevance |
+|---|---|---|
+| Gnosis Conditional Tokens | [`eeefca66`](https://github.com/gnosis/conditional-tokens-contracts/tree/eeefca66eb46c800a9aaab88db2064a99026fde5) | LGPL-3.0; ERC-1155 outcome creation, payout, and redemption |
+| Gnosis Fixed Product Market Maker | [`6814c024`](https://github.com/gnosis/conditional-tokens-market-makers/tree/6814c0247c745680bb13298d4f0dd7f5b574d0db) | LGPL-3.0; one-pool outcome trading and minimum-output-protected buys |
+| Seer monorepo | [`af50f523`](https://github.com/seer-pm/demo/tree/af50f523e6fd47bfc150f66b1db712ebd81d68d5) | MIT; modern market and wrapped-outcome alternative |
+| Nox Handle SDK beta.13 networks | [`e552f6a`](https://github.com/iExec-Nox/nox-handle-sdk/blob/e552f6a3b297bc5bc7d1afd514c96e7b9b30cea0/src/config/networks.ts) | Released configuration used to recheck public network support |
+
+### Current primary documentation
+
+| Subject | Source |
+|---|---|
+| Gemini prediction-market order types | [Trading API](https://developer.gemini.com/prediction-markets-spec/trading) |
+| Kalshi advanced trading surface | [Kalshi Pro announcement](https://news.kalshi.com/p/kalshi-pro-trading-terminal) |
+| Polymarket resting-order behavior | [Order overview](https://docs.polymarket.com/trading/orders/overview) |
+| Limitless onchain prediction markets | [Documentation](https://docs.limitless.exchange/) |
+| Uniswap V3 Ethereum/Sepolia addresses | [Official deployment manifest](https://developers.uniswap.org/docs/protocols/v3/deployments/v3-ethereum-deployments) |
+| Chainlink Automation support and sunset notices | [Supported networks](https://docs.chain.link/chainlink-automation/overview/supported-networks) |
+
+The demand sources prove that advanced event-contract order management exists. They do not prove
+privacy-specific demand. The independent audit must find direct evidence for the confidential
+resting-intent problem or downgrade the hypothesis.
+
 ## Visible July 2026 competitor snapshot
 
 Observed at `2026-07-23T15:16:47Z` with:
@@ -154,6 +185,8 @@ history.
 | Subject | Context7 ID |
 |---|---|
 | Nox documentation | `/iexec-nox/documentation` |
+| Gnosis Conditional Tokens documentation | `/websites/conditional-tokens_readthedocs_io_en` |
+| Uniswap developer documentation | `/websites/developers_uniswap` |
 | Current iExec/DataProtector documentation | `/websites/iex_ec` |
 | iExec documentation repository | `/iexecblockchaincomputing/documentation` |
 
