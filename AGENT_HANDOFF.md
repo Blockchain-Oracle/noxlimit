@@ -3,12 +3,15 @@
 ## Mission
 
 Use this repository to select an original, buildable iExec WTF Hackathon product. Do not assume the
-organizer's wallet, DeFi, or treasury suggestions are mandatory. No product is selected. NoxLimit
-is the only current leading hypothesis, with status `KEEP AND VERIFY`; it is not yet a survivor.
-Do not inherit QuietRound, SLA Lock, Proofline, AgentDispute, or any historical idea as a decision.
-Start with the
-[current decision](./.thoughts/decisions/CURRENT.md) and
-[NoxLimit product hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md).
+organizer's wallet, DeFi, or treasury suggestions are mandatory. **No product is selected, and
+there are zero technically verified survivors.** NoxLimit is one unselected conditional candidate
+at **`KEEP AND VERIFY`**. An independent audit returned `DROP`; a hackathon-calibrated reassessment
+found material errors in the decisive demand,
+substitute, leakage, and sponsor-fit claims. Do not inherit QuietRound, SLA Lock, Proofline,
+AgentDispute, or any historical idea as a decision, and do not inherit NoxLimit as already feasible
+or selected. Start with the [current decision](./.thoughts/decisions/CURRENT.md), the
+[independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md), and the
+[reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md).
 
 The corrected docs-first discovery is complete and currently returns `NONE SURVIVE`. It read the
 component-rendered use-case catalog, allowed standalone products, researched nine candidates across
@@ -16,8 +19,8 @@ six major lanes, and adversarially killed its two initial near-survivors. Preser
 Use [`prompts/00-docs-first-product-discovery.md`](./prompts/00-docs-first-product-discovery.md) for
 an independent rerun or when new evidence appears; do not treat its existence as evidence that
 discovery is still unfinished. Use
-[`prompts/01-independent-noxlimit-audit.md`](./prompts/01-independent-noxlimit-audit.md) for the
-current independent pass.
+[`prompts/01a-hackathon-calibrated-noxlimit-reassessment.md`](./prompts/01a-hackathon-calibrated-noxlimit-reassessment.md)
+to hand the disputed verdict back to the external agent.
 
 An independent or future discovery pass should produce a cited evidence and candidate report with:
 
@@ -34,7 +37,8 @@ architecture, implementation planning, or code.
 
 ### Current decision state
 
-No product has been selected. The two strongest docs-first near-misses failed:
+No product has been selected and no candidate is technically verified. NoxLimit is one conditional
+candidate; the two strongest docs-first near-misses still failed:
 
 - **Private Quote-to-Pay:** PaySec already exposes the same product surface; current shared
   optimized cUSDC does not grant a receiver the transferred-amount handle needed for
@@ -47,19 +51,28 @@ No product has been selected. The two strongest docs-first near-misses failed:
 
 Generic native prediction markets remain excluded because DarkOdds already built them.
 
-New research identified a narrower product-shaped hypothesis:
+Research identified a narrower product-shaped hypothesis, **NoxLimit**: one fixed-size confidential
+buy limit against a real onchain outcome-share AMM.
 
-- **NoxLimit:** one fixed-size confidential buy limit against a real onchain outcome-share AMM. The
-  market and side are public; the resting threshold is confidential; an external worker advances
-  asynchronous Nox evaluation; a replay-safe proof may authorize one real pool buy whose
-  minimum-output bound is enforced again at execution.
+**Current outcome (2026-07-24): `KEEP AND VERIFY`, unselected.**
 
-Its key distinction is order management over secondary outcome shares, not creation of another
-native prediction market. Current official Nox support was found only on Ethereum Sepolia and
-Arbitrum Sepolia, so there is no present same-chain production-mainnet integration. The market
-substrate, privacy leakage, worker path, escrow/custody, stale-quote safety, liquidity manipulation,
-and fresh-user path remain unverified. Do not advance Prompt 2 or Prompt 3 until the independent
-audit returns and the user reviews it.
+- Demand for hands-off conditional execution and the structural onchain order-flow problem is real.
+  Direct evidence that traders specifically value hiding only this threshold is still unknown.
+- A backend can reproduce browser-off, same-chain, contract-custodied execution, but it receives
+  the raw threshold. A local bot can preserve threshold privacy but needs an always-on process and
+  gas-paying signing path.
+- Unchanged `FPMM.buy` takes plaintext `minOutcomeTokensToBuy`, so the limit-equivalent is public at
+  fill. However, released Nox `select + addViewer` and Handle SDK private `decrypt` make a
+  success-only publication flow plausible; failed evaluations do not inherently need explicit
+  public proofs, although public timing/non-action inference remains.
+- Prediction markets are “already seen,” creating a heavy originality burden, but are not banned.
+  Creativity is tied with end-to-end/no-mock at the highest displayed weight.
+- `FPMM.buy` natively enforces atomic minimum output. Nox is live only on Ethereum Sepolia and
+  Arbitrum Sepolia; no production mainnet exists, but Ethereum Sepolia is the required hackathon
+  chain.
+
+Prompt 2 remains premature. Prompt 3 is allowed only as the 24–36-hour disposable privacy +
+real-pool verification defined by the reassessment. Do not start the full product until it passes.
 
 ## Canonical facts to inherit
 
@@ -72,9 +85,17 @@ audit returns and the user reviews it.
 - A live end-to-end path without mock data.
 - Ethereum Sepolia deployment, a functional frontend, a public repository, complete documentation,
   `feedback.md`, an X post, and a four-minute maximum video.
-- The current DoraHacks page displayed a deadline of `2026/08/01 21:59`; verify the timezone before
-  relying on it.
-- On 2026-07-23, the page showed 13 submissions and 74 hackers, but the submission list was private.
+- Deadline verified 2026-07-24 from the DoraHacks API `end_time` epoch 1785621540 =
+  **2026-08-01 21:59:00 UTC** (`is_extended:false`). Required chain: **Ethereum Sepolia** (⭐⭐
+  criterion) — note prior winners were on Arbitrum Sepolia. Required: functional frontend, public
+  repo + docs, `feedback.md`, X post tagging `@iEx_ec`, ≤4-min demo video, end-to-end without mock
+  data.
+- On 2026-07-24 the API showed 13 BUIDLs and 80 hackers, but the submission list is private.
+- Prediction markets are not prohibited, but the Innovative track lists them as "already seen … we
+  want what nobody has shipped yet." Creativity and end-to-end/no-mock are tied at the highest
+  displayed weight.
+- Registration currently requires completing the iExec Hello World journey and submitting the
+  wallet used.
 
 ### Previous winners
 
@@ -171,9 +192,17 @@ Feasibility is now a veto. The search must begin with comparable winners and cur
 people already use. Only then test whether a small, exact Nox computation is indispensable to one
 self-serve product action. Zero survivors is a valid research result.
 
-## NoxLimit audit boundary
+## NoxLimit verification boundary (`KEEP AND VERIFY`, 2026-07-24)
 
-The current product question is not “should we build a prediction market?” It is:
+> The independent audit returned `DROP`, but its decisive privacy claim—that every failed
+> evaluation must have an explicit public proof—is not established because the released stack has
+> a viewer/private-decrypt path. Public observers may still infer a failed evaluation from timing
+> and non-action, so the complete boundary remains spike-required. Demand remains unvalidated and
+> the privacy boundary remains narrow. See the
+> [independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md) and
+> [reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md).
+
+The audited product question was not “should we build a prediction market?” It was:
 
 > Does an active outcome-share trader have a valuable need for a confidential resting threshold,
 > and can the current released Nox stack turn that threshold into one safe, browser-off, real pool
@@ -195,10 +224,11 @@ The final action must remain:
 quote sampled in the evaluation-request transaction → threshold-derived public minimum output →
 replay-safe one-shot minimum-output-protected outcome-share buy`
 
-The worker may advance the state but must not learn or change the threshold, fill worse than the
-committed limit, redirect proceeds, or steal collateral. It may still delay or censor. If the
-browser must remain open, if repeated evaluation reveals the threshold, or if a normal backend
-preserves the user outcome with acceptable trust, the hypothesis should be reshaped or dropped.
+The worker may advance the state and may learn one readiness bit per permitted evaluation plus the
+successful `minOut`, but it must not receive the raw resting threshold, change immutable order
+fields, fill worse than the committed limit, redirect proceeds, or steal collateral. It may still
+delay or censor. If the browser must remain open, if the live viewer path forces failed
+evaluations public, or if the proof cannot safely cause one real action, drop the hypothesis.
 
 A decrypted `ready` boolean plus a generic slippage setting does not enforce the secret limit after
 Nox's asynchronous delay. The likely exact design must reveal a threshold-derived minimum output at
@@ -214,6 +244,9 @@ reverts, the order is disclosed/refundable rather than confidential-pending agai
 
 - [NoxLimit product and market reality](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md)
 - [NoxLimit product hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md)
+- [Independent NoxLimit audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)
+- [Hackathon-calibrated reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
+- [Reassessment prompt](./prompts/01a-hackathon-calibrated-noxlimit-reassessment.md)
 - [Independent NoxLimit audit prompt](./prompts/01-independent-noxlimit-audit.md)
 - [Docs-first correction](./.thoughts/research/2026-07-23-nox-docs-first-correction.md)
 - [Docs-first product research](./.thoughts/research/2026-07-23-docs-first-product-research.md)

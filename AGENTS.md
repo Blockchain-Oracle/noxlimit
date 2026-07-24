@@ -3,9 +3,12 @@
 ## Project Snapshot
 
 This repository is the context and decision corpus for an iExec WTF Hackathon product. No product
-has been selected or implemented. The corrected docs-first discovery found no survivor. NoxLimit
-is now the only current hypothesis with status `KEEP AND VERIFY`; it must pass the independent
-audit in `prompts/01-independent-noxlimit-audit.md` and user review before it becomes a survivor.
+has been selected or implemented, and there are zero technically verified survivors. NoxLimit is
+one unselected conditional candidate at **`KEEP AND VERIFY`**. An independent audit returned
+`DROP`; the 2026-07-24 hackathon-calibrated reassessment found material errors in its demand,
+substitute, leakage, and sponsor-fit vetoes. NoxLimit is authorized only for a bounded
+critical-path spike, not a full build. See
+`.thoughts/decisions/CURRENT.md`.
 
 ## Working Rules
 
@@ -17,6 +20,11 @@ audit in `prompts/01-independent-noxlimit-audit.md` and user review before it be
 - Recheck current hackathon rules, packages, chain state, and competitor claims before relying on
   them.
 - Treat Nox as confidential TEE computation, not anonymity or FHE.
+- Apply a hackathon-appropriate risk standard: require real non-mock Sepolia behavior, immutable
+  order binding, no obvious asset loss, replay protection, atomic limits, and honest privacy
+  claims. Do not turn mainnet availability, professional auditing, formal verification, organic
+  liquidity, decentralized keepers, production economic modelling, or SLA distributions into
+  pre-build vetoes; record them as post-hackathon hardening.
 - Do not start product architecture or implementation until idea selection and the critical-path
   verification gate have passed. A bounded, disposable integration spike is allowed when Prompt 3
   needs executable evidence for that gate.
@@ -67,7 +75,9 @@ silently guessing from memory.
 - Nox implementation reality lives in `.thoughts/wiki/`.
 - Exact third-party commits live in `.thoughts/sources/source-manifest.md`.
 - Staged agent prompts live in `prompts/`.
-- The current independent-audit entry point is `prompts/01-independent-noxlimit-audit.md`.
+- The current external-agent entry point is
+  `prompts/01a-hackathon-calibrated-noxlimit-reassessment.md`. The original independent audit is
+  preserved in `prompts/01-independent-noxlimit-audit.md`.
   `prompts/00-docs-first-product-discovery.md` remains the discovery rerun; the older
   `01-refresh-reality-and-ideas.md` is historical.
 
@@ -78,9 +88,14 @@ silently guessing from memory.
 - Do not inherit the old QuietRound recommendation without rerunning selection.
 - Do not inherit SLA Lock or either `NONE SURVIVE` verdict without reading the dated evidence. The
   newest docs-first verdict is current research state, not a selected product.
-- Do not inherit NoxLimit as selected or feasible. `KEEP AND VERIFY` means only that it warrants an
-  independent audit.
+- Do not inherit NoxLimit as selected or feasible. Its status is `KEEP AND VERIFY`: only the
+  time-boxed privacy + real-pool spike in the reassessment is authorized before user review.
+- Do not inherit the independent audit's claim that every failed evaluation needs an explicit
+  public-decryption proof. Recheck the released `select`, `addViewer`, private `decrypt`, and
+  honest-worker-gated publication path while preserving timing/non-action inference as a risk.
 - Do not describe DarkOdds as a Polymarket router; it built native Nox markets and used Polymarket
   only as a read-only display source.
 - Do not use unreleased Nox `main` APIs against current published packages or the live Sepolia ABI.
-- Do not claim mock, seeded, or self-reported data is a real end-to-end product path.
+- Do not claim mock or self-reported data is a real end-to-end product path. Builder-seeded
+  liquidity is acceptable when it is a real onchain pool and is labeled honestly; it is not
+  evidence of organic liquidity.

@@ -5,10 +5,15 @@ exciting idea into architecture or code before originality and feasibility are e
 Persisted workflow state lives in
 [`.thoughts/decisions/CURRENT.md`](../.thoughts/decisions/CURRENT.md).
 
+**Current-state exception:** if the user directs technical verification after Prompt 1A, the next
+step is only the bounded verification slice of Prompt 3. Do not run Prompt 2 first unless the user
+asks for a comparison or selection. This exception does not authorize a full implementation.
+
 1. [Run docs-first product discovery](./00-docs-first-product-discovery.md)
 2. [Independently audit NoxLimit and the full corpus](./01-independent-noxlimit-audit.md)
-3. [Adversarially choose one concept](./02-adversarial-selection.md)
-4. [Verify the chosen concept's critical path](./03-critical-path-verification.md)
+3. [Reassess the disputed `DROP` under the hackathon standard](./01a-hackathon-calibrated-noxlimit-reassessment.md)
+4. [Adversarially choose one concept](./02-adversarial-selection.md)
+5. [Verify the chosen concept's critical path](./03-critical-path-verification.md)
 
 The docs-first Prompt 0 is the only current discovery prompt. It recovers the official Nox product
 catalog that the generated `llms-full.txt` omits, distinguishes shipping references from concept
@@ -17,19 +22,26 @@ veto. This task has already run it; the canonical result is
 [`NONE SURVIVE`](../.thoughts/ideas/2026-07-23-nox-docs-first-candidates.md). Keep the prompt for an
 independent agent or a rerun with new evidence.
 
-The current task has since produced one unselected `KEEP AND VERIFY` hypothesis:
-[`NoxLimit`](../.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md). Run the new Prompt 1 in a
-fresh Claude Code or other coding-agent session. It reconstructs outcome-share markets, refreshes
-demand and competitor evidence, rechecks released Nox and network reality, compares market
-substrates, audits security/performance/UX, and permits `KEEP`, `RESHAPE`, `DROP`, or
-`NONE SURVIVE`. Its verdict still requires user review.
+Prompt 1 has run. Its
+[**`DROP`**](../.thoughts/verification/2026-07-24-noxlimit-independent-audit.md) verdict and
+[research](../.thoughts/research/2026-07-24-noxlimit-independent-research.md) are preserved, but the
+[hackathon-calibrated reassessment](../.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
+found material errors in the decisive vetoes. Direct demand is unvalidated rather than disproved;
+a normal backend can preserve the execution shape but must receive the raw threshold; released Nox
+supports viewer-only private decrypt; and prediction markets face an originality burden rather
+than a formal ban.
+
+Prompt 1A is now the external-agent handoff. It requires the original auditor to independently
+correct or reaffirm the verdict while separating demo blockers from production hardening. Current
+state is `KEEP AND VERIFY`, not selected.
 
 [`00-feasibility-first-winner-research.md`](./00-feasibility-first-winner-research.md) and the old
 [`01-refresh-reality-and-ideas.md`](./01-refresh-reality-and-ideas.md) are preserved only as
 historical context and must not be run. The older Prompt 0 excluded several official categories and
 incorrectly required an unchanged third-party integration even for a standalone Nox product.
 
-Run Prompt 2 only after the independent audit and when the user asks to compare or select one or
-more genuine survivors. NoxLimit's present `KEEP AND VERIFY` label is not a survivor verdict.
-Run Prompt 3 only after the user explicitly selects a concept or asks the agent to validate a
-surviving front-runner.
+Run Prompt 2 only when the user asks to compare or select one or more genuine survivors. There are
+zero technically verified survivors; NoxLimit is one unselected conditional candidate, so
+comparison is currently optional rather than useful. Prompt 3 is allowed only as the 24–36-hour
+disposable privacy + real-FPMM experiment defined by the reassessment. A full product build still
+requires that spike to pass and the user to select the concept.
