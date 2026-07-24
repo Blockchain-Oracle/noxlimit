@@ -31,9 +31,14 @@ a normal backend can preserve the execution shape but must receive the raw thres
 supports viewer-only private decrypt; and prediction markets face an originality burden rather
 than a formal ban.
 
-Prompt 1A is now the external-agent handoff. It requires the original auditor to independently
-correct or reaffirm the verdict while separating demo blockers from production hardening. Current
-state is `KEEP AND VERIFY`, not selected.
+Prompt 1A has now run: an independent recheck re-derived the disputed claims from the pinned
+sources, a compile of the contract-side Nox primitive skeleton against released v0.2.4, and live
+rules/product documentation, and
+[**reaffirmed `KEEP AND VERIFY`**](../.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
+with a gate split separating demo blockers from post-hackathon hardening. The compile did not cover
+the Handle SDK, real pool, adapter, asset forwarding, expiry, or refund. Current state is `KEEP AND
+VERIFY`, not selected; the next step after user direction is only the bounded Prompt 3 spike defined
+in that memo.
 
 [`00-feasibility-first-winner-research.md`](./00-feasibility-first-winner-research.md) and the old
 [`01-refresh-reality-and-ideas.md`](./01-refresh-reality-and-ideas.md) are preserved only as

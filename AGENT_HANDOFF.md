@@ -6,21 +6,22 @@ Use this repository to select an original, buildable iExec WTF Hackathon product
 organizer's wallet, DeFi, or treasury suggestions are mandatory. **No product is selected, and
 there are zero technically verified survivors.** NoxLimit is one unselected conditional candidate
 at **`KEEP AND VERIFY`**. An independent audit returned `DROP`; a hackathon-calibrated reassessment
-found material errors in the decisive demand,
-substitute, leakage, and sponsor-fit claims. Do not inherit QuietRound, SLA Lock, Proofline,
-AgentDispute, or any historical idea as a decision, and do not inherit NoxLimit as already feasible
-or selected. Start with the [current decision](./.thoughts/decisions/CURRENT.md), the
-[independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md), and the
-[reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md).
+found material errors in the decisive demand, substitute, leakage, and sponsor-fit claims, and an
+independent same-day recheck **reaffirmed** `KEEP AND VERIFY` from primary source and live rules
+evidence. Do not inherit QuietRound, SLA Lock, Proofline, AgentDispute, or any historical idea as a
+decision, and do not inherit NoxLimit as already feasible or selected. Start with the
+[current decision](./.thoughts/decisions/CURRENT.md), the
+[independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md), the
+[reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md), and the
+[reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md).
 
 The corrected docs-first discovery is complete and currently returns `NONE SURVIVE`. It read the
 component-rendered use-case catalog, allowed standalone products, researched nine candidates across
 six major lanes, and adversarially killed its two initial near-survivors. Preserve both graveyards.
 Use [`prompts/00-docs-first-product-discovery.md`](./prompts/00-docs-first-product-discovery.md) for
 an independent rerun or when new evidence appears; do not treat its existence as evidence that
-discovery is still unfinished. Use
-[`prompts/01a-hackathon-calibrated-noxlimit-reassessment.md`](./prompts/01a-hackathon-calibrated-noxlimit-reassessment.md)
-to hand the disputed verdict back to the external agent.
+discovery is still unfinished. The Prompt 1A reassessment has run and is retained as history; after
+user direction, only its bounded Prompt 3 verification slice is authorized.
 
 An independent or future discovery pass should produce a cited evidence and candidate report with:
 
@@ -56,8 +57,9 @@ buy limit against a real onchain outcome-share AMM.
 
 **Current outcome (2026-07-24): `KEEP AND VERIFY`, unselected.**
 
-- Demand for hands-off conditional execution and the structural onchain order-flow problem is real.
-  Direct evidence that traders specifically value hiding only this threshold is still unknown.
+- Conditional execution is a shipping workflow, and public onchain order flow has structural
+  pre-trade exposure. Direct evidence that prediction traders specifically value hiding only this
+  threshold is still unknown.
 - A backend can reproduce browser-off, same-chain, contract-custodied execution, but it receives
   the raw threshold. A local bot can preserve threshold privacy but needs an always-on process and
   gas-paying signing path.
@@ -90,12 +92,16 @@ real-pool verification defined by the reassessment. Do not start the full produc
   criterion) — note prior winners were on Arbitrum Sepolia. Required: functional frontend, public
   repo + docs, `feedback.md`, X post tagging `@iEx_ec`, ≤4-min demo video, end-to-end without mock
   data.
-- On 2026-07-24 the API showed 13 BUIDLs and 80 hackers, but the submission list is private.
+- On 2026-07-24 the API showed 13 BUIDLs and 80 hackers (81 at the evening recheck), but the
+  submission list is private. DoraHacks challenged the default command-line request; a browser-like
+  user agent reached the official API, and a rendered browser can inspect the page.
 - Prediction markets are not prohibited, but the Innovative track lists them as "already seen … we
   want what nobody has shipped yet." Creativity and end-to-end/no-mock are tied at the highest
-  displayed weight.
-- Registration currently requires completing the iExec Hello World journey and submitting the
-  wallet used.
+  displayed weight. The track's published `judging_criteria` API field is empty (verified live
+  2026-07-24) — the steer is description prose, not a scoring formula.
+- The current official API has `is_enabled_ask_hackers:true` and a required registration question
+  instructing the hacker to complete iExec Hello World and submit the wallet address used.
+  `register_form_url:null` and `has_onboarding:false` do not negate that question.
 
 ### Previous winners
 
@@ -195,12 +201,16 @@ self-serve product action. Zero survivors is a valid research result.
 ## NoxLimit verification boundary (`KEEP AND VERIFY`, 2026-07-24)
 
 > The independent audit returned `DROP`, but its decisive privacy claim—that every failed
-> evaluation must have an explicit public proof—is not established because the released stack has
-> a viewer/private-decrypt path. Public observers may still infer a failed evaluation from timing
-> and non-action, so the complete boundary remains spike-required. Demand remains unvalidated and
-> the privacy boundary remains narrow. See the
-> [independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md) and
-> [reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md).
+> evaluation must have an explicit public proof—is contradicted by released source: Handle SDK
+> `decrypt` privately serves any `isViewer`-authorized address with no transaction and no public
+> proof, and a contract-side Nox primitive skeleton compiles against released v0.2.4. The fixture
+> did not cover the Handle SDK, real pool, adapter, asset forwarding, expiry, or refund. Public
+> observers may still infer a failed evaluation from timing and non-action (each evaluation emits
+> a public `ViewerAdded` event), so the complete live boundary remains spike-required. Demand
+> remains unvalidated and the privacy boundary remains narrow. See the
+> [independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md), the
+> [reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md), and
+> the [reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md).
 
 The audited product question was not “should we build a prediction market?” It was:
 
@@ -222,7 +232,7 @@ The final action must remain:
 
 `encryptInput → fromExternal → persisted handle → confidential comparison with the fixed-input
 quote sampled in the evaluation-request transaction → threshold-derived public minimum output →
-replay-safe one-shot minimum-output-protected outcome-share buy`
+application-bound proof → replay-guarded one-shot minimum-output-protected outcome-share buy`
 
 The worker may advance the state and may learn one readiness bit per permitted evaluation plus the
 successful `minOut`, but it must not receive the raw resting threshold, change immutable order
@@ -246,6 +256,7 @@ reverts, the order is disclosed/refundable rather than confidential-pending agai
 - [NoxLimit product hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md)
 - [Independent NoxLimit audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)
 - [Hackathon-calibrated reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
+- [Reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
 - [Reassessment prompt](./prompts/01a-hackathon-calibrated-noxlimit-reassessment.md)
 - [Independent NoxLimit audit prompt](./prompts/01-independent-noxlimit-audit.md)
 - [Docs-first correction](./.thoughts/research/2026-07-23-nox-docs-first-correction.md)

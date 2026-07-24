@@ -1,14 +1,19 @@
 # Current Product Decision
 
 - **Status:** NoxLimit `DROP` verdict reassessed → **`KEEP AND VERIFY`** as an unselected hackathon
-  candidate.
+  candidate. Independently rechecked and **reaffirmed** later the same day from primary source and
+  live rules evidence; see the
+  [reaffirmation memo](../verification/2026-07-24-noxlimit-reaudit-reaffirmation.md).
 - **Leading hypothesis:** NoxLimit, but only as a candidate for a 24–36-hour disposable
   critical-path spike. It is not selected and no full implementation is authorized.
 - **Survivors:** Zero technically verified survivors. NoxLimit is one unselected conditional
   candidate.
-- **Confidence:** High that the hard `DROP` is unsupported; medium that the released Nox primitives
-  permit a success-only evaluation path; low-to-medium on privacy-specific demand and final
-  eight-day integration feasibility until the bounded spike runs.
+- **Confidence:** High that the hard `DROP` is unsupported. A disposable contract-side Nox
+  primitive skeleton (`fromExternal → allowThis → ge → select → allowThis → addViewer →
+  allowPublicDecryption → validateDecryptionProof`) builds against released v0.2.4 with solc
+  0.8.35. It did **not** compile the Handle SDK, real-pool quote, adapter, asset-forwarding, expiry,
+  or refund path; those and the live Gateway/worker flow remain spike-required. Low-to-medium on
+  privacy-specific demand and final eight-day integration feasibility until the bounded spike runs.
 - **Independent audit (2026-07-24):** returned `DROP` and remains preserved as evidence. Its useful
   feasibility findings stand, but its decisive claims do not: the demand search proves
   *unvalidated*, not *absent*; a normal backend can preserve the execution shape but must receive
@@ -25,6 +30,8 @@
   [`../research/2026-07-24-noxlimit-independent-research.md`](../research/2026-07-24-noxlimit-independent-research.md)
 - **Reassessment of the `DROP` verdict:**
   [`../verification/2026-07-24-noxlimit-drop-verdict-reassessment.md`](../verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
+- **Independent recheck and reaffirmation (source + live evidence, gate split, spike spec):**
+  [`../verification/2026-07-24-noxlimit-reaudit-reaffirmation.md`](../verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
 - **NoxLimit hypothesis (conditional candidate, not selected):**
   [`2026-07-24-noxlimit-product-hypothesis.md`](../ideas/2026-07-24-noxlimit-product-hypothesis.md)
 - **NoxLimit product-reality brief:**
@@ -39,10 +46,9 @@
   [`2026-07-23-docs-first-product-research.md`](../research/2026-07-23-docs-first-product-research.md)
 - **Candidate report:**
   [`2026-07-23-nox-docs-first-candidates.md`](../ideas/2026-07-23-nox-docs-first-candidates.md)
-- **Next workflow:** Run the reassessment prompt in the external agent and, after user direction,
-  run only the bounded privacy-path + real-FPMM critical-path spike. Ask the organizer to validate
-  the exact confidential advanced-order distinction in parallel. Do not build a polished frontend
-  until the spike passes.
+- **Next workflow:** The reassessment prompt has run. After user direction, run only the bounded
+  privacy-path + real-FPMM critical-path spike. Ask the organizer to validate the exact confidential
+  advanced-order distinction in parallel. Do not build a polished frontend until the spike passes.
 - **Prompt 2 allowed:** Not yet — there is only one conditional candidate and it has not passed the
   critical technical gate.
 - **Prompt 3 allowed:** Yes, but only as the 24–36-hour disposable experiment in the reassessment,
@@ -50,8 +56,14 @@
 
 ## Verified state at audit time (2026-07-24)
 
-- WTF deadline: **2026-08-01 21:59 UTC** (8 days out). Required chain: **Ethereum Sepolia** (prior
-  winners were on Arbitrum Sepolia — do not inherit their chain).
+- WTF deadline: **2026-08-01 21:59 UTC** (8 days out; re-verified through the official page/API).
+  DoraHacks challenged a default command-line request, but a browser-like user agent reached the
+  official API. Required chain: **Ethereum Sepolia** (prior winners were on
+  Arbitrum Sepolia — do not inherit their chain). 13 BUIDLs, 81 hackers at the evening recheck. The
+  Innovative track's published `judging_criteria` field is **empty** — the "already seen …
+  prediction markets" steer is track-description prose, not a separate scoring formula; the empty
+  field does not negate that originality risk. The official API's required registration-question
+  payload instructs hackers to complete iExec Hello World and submit the wallet address used.
 - Nox is live **only** on Ethereum Sepolia (11155111) and Arbitrum Sepolia (421614); **no production
   mainnet**. Ethereum NoxCompute impl `0xc9B5…b819` unchanged since 2026-07-22. Packages still
   0.2.4 / beta.13 / 0.1.0.

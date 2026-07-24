@@ -8,10 +8,12 @@ agent can inherit without restarting discovery.
 **Current state:** no product has been selected or implemented, and there are zero technically
 verified survivors. **NoxLimit** is one unselected conditional candidate at **`KEEP AND VERIFY`**.
 An independent audit returned `DROP`, but a hackathon-calibrated reassessment found material errors
-in its demand, substitute, leakage, and sponsor-fit vetoes. The candidate is authorized only for a
-bounded live verification, not a full build. See the
+in its demand, substitute, leakage, and sponsor-fit vetoes, and an independent same-day recheck
+reaffirmed `KEEP AND VERIFY` from primary source and live rules evidence. The candidate is
+authorized only for a bounded live verification, not a full build. See the
 [independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md),
-[reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md), and
+[reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md),
+[reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md), and
 [current decision](./.thoughts/decisions/CURRENT.md).
 
 ## WTF in one minute
@@ -80,18 +82,22 @@ gift-card checkout. See the
 
 ## Conditional candidate: NoxLimit
 
-> **Current verdict 2026-07-24: `KEEP AND VERIFY`, not selected.** The original independent audit
-> returned `DROP`; the reassessment showed that direct demand is unknown rather than disproved,
-> ordinary backends do not keep the raw threshold from their operator, viewer-only decrypt can
-> plausibly avoid explicit public proofs for failed evaluations, and prediction markets are not
-> prohibited. Timing and non-action may still leak a failed-evaluation inference. The live
-> released-API path still has to pass a time-boxed spike.
+> **Current verdict 2026-07-24: `KEEP AND VERIFY`, not selected — reaffirmed by an independent
+> recheck.** The original independent audit returned `DROP`; the reassessment showed that direct
+> demand is unknown rather than disproved, ordinary backends do not keep the raw threshold from
+> their operator, viewer-only decrypt avoids explicit public proofs for failed evaluations (the
+> contract-side Nox primitive subset compiles against released v0.2.4), and no formal
+> prediction-market prohibition was found. The empty `judging_criteria` API field does not erase
+> the track's explicit prediction-market originality warning. Timing and non-action may still leak
+> a failed-evaluation inference. The live released-API and real-pool path still has to pass a
+> time-boxed spike.
 
 NoxLimit is not a generic prediction market. It proposed one private advanced-order layer over a
 real onchain outcome-share AMM:
 
 `encrypted resting limit → evaluation-block fixed-input pool quote → confidential comparison →
-one-shot proof → real minimum-output-protected outcome-share buy`
+application-bound proof → one-shot state transition → real minimum-output-protected outcome-share
+buy`
 
 The smallest product is one curated BTC binary market, a public fixed-size buy and outcome side,
 and a maximum price that is confidential while resting and revealed as a minimum-output bound when
@@ -103,28 +109,30 @@ and Arbitrum Sepolia, not production mainnet, so any delivered claim must remain
 Read the [product-reality brief](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md),
 [candidate hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md), and
 [independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md), then the
-[hackathon-calibrated reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md).
-The [reassessment prompt](./prompts/01a-hackathon-calibrated-noxlimit-reassessment.md) is the current
-handoff for the external agent.
+[hackathon-calibrated reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
+and [reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md).
+The reassessment prompt has run; the only authorized next technical work is the bounded Prompt 3
+spike after user direction.
 
 ## Read order for an agent
 
 1. [Agent handoff](./AGENT_HANDOFF.md)
 2. [Current product decision](./.thoughts/decisions/CURRENT.md)
-3. [NoxLimit `DROP` reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
-4. [NoxLimit independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)
-5. [NoxLimit product-reality brief](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md)
-6. [NoxLimit candidate hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md)
-7. [Hackathon-calibrated reassessment prompt](./prompts/01a-hackathon-calibrated-noxlimit-reassessment.md)
-8. [Docs-first correction](./.thoughts/research/2026-07-23-nox-docs-first-correction.md)
-9. [Docs-first product research](./.thoughts/research/2026-07-23-docs-first-product-research.md)
-10. [Docs-first candidate report](./.thoughts/ideas/2026-07-23-nox-docs-first-candidates.md)
-11. [Nox product/use-case map](./.thoughts/wiki/nox-use-case-map.md)
-12. [Winner and opportunity research](./.thoughts/research/2026-07-23-iexec-wtf-winners-and-opportunity-space.md)
-13. [Nox domain wiki](./.thoughts/wiki/index.md)
-14. [Known contradictions](./.thoughts/wiki/nox-known-contradictions.md)
-15. [Source manifest](./.thoughts/sources/source-manifest.md)
-16. [Prompt sequence](./prompts/README.md)
+3. [NoxLimit reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
+4. [NoxLimit `DROP` reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
+5. [NoxLimit independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)
+6. [NoxLimit product-reality brief](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md)
+7. [NoxLimit candidate hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md)
+8. [Hackathon-calibrated reassessment prompt](./prompts/01a-hackathon-calibrated-noxlimit-reassessment.md)
+9. [Docs-first correction](./.thoughts/research/2026-07-23-nox-docs-first-correction.md)
+10. [Docs-first product research](./.thoughts/research/2026-07-23-docs-first-product-research.md)
+11. [Docs-first candidate report](./.thoughts/ideas/2026-07-23-nox-docs-first-candidates.md)
+12. [Nox product/use-case map](./.thoughts/wiki/nox-use-case-map.md)
+13. [Winner and opportunity research](./.thoughts/research/2026-07-23-iexec-wtf-winners-and-opportunity-space.md)
+14. [Nox domain wiki](./.thoughts/wiki/index.md)
+15. [Known contradictions](./.thoughts/wiki/nox-known-contradictions.md)
+16. [Source manifest](./.thoughts/sources/source-manifest.md)
+17. [Prompt sequence](./prompts/README.md)
 
 The historical idea files remain useful only as collision and rejection evidence. Their
 recommendations are superseded by the current decision record.

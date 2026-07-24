@@ -6,8 +6,10 @@ This repository is the context and decision corpus for an iExec WTF Hackathon pr
 has been selected or implemented, and there are zero technically verified survivors. NoxLimit is
 one unselected conditional candidate at **`KEEP AND VERIFY`**. An independent audit returned
 `DROP`; the 2026-07-24 hackathon-calibrated reassessment found material errors in its demand,
-substitute, leakage, and sponsor-fit vetoes. NoxLimit is authorized only for a bounded
-critical-path spike, not a full build. See
+substitute, leakage, and sponsor-fit vetoes, and a same-day independent recheck reaffirmed
+`KEEP AND VERIFY` from primary source and live rules evidence
+(`.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md`). NoxLimit is authorized
+only for a bounded critical-path spike, not a full build. See
 `.thoughts/decisions/CURRENT.md`.
 
 ## Working Rules
@@ -75,8 +77,9 @@ silently guessing from memory.
 - Nox implementation reality lives in `.thoughts/wiki/`.
 - Exact third-party commits live in `.thoughts/sources/source-manifest.md`.
 - Staged agent prompts live in `prompts/`.
-- The current external-agent entry point is
-  `prompts/01a-hackathon-calibrated-noxlimit-reassessment.md`. The original independent audit is
+- `prompts/01a-hackathon-calibrated-noxlimit-reassessment.md` has run; its reaffirmation lives in
+  `.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md`. The next step, after user
+  direction, is only the bounded Prompt 3 spike defined there. The original independent audit is
   preserved in `prompts/01-independent-noxlimit-audit.md`.
   `prompts/00-docs-first-product-discovery.md` remains the discovery rerun; the older
   `01-refresh-reality-and-ideas.md` is historical.
