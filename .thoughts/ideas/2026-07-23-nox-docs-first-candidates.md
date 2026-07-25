@@ -1,5 +1,9 @@
 # Nox Docs-First Candidate Report
 
+> **Historical discovery verdict.** `NONE SURVIVE` described this 2026-07-23 pass and does not
+> control the product now selected. Do not execute its “no architecture” instruction; follow
+> [`../decisions/CURRENT.md`](../decisions/CURRENT.md).
+
 **Research date:** 2026-07-23
 
 **Status:** Complete; no product selected

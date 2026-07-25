@@ -1,5 +1,9 @@
 # Nox Documentation-First Use-Case Correction
 
+> **Historical research artifact.** Preserve its docs correction and evidence, but follow
+> [`../decisions/CURRENT.md`](../decisions/CURRENT.md) for selection and workflow. Any conclusion
+> here that selection or architecture remains blocked is superseded.
+
 **Research date:** 2026-07-23
 
 **Status:** Complete source audit; corrected discovery completed

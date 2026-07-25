@@ -1,5 +1,8 @@
 # Prompt 1A: Reassess NoxLimit Using the Hackathon-Appropriate Standard
 
+> **Completed historical prompt.** Its reassessment and independent reaffirmation have run. Do not
+> reopen the verdict from this file; follow `CURRENT.md` and the canonical architecture.
+
 Copy everything below the divider into the agent session that authored the NoxLimit `DROP` audit.
 
 ---

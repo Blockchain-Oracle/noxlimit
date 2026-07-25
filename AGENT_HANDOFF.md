@@ -1,27 +1,30 @@
-# Agent Handoff: Find the WTF Product Worth Building
+# Agent Handoff: Verify and Build NoxLimit Deliberately
 
 ## Mission
 
-Use this repository to select an original, buildable iExec WTF Hackathon product. Do not assume the
-organizer's wallet, DeFi, or treasury suggestions are mandatory. **No product is selected, and
-there are zero technically verified survivors.** NoxLimit is one unselected conditional candidate
-at **`KEEP AND VERIFY`**. An independent audit returned `DROP`; a hackathon-calibrated reassessment
-found material errors in the decisive demand, substitute, leakage, and sponsor-fit claims, and an
-independent same-day recheck **reaffirmed** `KEEP AND VERIFY` from primary source and live rules
-evidence. Do not inherit QuietRound, SLA Lock, Proofline, AgentDispute, or any historical idea as a
-decision, and do not inherit NoxLimit as already feasible or selected. Start with the
-[current decision](./.thoughts/decisions/CURRENT.md), the
-[independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md), the
-[reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md), and the
-[reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md).
+Use this repository to verify and then build the selected iExec WTF Hackathon direction.
+**NoxLimit is selected for architecture review and bounded critical-path verification; it is not
+yet technically verified and the polished build has not started.** Do not reopen product discovery
+or inherit QuietRound, SLA Lock, Proofline, AgentDispute, or another historical idea unless the
+user explicitly reopens selection or executable evidence kills a load-bearing NoxLimit assumption.
 
-The corrected docs-first discovery is complete and currently returns `NONE SURVIVE`. It read the
+Start with the [current decision](./.thoughts/decisions/CURRENT.md),
+[selection/adoption memo](./.thoughts/decisions/2026-07-25-noxlimit-direction-and-architecture-gate.md),
+[audit and authority gates](./.thoughts/decisions/AUDIT-GATES.md), and
+[canonical architecture](./.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md).
+The [independent `DROP` audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)
+is historical evidence. Its workflow verdict was superseded by the
+[reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md) and
+[independent reaffirmation](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md).
+
+The corrected docs-first discovery is complete and historically returned `NONE SURVIVE`. It read the
 component-rendered use-case catalog, allowed standalone products, researched nine candidates across
 six major lanes, and adversarially killed its two initial near-survivors. Preserve both graveyards.
 Use [`prompts/00-docs-first-product-discovery.md`](./prompts/00-docs-first-product-discovery.md) for
 an independent rerun or when new evidence appears; do not treat its existence as evidence that
-discovery is still unfinished. The Prompt 1A reassessment has run and is retained as history; after
-user direction, only its bounded Prompt 3 verification slice is authorized.
+discovery is still unfinished. The Prompt 1A reassessment has run and is retained as evidence.
+Prompt 2 is waived by the user's selection. After architecture review, only its bounded Prompt 3
+verification slice is authorized.
 
 An independent or future discovery pass should produce a cited evidence and candidate report with:
 
@@ -33,13 +36,13 @@ An independent or future discovery pass should produce a cited evidence and cand
 5. no more than five candidates that pass every feasibility gate;
 6. up to three recommendations, or an explicit `NONE SURVIVE` verdict.
 
-Recommendations are not selections. Stop for user review before Prompt 2, product specification,
-architecture, implementation planning, or code.
+If discovery is explicitly reopened, recommendations are not selections. That historical discovery
+rule does not prohibit maintaining the already-authorized canonical NoxLimit architecture.
 
 ### Current decision state
 
-No product has been selected and no candidate is technically verified. NoxLimit is one conditional
-candidate; the two strongest docs-first near-misses still failed:
+NoxLimit is the selected direction but remains technically unverified. The two strongest docs-first
+near-misses still failed and remain in the graveyard:
 
 - **Private Quote-to-Pay:** PaySec already exposes the same product surface; current shared
   optimized cUSDC does not grant a receiver the transferred-amount handle needed for
@@ -55,7 +58,7 @@ Generic native prediction markets remain excluded because DarkOdds already built
 Research identified a narrower product-shaped hypothesis, **NoxLimit**: one fixed-size confidential
 buy limit against a real onchain outcome-share AMM.
 
-**Current outcome (2026-07-24): `KEEP AND VERIFY`, unselected.**
+**Current outcome (2026-07-25): selected direction; technical maturity `KEEP AND VERIFY`.**
 
 - Conditional execution is a shipping workflow, and public onchain order flow has structural
   pre-trade exposure. Direct evidence that prediction traders specifically value hiding only this
@@ -73,8 +76,8 @@ buy limit against a real onchain outcome-share AMM.
   Arbitrum Sepolia; no production mainnet exists, but Ethereum Sepolia is the required hackathon
   chain.
 
-Prompt 2 remains premature. Prompt 3 is allowed only as the 24–36-hour disposable privacy +
-real-pool verification defined by the reassessment. Do not start the full product until it passes.
+Prompt 2 is waived. Prompt 3 is allowed after architecture review only as the 24–36-hour
+disposable privacy + real-pool verification. Do not start the polished product until it passes.
 
 ## Canonical facts to inherit
 
@@ -220,8 +223,8 @@ The audited product question was not “should we build a prediction market?” 
 
 An onchain outcome-share pool holds redeemable `YES` and `NO` assets and quotes trades from its
 reserves. A prediction oracle resolves which asset wins; the AMM quote separately decides whether
-the order's limit is executable. The first substrate candidates are unchanged Gnosis Conditional
-Tokens/FPMM and Seer outcomes with Uniswap V3. Neither is selected.
+the order's limit is executable. The bounded spike uses unchanged Gnosis Conditional Tokens/FPMM.
+Seer outcomes with Uniswap V3 remain historical comparison evidence, not a competing branch.
 
 The smallest credible version is one curated BTC market, one public fixed order size and side, one
 confidential buy limit, cancellation, expiry, refund, resolution, and redemption. A genuine
@@ -252,6 +255,11 @@ reverts, the order is disclosed/refundable rather than confidential-pending agai
 
 ## Required reading
 
+- [Current product decision](./.thoughts/decisions/CURRENT.md)
+- [Selection and architecture-gate memo](./.thoughts/decisions/2026-07-25-noxlimit-direction-and-architecture-gate.md)
+- [Audit and authority gates](./.thoughts/decisions/AUDIT-GATES.md)
+- [Canonical NoxLimit architecture](./.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md)
+- [Context/gate/architecture verification](./.thoughts/verification/2026-07-25-context-gate-and-architecture-audit.md)
 - [NoxLimit product and market reality](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md)
 - [NoxLimit product hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md)
 - [Independent NoxLimit audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)
@@ -265,7 +273,6 @@ reverts, the order is disclosed/refundable rather than confidential-pending agai
 - [Nox product/use-case map](./.thoughts/wiki/nox-use-case-map.md)
 - [Feasibility-first winner research](./.thoughts/research/2026-07-23-feasibility-first-winner-patterns.md)
 - [Feasibility-first candidate graveyard](./.thoughts/ideas/2026-07-23-feasibility-first-candidates.md)
-- [Current product decision](./.thoughts/decisions/CURRENT.md)
 - [Nox protocol reality](./.thoughts/wiki/nox-protocol.md)
 - [Nox developer stack](./.thoughts/wiki/nox-developer-stack.md)
 - [Nox integration patterns](./.thoughts/wiki/nox-integration-patterns.md)

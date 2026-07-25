@@ -1,8 +1,12 @@
 # NoxLimit Product and Market Reality
 
 **Date:** 2026-07-24
-**Status:** New product hypothesis under independent audit; not selected
-**Current verdict:** `KEEP AND VERIFY`
+**Status:** Historical reality brief for the product direction selected on 2026-07-25
+**Technical maturity:** `KEEP AND VERIFY`
+
+Current authority:
+[`../decisions/CURRENT.md`](../decisions/CURRENT.md) and
+[`../architecture/2026-07-25-noxlimit-system-architecture.md`](../architecture/2026-07-25-noxlimit-system-architecture.md).
 
 ## Executive conclusion
 
@@ -13,11 +17,11 @@ Polymarket router. The narrow product hypothesis is:
 > against a real onchain outcome-share AMM. A worker evaluates the encrypted threshold through Nox
 > and, when eligible, a one-shot proof executes the real trade with an atomic minimum-output bound.
 
-This is the first direction found after the docs-first `NONE SURVIVE` pass that has a plausible
+This was the first direction found after the docs-first `NONE SURVIVE` pass that had a plausible
 self-serve product loop, current feature-supply signals, and a testable reason for Nox to exist. It
-is still only a hypothesis. Its originality and user loop are plausible; its demand and
-implementation are unproven. Do not start the application architecture or implementation until an
-independent audit and the critical-path verification gate pass.
+has since been selected as the current direction. Its originality and user loop are plausible; its
+demand remains unvalidated and its live implementation is unproven. Use the canonical architecture
+for technical design and do not start the polished build until the critical-path gate passes.
 
 The scope-minimized candidate surface would be one curated BTC binary market, one public fixed-size
 buy order, one public outcome side, and one confidential maximum price. Cancellation, expiry,
@@ -402,7 +406,7 @@ The hypothesis should be dropped or substantially reshaped if any central gate f
 12. **Deadline gate:** measured build scope, latency, or failure recovery cannot fit the remaining
     hackathon time.
 
-## Evidence still needed before selection
+## Evidence originally requested before selection
 
 - Direct interviews, forum requests, or observable usage showing demand for private resting
   prediction-market intent, not only demand for prediction markets.
@@ -414,5 +418,6 @@ The hypothesis should be dropped or substantially reshaped if any central gate f
   outcome-share receipt.
 - Organizer clarification on unchanged protocol deployment and previous-project reuse.
 
-Until those are complete, `KEEP AND VERIFY` means “worth auditing,” not “chosen,” “feasible,” or
+Selection has since been made by the user. These items now distinguish technical verification and
+post-hackathon validation; `KEEP AND VERIFY` does not mean “feasible,” “production-ready,” or
 “winner.”

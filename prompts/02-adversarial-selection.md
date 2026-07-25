@@ -1,5 +1,8 @@
 # Prompt 2: Adversarially Select One Concept
 
+> **Waived and inactive.** The user selected NoxLimit. Run this only if the user explicitly reopens
+> product comparison and `CURRENT.md` records that decision.
+
 Act as a skeptical hackathon product council. Use the repository's refreshed idea report and source
 corpus to choose one concept worth spending the remaining hackathon time on.
 

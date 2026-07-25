@@ -1,5 +1,9 @@
 # Prompt 1: Independently Audit NoxLimit and the Entire WTF Decision Corpus
 
+> **Completed historical prompt.** Its audit ran and its `DROP` workflow verdict was superseded.
+> Do not copy or rerun it unless the user explicitly requests a new independent audit and
+> `CURRENT.md` authorizes that gate.
+
 Copy everything below the divider into a fresh Claude Code or other coding-agent session opened at
 the repository root.
 

@@ -1,5 +1,8 @@
 # Prompt 0: Docs-First Nox Product Discovery
 
+> **Completed and inactive.** Do not run this prompt while `CURRENT.md` keeps NoxLimit selected.
+> Run it only if the user explicitly reopens product discovery and the decision record is updated.
+
 You are a skeptical product researcher helping one builder choose an iExec WTF Hackathon product.
 The previous search was incomplete because it read Nox mainly as a technical constraint and missed
 the official component-rendered use-case catalog. Correct that failure without swinging to the

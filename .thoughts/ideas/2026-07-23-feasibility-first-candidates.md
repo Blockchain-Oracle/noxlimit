@@ -1,5 +1,9 @@
 # Feasibility-First Candidate Report
 
+> **Historical graveyard.** Preserve its rejected directions and evidence, but do not treat
+> “selection pending” or any stop instruction as current. Follow
+> [`../decisions/CURRENT.md`](../decisions/CURRENT.md).
+
 **Research date:** 2026-07-23
 
 **Status:** Research complete; user selection pending

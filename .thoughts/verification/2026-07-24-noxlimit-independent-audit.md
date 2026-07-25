@@ -1,5 +1,13 @@
 # NoxLimit Independent Audit and Verdict
 
+> **Historical verdict — superseded for workflow decisions.** Preserve this audit for its evidence
+> and objections, but do not execute its `DROP`, “no Prompt 3,” or stop instructions. Its decisive
+> claims were rechecked in
+> [`2026-07-24-noxlimit-drop-verdict-reassessment.md`](./2026-07-24-noxlimit-drop-verdict-reassessment.md)
+> and independently in
+> [`2026-07-24-noxlimit-reaudit-reaffirmation.md`](./2026-07-24-noxlimit-reaudit-reaffirmation.md).
+> Current authority is [`../decisions/CURRENT.md`](../decisions/CURRENT.md).
+
 **Date:** 2026-07-24
 **Auditor:** Independent (no prior NoxLimit involvement)
 **Evidence:** [`../research/2026-07-24-noxlimit-independent-research.md`](../research/2026-07-24-noxlimit-independent-research.md)
@@ -193,7 +201,8 @@ integration boundary must not become evidence the product deserves to exist.
 
 ## 12. Minimal Prompt-3 spike
 
-**None authorized.** The verdict is `DROP`; Prompt 2 and Prompt 3 remain disallowed. Had the verdict been
+**Historical recommendation: none authorized.** At the time, this audit returned `DROP`. Current
+Prompt authorization is governed by `CURRENT.md`, not this section. Had the verdict been
 `KEEP`, the single smallest disposable spike would have been the privacy-integrity question (§6): can a
 worker advance evaluation and finalize a real `FPMM.buy` on Sepolia **without** publicly disclosing the
 threshold before the intended fill, and how tightly do repeated evaluations bracket it? That is the gate the
@@ -201,11 +210,9 @@ product most needs and the one the reasoning says it fails.
 
 ## 13. Explicit stop condition
 
-Stop here. Do not write product code, deploy contracts, send transactions, choose or design an architecture,
-or advance Prompt 2 / Prompt 3. Selection is the user's call: `DROP` is the auditor's verdict, not a
-selection event. Preserve the rejection graveyard. If the user wants to continue on Nox at all, the next
-step is a fresh docs-first discovery pass aimed at the sponsor's "what nobody has shipped yet" bar, with
-organizer idea-validation *before* any build — not a NoxLimit rework.
+**Historical stop condition:** this was the auditor's recommendation on 2026-07-24. It no longer
+controls architecture, Prompt 3, or product selection. Preserve it as disagreement evidence and
+follow `CURRENT.md` plus `AUDIT-GATES.md`.
 
 ---
 

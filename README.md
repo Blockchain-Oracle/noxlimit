@@ -5,16 +5,19 @@ product. It contains source-pinned Nox implementation research, a verified audit
 three winners, a live competitor scan, a revised product-idea menu, and prompts that another coding
 agent can inherit without restarting discovery.
 
-**Current state:** no product has been selected or implemented, and there are zero technically
-verified survivors. **NoxLimit** is one unselected conditional candidate at **`KEEP AND VERIFY`**.
-An independent audit returned `DROP`, but a hackathon-calibrated reassessment found material errors
-in its demand, substitute, leakage, and sponsor-fit vetoes, and an independent same-day recheck
-reaffirmed `KEEP AND VERIFY` from primary source and live rules evidence. The candidate is
-authorized only for a bounded live verification, not a full build. See the
-[independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md),
-[reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md),
-[reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md), and
-[current decision](./.thoughts/decisions/CURRENT.md).
+**Current state:** **NoxLimit is the selected product direction for architecture review and bounded
+critical-path verification.** It is not yet technically verified, and no polished/full
+implementation has started. The architecture that was previously scattered across several reports
+is now consolidated in the
+[canonical system architecture](./.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md).
+See the [current decision](./.thoughts/decisions/CURRENT.md) and
+[adoption memo](./.thoughts/decisions/2026-07-25-noxlimit-direction-and-architecture-gate.md), plus
+the [audit/authority gates](./.thoughts/decisions/AUDIT-GATES.md). The original `DROP` audit remains
+historical evidence; the [reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
+and [independent reaffirmation](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
+superseded its workflow verdict. The completed
+[context/gate/architecture audit](./.thoughts/verification/2026-07-25-context-gate-and-architecture-audit.md)
+records the consistency checks.
 
 ## WTF in one minute
 
@@ -80,10 +83,10 @@ merchant database preserves the same user outcome, while Sigill and FHE2P alread
 gift-card checkout. See the
 [docs-first candidate report](./.thoughts/ideas/2026-07-23-nox-docs-first-candidates.md).
 
-## Conditional candidate: NoxLimit
+## Selected direction: NoxLimit
 
-> **Current verdict 2026-07-24: `KEEP AND VERIFY`, not selected — reaffirmed by an independent
-> recheck.** The original independent audit returned `DROP`; the reassessment showed that direct
+> **Current maturity: selected direction, `KEEP AND VERIFY` technically.** The original independent
+> audit returned `DROP`; the reassessment showed that direct
 > demand is unknown rather than disproved, ordinary backends do not keep the raw threshold from
 > their operator, viewer-only decrypt avoids explicit public proofs for failed evaluations (the
 > contract-side Nox primitive subset compiles against released v0.2.4), and no formal
@@ -106,33 +109,37 @@ evaluation. It must work after the browser closes and include cancellation, expi
 objective resolution, and redemption. Current official Nox support was found on Ethereum Sepolia
 and Arbitrum Sepolia, not production mainnet, so any delivered claim must remain testnet-honest.
 
-Read the [product-reality brief](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md),
-[candidate hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md), and
-[independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md), then the
-[hackathon-calibrated reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
-and [reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md).
-The reassessment prompt has run; the only authorized next technical work is the bounded Prompt 3
-spike after user direction.
+Start with the
+[canonical architecture](./.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md), then
+use the [product-reality brief](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md),
+[candidate hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md),
+[hackathon-calibrated reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md),
+and [reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
+as evidence. The only authorized next technical work, after architecture review, is the bounded
+Prompt 3 spike.
 
 ## Read order for an agent
 
-1. [Agent handoff](./AGENT_HANDOFF.md)
-2. [Current product decision](./.thoughts/decisions/CURRENT.md)
-3. [NoxLimit reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
-4. [NoxLimit `DROP` reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
-5. [NoxLimit independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)
-6. [NoxLimit product-reality brief](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md)
-7. [NoxLimit candidate hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md)
-8. [Hackathon-calibrated reassessment prompt](./prompts/01a-hackathon-calibrated-noxlimit-reassessment.md)
-9. [Docs-first correction](./.thoughts/research/2026-07-23-nox-docs-first-correction.md)
-10. [Docs-first product research](./.thoughts/research/2026-07-23-docs-first-product-research.md)
-11. [Docs-first candidate report](./.thoughts/ideas/2026-07-23-nox-docs-first-candidates.md)
-12. [Nox product/use-case map](./.thoughts/wiki/nox-use-case-map.md)
-13. [Winner and opportunity research](./.thoughts/research/2026-07-23-iexec-wtf-winners-and-opportunity-space.md)
-14. [Nox domain wiki](./.thoughts/wiki/index.md)
-15. [Known contradictions](./.thoughts/wiki/nox-known-contradictions.md)
-16. [Source manifest](./.thoughts/sources/source-manifest.md)
-17. [Prompt sequence](./prompts/README.md)
+1. [Current product decision](./.thoughts/decisions/CURRENT.md)
+2. [Selection and architecture-gate memo](./.thoughts/decisions/2026-07-25-noxlimit-direction-and-architecture-gate.md)
+3. [Audit and authority gates](./.thoughts/decisions/AUDIT-GATES.md)
+4. [Canonical NoxLimit architecture](./.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md)
+5. [Agent handoff](./AGENT_HANDOFF.md)
+6. [Context/gate/architecture verification](./.thoughts/verification/2026-07-25-context-gate-and-architecture-audit.md)
+7. [NoxLimit reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
+8. [NoxLimit `DROP` reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
+9. [NoxLimit product-reality brief](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md)
+10. [NoxLimit candidate hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md)
+11. [NoxLimit independent audit — historical](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)
+12. [Docs-first correction](./.thoughts/research/2026-07-23-nox-docs-first-correction.md)
+13. [Docs-first product research](./.thoughts/research/2026-07-23-docs-first-product-research.md)
+14. [Docs-first candidate report](./.thoughts/ideas/2026-07-23-nox-docs-first-candidates.md)
+15. [Nox product/use-case map](./.thoughts/wiki/nox-use-case-map.md)
+16. [Winner and opportunity research](./.thoughts/research/2026-07-23-iexec-wtf-winners-and-opportunity-space.md)
+17. [Nox domain wiki](./.thoughts/wiki/index.md)
+18. [Known contradictions](./.thoughts/wiki/nox-known-contradictions.md)
+19. [Source manifest](./.thoughts/sources/source-manifest.md)
+20. [Prompt sequence](./prompts/README.md)
 
 The historical idea files remain useful only as collision and rejection evidence. Their
 recommendations are superseded by the current decision record.

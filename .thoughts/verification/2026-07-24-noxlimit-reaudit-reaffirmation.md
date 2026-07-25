@@ -1,5 +1,10 @@
 # NoxLimit Verdict Recheck: Independent Reaffirmation
 
+> **Adopted evidence; selection wording is historical.** This memo independently reaffirmed
+> `KEEP AND VERIFY` on 2026-07-24. The user subsequently selected NoxLimit as the current direction
+> and requested architecture review before the spike. Follow
+> [`../decisions/CURRENT.md`](../decisions/CURRENT.md) for current workflow authority.
+
 **Date:** 2026-07-24 (evening recheck)
 **Task:** Reopen the `DROP` verdict in
 [`2026-07-24-noxlimit-independent-audit.md`](./2026-07-24-noxlimit-independent-audit.md) and re-audit

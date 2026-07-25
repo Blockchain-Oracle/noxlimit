@@ -116,10 +116,12 @@ and Occulta were pinned because they materially constrain the lending and strate
 
 ## NoxLimit market-substrate and demand sources
 
-These sources were added on 2026-07-24 for an unselected prediction-market advanced-order
-hypothesis. The three exact source pins were also cloned under ignored
+These sources were added on 2026-07-24 for what was then an unselected prediction-market
+advanced-order hypothesis and is now the selected NoxLimit direction. The three exact source pins
+were also cloned under ignored
 `.thoughts/raw/noxlimit-substrates/` for independent inspection. A source pin is not an architecture
-decision, and those source trees must not be committed or republished.
+decision by itself; the selected spike substrate is recorded in `CURRENT.md` and the canonical
+architecture. These source trees must not be committed or republished.
 
 ### Source pins
 
@@ -142,8 +144,8 @@ decision, and those source trees must not be committed or republished.
 | Chainlink Automation support and sunset notices | [Supported networks](https://docs.chain.link/chainlink-automation/overview/supported-networks) |
 
 The demand sources prove that advanced event-contract order management exists. They do not prove
-privacy-specific demand. The independent audit must find direct evidence for the confidential
-resting-intent problem or downgrade the hypothesis.
+privacy-specific demand. That remaining product-demand uncertainty is recorded in `CURRENT.md`; it
+is not a smart-contract or hackathon critical-path failure.
 
 ## Visible July 2026 competitor snapshot
 

@@ -1,5 +1,9 @@
 # Docs-First Product Research
 
+> **Historical research artifact.** Its `NONE SURVIVE` result predates the NoxLimit hypothesis and
+> user selection. Preserve the evidence; follow
+> [`../decisions/CURRENT.md`](../decisions/CURRENT.md) for current product and workflow authority.
+
 **Research date:** 2026-07-23
 
 **Status:** Complete

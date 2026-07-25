@@ -2,19 +2,24 @@
 
 ## Project Snapshot
 
-This repository is the context and decision corpus for an iExec WTF Hackathon product. No product
-has been selected or implemented, and there are zero technically verified survivors. NoxLimit is
-one unselected conditional candidate at **`KEEP AND VERIFY`**. An independent audit returned
-`DROP`; the 2026-07-24 hackathon-calibrated reassessment found material errors in its demand,
-substitute, leakage, and sponsor-fit vetoes, and a same-day independent recheck reaffirmed
-`KEEP AND VERIFY` from primary source and live rules evidence
-(`.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md`). NoxLimit is authorized
-only for a bounded critical-path spike, not a full build. See
-`.thoughts/decisions/CURRENT.md`.
+This repository is the context and decision corpus for an iExec WTF Hackathon product.
+**NoxLimit is the selected product direction for architecture review and bounded critical-path
+verification.** It is not yet technically verified and no polished/full build has started. The
+canonical architecture is
+`.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md`; current authority is
+`.thoughts/decisions/CURRENT.md`. The historical independent `DROP` audit was superseded after its
+decisive demand, substitute, leakage, and sponsor-fit claims were rechecked.
 
 ## Working Rules
 
-- Read `AGENT_HANDOFF.md` before doing project work.
+- Before acting, reconcile context: read `.thoughts/decisions/CURRENT.md`,
+  `.thoughts/decisions/AUDIT-GATES.md`, the canonical architecture, and `AGENT_HANDOFF.md`; inspect
+  `git status`, relevant history, and existing `.thoughts/` artifacts.
+- State what is already established, what is genuinely unknown, which artifacts are historical,
+  and the next authorized action. Search the corpus before claiming research or architecture is
+  missing.
+- When artifacts conflict, follow the authority order in `.thoughts/decisions/AUDIT-GATES.md`.
+  Historical `STOP`, `DROP`, and “do not build” commands are evidence, not current instructions.
 - Read `.thoughts/wiki/nox-use-case-map.md` before product discovery. The generated
   `llms-full.txt` omits the Vue-rendered use-case cards and category grid.
 - Use the newest dated research and idea files; preserve older artifacts as history.
@@ -27,9 +32,9 @@ only for a bounded critical-path spike, not a full build. See
   claims. Do not turn mainnet availability, professional auditing, formal verification, organic
   liquidity, decentralized keepers, production economic modelling, or SLA distributions into
   pre-build vetoes; record them as post-hackathon hardening.
-- Do not start product architecture or implementation until idea selection and the critical-path
-  verification gate have passed. A bounded, disposable integration spike is allowed when Prompt 3
-  needs executable evidence for that gate.
+- Maintain the canonical architecture as the shared technical contract. Do not start the polished
+  product build until the user reviews it and the bounded Prompt 3 spike passes. A disposable
+  integration spike is allowed only when the user advances that gate.
 
 ## Commands
 
@@ -69,7 +74,8 @@ silently guessing from memory.
 
 ## Context Workflow
 
-- Start at `README.md`, then `AGENT_HANDOFF.md`.
+- Start at `.thoughts/decisions/CURRENT.md`, then `.thoughts/decisions/AUDIT-GATES.md`, the canonical
+  architecture, and `AGENT_HANDOFF.md`.
 - Research lives in `.thoughts/research/`.
 - Product candidates live in `.thoughts/ideas/`.
 - The durable selection state lives in `.thoughts/decisions/CURRENT.md`; dated decision memos live
@@ -78,9 +84,9 @@ silently guessing from memory.
 - Exact third-party commits live in `.thoughts/sources/source-manifest.md`.
 - Staged agent prompts live in `prompts/`.
 - `prompts/01a-hackathon-calibrated-noxlimit-reassessment.md` has run; its reaffirmation lives in
-  `.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md`. The next step, after user
-  direction, is only the bounded Prompt 3 spike defined there. The original independent audit is
-  preserved in `prompts/01-independent-noxlimit-audit.md`.
+  `.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md`. Prompt 2 is waived because
+  the user selected the direction. After architecture review, the next technical step is only the
+  bounded Prompt 3 spike. The original independent audit is preserved as history.
   `prompts/00-docs-first-product-discovery.md` remains the discovery rerun; the older
   `01-refresh-reality-and-ideas.md` is historical.
 
@@ -91,8 +97,10 @@ silently guessing from memory.
 - Do not inherit the old QuietRound recommendation without rerunning selection.
 - Do not inherit SLA Lock or either `NONE SURVIVE` verdict without reading the dated evidence. The
   newest docs-first verdict is current research state, not a selected product.
-- Do not inherit NoxLimit as selected or feasible. Its status is `KEEP AND VERIFY`: only the
-  time-boxed privacy + real-pool spike in the reassessment is authorized before user review.
+- Do not reopen product selection or inherit NoxLimit as technically verified. The direction is
+  selected; only its live feasibility remains conditional.
+- Do not create a second NoxLimit architecture. Update the canonical architecture when executable
+  evidence requires a change.
 - Do not inherit the independent audit's claim that every failed evaluation needs an explicit
   public-decryption proof. Recheck the released `select`, `addViewer`, private `decrypt`, and
   honest-worker-gated publication path while preserving timing/non-action inference as a risk.

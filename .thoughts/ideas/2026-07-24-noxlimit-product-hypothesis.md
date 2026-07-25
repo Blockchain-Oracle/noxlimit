@@ -1,9 +1,14 @@
 # Candidate: NoxLimit
 
 **Date:** 2026-07-24
-**Selection status:** Unselected hypothesis
-**Research verdict:** `KEEP AND VERIFY`
-**Next gate:** Independent evidence audit, then user review
+**Selection status:** Historical hypothesis adopted as the current product direction on 2026-07-25
+**Technical maturity:** `KEEP AND VERIFY`
+**Next gate:** User review of the canonical architecture, then bounded Prompt 3 verification
+
+Current authority:
+[`../decisions/CURRENT.md`](../decisions/CURRENT.md) and
+[`../architecture/2026-07-25-noxlimit-system-architecture.md`](../architecture/2026-07-25-noxlimit-system-architecture.md).
+This file preserves the product hypothesis and should not be used to reopen selection.
 
 ## One-line product
 
@@ -199,7 +204,9 @@ evaluation and trade confirmation always finish in 30 seconds.
 
 ## Hard gates
 
-The candidate does not become selected until an independent audit establishes:
+These were the original selection gates. Selection is now a user decision recorded in `CURRENT.md`;
+the unresolved technical items below route into the bounded critical-path verification rather than
+another broad selection audit:
 
 1. current rules and originality;
 2. evidence for the user problem and privacy-specific value;
@@ -220,4 +227,5 @@ The allowed audit verdicts are:
 - `DROP`: reject NoxLimit;
 - `NONE SURVIVE`: reject it and any adjacent alternatives found in the audit.
 
-No verdict should be biased toward preserving work already done.
+No technical verdict should be biased toward preserving work already done, but it must apply the
+current hackathon gate and cannot silently reverse the user's product selection.

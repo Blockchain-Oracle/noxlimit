@@ -1,5 +1,11 @@
 # Reassessment of the NoxLimit `DROP` Verdict
 
+> **Adopted evidence; selection wording is historical.** This memo restored `KEEP AND VERIFY` on
+> 2026-07-24. The user subsequently selected NoxLimit as the current direction and requested
+> architecture review before the spike. Follow
+> [`../decisions/CURRENT.md`](../decisions/CURRENT.md), not this memo's “unselected” or next-step
+> wording.
+
 **Date:** 2026-07-24
 
 **Scope:** Re-audit the decisive claims in

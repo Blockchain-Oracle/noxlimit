@@ -1,13 +1,20 @@
 # Current Product Decision
 
-- **Status:** NoxLimit `DROP` verdict reassessed → **`KEEP AND VERIFY`** as an unselected hackathon
-  candidate. Independently rechecked and **reaffirmed** later the same day from primary source and
-  live rules evidence; see the
-  [reaffirmation memo](../verification/2026-07-24-noxlimit-reaudit-reaffirmation.md).
-- **Leading hypothesis:** NoxLimit, but only as a candidate for a 24–36-hour disposable
-  critical-path spike. It is not selected and no full implementation is authorized.
-- **Survivors:** Zero technically verified survivors. NoxLimit is one unselected conditional
-  candidate.
+- **Status:** **NoxLimit is the user-selected product direction for architecture review and bounded
+  critical-path verification.** Product selection is closed unless the user reopens it or new
+  executable evidence invalidates a load-bearing assumption. It is not yet technically verified,
+  and no polished/full implementation is authorized.
+- **Canonical architecture:**
+  [`../architecture/2026-07-25-noxlimit-system-architecture.md`](../architecture/2026-07-25-noxlimit-system-architecture.md)
+- **Audit and authority policy:**
+  [`AUDIT-GATES.md`](./AUDIT-GATES.md)
+- **Selection and architecture-gate decision:**
+  [`2026-07-25-noxlimit-direction-and-architecture-gate.md`](./2026-07-25-noxlimit-direction-and-architecture-gate.md)
+- **Context/gate/architecture verification:**
+  [`../verification/2026-07-25-context-gate-and-architecture-audit.md`](../verification/2026-07-25-context-gate-and-architecture-audit.md)
+- **Spike substrate:** pinned, unmodified Gnosis Conditional Tokens + FPMM. This is selected for
+  the disposable verification slice, not asserted as an irreversible production-stack decision.
+- **Survivors:** One selected direction; zero technically verified implementations.
 - **Confidence:** High that the hard `DROP` is unsupported. A disposable contract-side Nox
   primitive skeleton (`fromExternal → allowThis → ge → select → allowThis → addViewer →
   allowPublicDecryption → validateDecryptionProof`) builds against released v0.2.4 with solc
@@ -32,7 +39,7 @@
   [`../verification/2026-07-24-noxlimit-drop-verdict-reassessment.md`](../verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
 - **Independent recheck and reaffirmation (source + live evidence, gate split, spike spec):**
   [`../verification/2026-07-24-noxlimit-reaudit-reaffirmation.md`](../verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
-- **NoxLimit hypothesis (conditional candidate, not selected):**
+- **NoxLimit hypothesis (historical candidate framing):**
   [`2026-07-24-noxlimit-product-hypothesis.md`](../ideas/2026-07-24-noxlimit-product-hypothesis.md)
 - **NoxLimit product-reality brief:**
   [`2026-07-24-noxlimit-product-and-market-reality.md`](../research/2026-07-24-noxlimit-product-and-market-reality.md)
@@ -46,13 +53,12 @@
   [`2026-07-23-docs-first-product-research.md`](../research/2026-07-23-docs-first-product-research.md)
 - **Candidate report:**
   [`2026-07-23-nox-docs-first-candidates.md`](../ideas/2026-07-23-nox-docs-first-candidates.md)
-- **Next workflow:** The reassessment prompt has run. After user direction, run only the bounded
-  privacy-path + real-FPMM critical-path spike. Ask the organizer to validate the exact confidential
-  advanced-order distinction in parallel. Do not build a polished frontend until the spike passes.
-- **Prompt 2 allowed:** Not yet — there is only one conditional candidate and it has not passed the
-  critical technical gate.
-- **Prompt 3 allowed:** Yes, but only as the 24–36-hour disposable experiment in the reassessment,
-  not as a full product implementation.
+- **Next workflow:** Let the user review the consolidated architecture. When the user advances the
+  technical gate, run only the bounded privacy-path + real-FPMM Prompt 3 spike. Do not restart
+  discovery or build a polished frontend before that spike passes.
+- **Prompt 2:** Waived by explicit user selection; do not run a new comparison loop.
+- **Prompt 3 state:** Blocked pending user architecture review. After that checkpoint, it is allowed
+  only as the 24–36-hour disposable experiment, not as a full product implementation.
 
 ## Verified state at audit time (2026-07-24)
 
@@ -106,11 +112,12 @@ DarkOdds also remains a native prediction-market collision; Polymarket was displ
 lending, NFT, vault, fundraising, RWA, trading, payroll, treasury, swap/routing, and escrow products
 remain crowded or user-excluded.
 
-## New hypothesis since the docs-first verdict (`KEEP AND VERIFY`, reassessed 2026-07-24)
+## Evidence behind the selected direction (`KEEP AND VERIFY`, reassessed 2026-07-24)
 
 > The independent audit returned `DROP`, but the hackathon-calibrated reassessment found material
-> factual and logical errors in the hard vetoes and their key supporting claims. The hypothesis is
-> reopened only for a bounded live verification. See the top of this file, the
+> factual and logical errors in the hard vetoes and their key supporting claims. The user later
+> selected NoxLimit as the direction; live feasibility remains bounded by Prompt 3. See the top of
+> this file, the
 > [independent audit](../verification/2026-07-24-noxlimit-independent-audit.md), and the
 > [reassessment](../verification/2026-07-24-noxlimit-drop-verdict-reassessment.md).
 
@@ -130,6 +137,6 @@ escrow/custody, evaluation leakage, manipulation of seeded liquidity, and fresh-
 official Nox production mainnet exists, but that is not a hackathon blocker because Ethereum
 Sepolia is the required chain.
 
-`KEEP AND VERIFY` is a research-routing label, not a selection or feasibility pass. No full product
-specification, polished architecture, or implementation should begin until the bounded critical
-path produces executable evidence and the user reviews it.
+`KEEP AND VERIFY` now describes technical maturity, not selection status. The user has selected
+the direction and the architecture is consolidated. No polished implementation should begin until
+the bounded critical path produces executable evidence and the user reviews the result.
