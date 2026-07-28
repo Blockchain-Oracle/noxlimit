@@ -3,8 +3,10 @@
 ## Mission
 
 Use this repository to verify and then build the selected iExec WTF Hackathon direction.
-**NoxLimit is selected for architecture review and bounded critical-path verification; it is not
-yet technically verified and the polished build has not started.** Do not reopen product discovery
+**NoxLimit is selected, the user approved its canonical architecture on 2026-07-28, and the bounded
+Prompt 3 spike is at `CONDITIONAL GO`: all local paths pass, while its final live Sepolia privacy
+trace and fill wait on funding the dedicated local signer. The polished build has not started.** Do not reopen product
+discovery
 or inherit QuietRound, SLA Lock, Proofline, AgentDispute, or another historical idea unless the
 user explicitly reopens selection or executable evidence kills a load-bearing NoxLimit assumption.
 
@@ -23,8 +25,8 @@ six major lanes, and adversarially killed its two initial near-survivors. Preser
 Use [`prompts/00-docs-first-product-discovery.md`](./prompts/00-docs-first-product-discovery.md) for
 an independent rerun or when new evidence appears; do not treat its existence as evidence that
 discovery is still unfinished. The Prompt 1A reassessment has run and is retained as evidence.
-Prompt 2 is waived by the user's selection. After architecture review, only its bounded Prompt 3
-verification slice is authorized.
+Prompt 2 is waived by the user's selection. The architecture checkpoint passed on 2026-07-28; only
+the prepared funded live Prompt 3 run and verdict update are now authorized.
 
 An independent or future discovery pass should produce a cited evidence and candidate report with:
 
@@ -41,8 +43,8 @@ rule does not prohibit maintaining the already-authorized canonical NoxLimit arc
 
 ### Current decision state
 
-NoxLimit is the selected direction but remains technically unverified. The two strongest docs-first
-near-misses still failed and remain in the graveyard:
+NoxLimit is selected and locally verified, but remains live-Sepolia conditional. The two strongest
+docs-first near-misses still failed and remain in the graveyard:
 
 - **Private Quote-to-Pay:** PaySec already exposes the same product surface; current shared
   optimized cUSDC does not grant a receiver the transferred-amount handle needed for
@@ -58,7 +60,8 @@ Generic native prediction markets remain excluded because DarkOdds already built
 Research identified a narrower product-shaped hypothesis, **NoxLimit**: one fixed-size confidential
 buy limit against a real onchain outcome-share AMM.
 
-**Current outcome (2026-07-25): selected direction; technical maturity `KEEP AND VERIFY`.**
+**Current outcome (2026-07-28): selected, architecture approved, local Gates A/B/adapter verified;
+technical maturity `CONDITIONAL GO` pending one funded live run.**
 
 - Conditional execution is a shipping workflow, and public onchain order flow has structural
   pre-trade exposure. Direct evidence that prediction traders specifically value hiding only this
@@ -67,17 +70,27 @@ buy limit against a real onchain outcome-share AMM.
   the raw threshold. A local bot can preserve threshold privacy but needs an always-on process and
   gas-paying signing path.
 - Unchanged `FPMM.buy` takes plaintext `minOutcomeTokensToBuy`, so the limit-equivalent is public at
-  fill. However, released Nox `select + addViewer` and Handle SDK private `decrypt` make a
-  success-only publication flow plausible; failed evaluations do not inherently need explicit
-  public proofs, although public timing/non-action inference remains.
+  fill. Released Nox `select + addViewer` and Handle SDK private `decrypt` now execute locally in
+  the success-only publication flow; failed evaluations do not inherently need explicit public
+  proofs, although public timing/non-action inference remains.
 - Prediction markets are “already seen,” creating a heavy originality burden, but are not banned.
   Creativity is tied with end-to-end/no-mock at the highest displayed weight.
 - `FPMM.buy` natively enforces atomic minimum output. Nox is live only on Ethereum Sepolia and
   Arbitrum Sepolia; no production mainnet exists, but Ethereum Sepolia is the required hackathon
   chain.
 
-Prompt 2 is waived. Prompt 3 is allowed after architecture review only as the 24–36-hour
-disposable privacy + real-pool verification. Do not start the polished product until it passes.
+Prompt 2 is waived. Prompt 3's local privacy + real-pool verification passes: 16 released-Nox and
+combined-adapter tests plus 8 independent market/math tests. The dedicated gitignored deployer is
+`0xA03D26E19ee4061A06a9a097010Bc06028Bba60A`; fund it with at least 0.03 **Sepolia ETH only**, then
+run `cd spike/nox && pnpm gate-c:sepolia`. The official Nox demo points to the
+[Google Cloud Ethereum Sepolia faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia).
+Do not start the polished product until that receipt
+passes and the user reviews its verdict.
+
+Prompt 3 activated at `2026-07-27 23:40 UTC`, targets a verdict by
+`2026-07-28 23:40 UTC`, and has an absolute stop at `2026-07-29 11:40 UTC`. Gates A and B run in
+parallel; Gate C starts immediately after both pass. The detailed post-spike reserve is recorded in
+[`CURRENT.md`](./.thoughts/decisions/CURRENT.md).
 
 ## Canonical facts to inherit
 
@@ -201,7 +214,12 @@ Feasibility is now a veto. The search must begin with comparable winners and cur
 people already use. Only then test whether a small, exact Nox computation is indispensable to one
 self-serve product action. Zero survivors is a valid research result.
 
-## NoxLimit verification boundary (`KEEP AND VERIFY`, 2026-07-24)
+## NoxLimit verification boundary (`KEEP AND VERIFY`, historical 2026-07-24 checkpoint)
+
+> **Current correction:** the Handle SDK, real pool, adapter, asset forwarding, expiry, refund,
+> and local inference experiment now pass. See the
+> [Prompt 3 memo](./.thoughts/verification/2026-07-28-noxlimit-critical-path.md); only its funded
+> combined live run remains.
 
 > The independent audit returned `DROP`, but its decisive privacy claim—that every failed
 > evaluation must have an explicit public proof—is contradicted by released source: Handle SDK
@@ -237,11 +255,17 @@ The final action must remain:
 quote sampled in the evaluation-request transaction → threshold-derived public minimum output →
 application-bound proof → replay-guarded one-shot minimum-output-protected outcome-share buy`
 
-The worker may advance the state and may learn one readiness bit per permitted evaluation plus the
-successful `minOut`, but it must not receive the raw resting threshold, change immutable order
-fields, fill worse than the committed limit, redirect proceeds, or steal collateral. It may still
-delay or censor. If the browser must remain open, if the live viewer path forces failed
-evaluations public, or if the proof cannot safely cause one real action, drop the hypothesis.
+The worker may advance the state. A zero candidate tells it `quote < minOut`; an eligible candidate
+reveals the exact `minOut` even before publication. Public viewers see evaluation timing and the
+corresponding pool quote; quiet checks are assumption-dependent evidence, not proof, of
+ineligibility because worker delay/failure has the same normalized result-dependent public shape.
+The worker must not receive the raw resting threshold before an eligible evaluation, change
+immutable order fields, fill worse than the committed limit, redirect proceeds, or steal
+collateral. It may delay, censor,
+or request irreversible publication for the wrong candidate and thereby force disclosure and,
+absent permissionless rescue, a terminal refund. If the browser must remain open, if the live
+viewer path forces failed evaluations public, if nonce-distinct candidate isolation fails, or if
+the proof cannot safely cause one real action, stop with the Prompt 3 verdict.
 
 A decrypted `ready` boolean plus a generic slippage setting does not enforce the secret limit after
 Nox's asynchronous delay. The likely exact design must reveal a threshold-derived minimum output at
@@ -259,7 +283,9 @@ reverts, the order is disclosed/refundable rather than confidential-pending agai
 - [Selection and architecture-gate memo](./.thoughts/decisions/2026-07-25-noxlimit-direction-and-architecture-gate.md)
 - [Audit and authority gates](./.thoughts/decisions/AUDIT-GATES.md)
 - [Canonical NoxLimit architecture](./.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md)
+- [Prompt 3 critical-path evidence](./.thoughts/verification/2026-07-28-noxlimit-critical-path.md)
 - [Context/gate/architecture verification](./.thoughts/verification/2026-07-25-context-gate-and-architecture-audit.md)
+- [Architecture approval and Opus 5 review reconciliation](./.thoughts/verification/2026-07-28-opus-architecture-review-reconciliation.md)
 - [NoxLimit product and market reality](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md)
 - [NoxLimit product hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md)
 - [Independent NoxLimit audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)

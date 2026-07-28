@@ -1,9 +1,11 @@
 # Current Product Decision
 
-- **Status:** **NoxLimit is the user-selected product direction for architecture review and bounded
-  critical-path verification.** Product selection is closed unless the user reopens it or new
-  executable evidence invalidates a load-bearing assumption. It is not yet technically verified,
-  and no polished/full implementation is authorized.
+- **Status:** **NoxLimit is the user-selected product direction and its canonical architecture was
+  approved by the user on 2026-07-28. Prompt 3 is now `CONDITIONAL GO`: Gates A and B and the
+  combined adapter pass locally, while the final live Ethereum Sepolia trace/receipt waits only on
+  funding the dedicated local signer.** Product selection is closed unless the user reopens it or new executable
+  evidence invalidates a load-bearing assumption. No polished/full implementation is authorized
+  until that live gate passes and the user reviews the verdict.
 - **Canonical architecture:**
   [`../architecture/2026-07-25-noxlimit-system-architecture.md`](../architecture/2026-07-25-noxlimit-system-architecture.md)
 - **Audit and authority policy:**
@@ -12,15 +14,21 @@
   [`2026-07-25-noxlimit-direction-and-architecture-gate.md`](./2026-07-25-noxlimit-direction-and-architecture-gate.md)
 - **Context/gate/architecture verification:**
   [`../verification/2026-07-25-context-gate-and-architecture-audit.md`](../verification/2026-07-25-context-gate-and-architecture-audit.md)
+- **Architecture approval and Opus 5 review reconciliation:**
+  [`../verification/2026-07-28-opus-architecture-review-reconciliation.md`](../verification/2026-07-28-opus-architecture-review-reconciliation.md)
+- **Prompt 3 executable evidence and verdict:**
+  [`../verification/2026-07-28-noxlimit-critical-path.md`](../verification/2026-07-28-noxlimit-critical-path.md)
 - **Spike substrate:** pinned, unmodified Gnosis Conditional Tokens + FPMM. This is selected for
   the disposable verification slice, not asserted as an irreversible production-stack decision.
-- **Survivors:** One selected direction; zero technically verified implementations.
-- **Confidence:** High that the hard `DROP` is unsupported. A disposable contract-side Nox
-  primitive skeleton (`fromExternal → allowThis → ge → select → allowThis → addViewer →
-  allowPublicDecryption → validateDecryptionProof`) builds against released v0.2.4 with solc
-  0.8.35. It did **not** compile the Handle SDK, real-pool quote, adapter, asset-forwarding, expiry,
-  or refund path; those and the live Gateway/worker flow remain spike-required. Low-to-medium on
-  privacy-specific demand and final eight-day integration feasibility until the bounded spike runs.
+- **Survivors:** One selected direction; one locally verified disposable adapter; zero live
+  Sepolia fills.
+- **Confidence:** High that the local architecture is executable. Clean suites pass 8 released-Nox
+  primitive tests, 8 combined adapter/adversarial tests, and 8 independent market/math tests. The
+  exact typed wrapper, private viewer path, nonce isolation, real FPMM fill/refund behavior, ERC-1155
+  forwarding, atomic limit, replay guard, and public-inference experiment all execute. Live
+  Sepolia SDK encryption and input-proof validation also pass. Final cross-service integration and
+  privacy behavior remain conditional until the prepared live trace mines. Product demand remains
+  unvalidated rather than disproved.
 - **Independent audit (2026-07-24):** returned `DROP` and remains preserved as evidence. Its useful
   feasibility findings stand, but its decisive claims do not: the demand search proves
   *unvalidated*, not *absent*; a normal backend can preserve the execution shape but must receive
@@ -53,12 +61,21 @@
   [`2026-07-23-docs-first-product-research.md`](../research/2026-07-23-docs-first-product-research.md)
 - **Candidate report:**
   [`2026-07-23-nox-docs-first-candidates.md`](../ideas/2026-07-23-nox-docs-first-candidates.md)
-- **Next workflow:** Let the user review the consolidated architecture. When the user advances the
-  technical gate, run only the bounded privacy-path + real-FPMM Prompt 3 spike. Do not restart
-  discovery or build a polished frontend before that spike passes.
+- **Next workflow:** Fund `0xA03D26E19ee4061A06a9a097010Bc06028Bba60A` with at least 0.03
+  **Sepolia ETH only**, then run `cd spike/nox && pnpm gate-c:sepolia`. Its private key is already
+  local, mode-`0600`, and gitignored; never paste it in chat. The runner compiles clean, reproduces
+  the live false/withheld/two-quiet privacy trace, and attempts the real combined fill.
+  Do not restart discovery or build a polished frontend before that receipt passes and the user
+  reviews the verdict.
 - **Prompt 2:** Waived by explicit user selection; do not run a new comparison loop.
-- **Prompt 3 state:** Blocked pending user architecture review. After that checkpoint, it is allowed
-  only as the 24–36-hour disposable experiment, not as a full product implementation.
+- **Prompt 3 state:** **CONDITIONAL GO — LIVE GATE C WAITING FOR SEPOLIA ETH.** Gates A and B
+  and the combined local adapter are verified. The only authorized mutation is the prepared live
+  Gate C run and its evidence/verdict update; this is not authorization for the polished build.
+- **Clock:** Activated **2026-07-27 23:40 UTC**. Target verdict by **2026-07-28 23:40 UTC**;
+  absolute spike stop **2026-07-29 11:40 UTC**. A missing live Gate C transaction at the hard stop
+  is not permission to keep polishing the spike. If it passes at the hard stop, the remaining
+  approximately 82 hours are reserved for 30h core build, 20h worker/frontend/judge path, 14h
+  deployment/stabilization, 10h submission artifacts, and at least 8h final buffer.
 
 ## Verified state at audit time (2026-07-24)
 
@@ -112,11 +129,11 @@ DarkOdds also remains a native prediction-market collision; Polymarket was displ
 lending, NFT, vault, fundraising, RWA, trading, payroll, treasury, swap/routing, and escrow products
 remain crowded or user-excluded.
 
-## Evidence behind the selected direction (`KEEP AND VERIFY`, reassessed 2026-07-24)
+## Evidence behind the selected direction (`KEEP AND VERIFY` on 2026-07-24; locally verified now)
 
 > The independent audit returned `DROP`, but the hackathon-calibrated reassessment found material
 > factual and logical errors in the hard vetoes and their key supporting claims. The user later
-> selected NoxLimit as the direction; live feasibility remains bounded by Prompt 3. See the top of
+> selected NoxLimit as the direction; combined live feasibility remains bounded by Prompt 3. See the top of
 > this file, the
 > [independent audit](../verification/2026-07-24-noxlimit-independent-audit.md), and the
 > [reassessment](../verification/2026-07-24-noxlimit-drop-verdict-reassessment.md).
@@ -129,14 +146,13 @@ outcome-share AMM:
 → reveal threshold-derived minimum output → consume proof once → execute a
 minimum-output-protected buy`
 
-The current research found feature-supply and product-investment signals for advanced
-prediction-market orders, but no direct proof of privacy-specific demand. It also found a plausible
-difference from DarkOdds and unresolved gates: live validation of the plausible
-viewer/private-decrypt path, real FPMM deployment, asynchronous orchestration, worker dependence,
-escrow/custody, evaluation leakage, manipulation of seeded liquidity, and fresh-user funding. No
-official Nox production mainnet exists, but that is not a hackathon blocker because Ethereum
-Sepolia is the required chain.
+The research found feature-supply and product-investment signals for advanced prediction-market
+orders, but no direct proof of privacy-specific demand. The released viewer/private-decrypt path,
+real FPMM deployment, asynchronous orchestration, escrow/custody, and measured evaluation leakage
+now pass locally. Their combined live run, seeded-liquidity presentation, and fresh-user funding
+remain. No official Nox production mainnet exists, but that is not a hackathon blocker because
+Ethereum Sepolia is the required chain.
 
-`KEEP AND VERIFY` now describes technical maturity, not selection status. The user has selected
-the direction and the architecture is consolidated. No polished implementation should begin until
-the bounded critical path produces executable evidence and the user reviews the result.
+`KEEP AND VERIFY` is the historical 2026-07-24 maturity label. The current status is
+`CONDITIONAL GO`: local executable evidence exists, and the funded live receipt plus user checkpoint
+remain before polished implementation.

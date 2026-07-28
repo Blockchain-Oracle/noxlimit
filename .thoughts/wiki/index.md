@@ -1,6 +1,6 @@
 # iExec-Nox domain wiki
 
-Last verified: **2026-07-23**
+Last verified: **2026-07-28**
 
 This wiki is the implementation-facing map of the local iExec-Nox research corpus. It separates
 live/released behavior from forward-looking `main` code and from contradictory documentation.
@@ -13,10 +13,15 @@ live/released behavior from forward-looking `main` code and from contradictory d
 - [2026-07-23 winner and opportunity audit](../research/2026-07-23-iexec-wtf-winners-and-opportunity-space.md)
 - [Current product decision](../decisions/CURRENT.md)
 - [Agent handoff](../../AGENT_HANDOFF.md)
+- [Prompt 3 critical-path evidence](../verification/2026-07-28-noxlimit-critical-path.md)
 
-No product is selected and no current candidate survives every gate. Some technical pages below
-retain QuietRound examples because they are concrete illustrations of Nox integration constraints,
-not because the product is a backup or recommendation.
+NoxLimit is selected, its canonical architecture was approved by the user on 2026-07-28, and the
+bounded Prompt 3 spike is at `CONDITIONAL GO`. Local Nox, real-market, and combined-adapter paths
+pass; a funded live Sepolia trace/fill remains, and no polished build is authorized. Some technical
+pages below retain QuietRound examples because they are
+concrete illustrations of Nox integration constraints, not because the product is a backup or
+recommendation. Current authority remains
+[`CURRENT.md`](../decisions/CURRENT.md).
 
 ## Start here
 

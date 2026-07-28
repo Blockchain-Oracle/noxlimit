@@ -5,10 +5,11 @@ product. It contains source-pinned Nox implementation research, a verified audit
 three winners, a live competitor scan, a revised product-idea menu, and prompts that another coding
 agent can inherit without restarting discovery.
 
-**Current state:** **NoxLimit is the selected product direction for architecture review and bounded
-critical-path verification.** It is not yet technically verified, and no polished/full
-implementation has started. The architecture that was previously scattered across several reports
-is now consolidated in the
+**Current state:** **NoxLimit is selected, the user approved its canonical architecture on
+2026-07-28, and Prompt 3 is at `CONDITIONAL GO`.** The released Nox path, real FPMM lifecycle, and
+combined adapter pass locally; the final live Ethereum Sepolia privacy trace and fill wait on a
+0.03 Sepolia ETH top-up to the dedicated local signer. No polished/full implementation has started. The architecture that was previously
+scattered across several reports is now consolidated in the
 [canonical system architecture](./.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md).
 See the [current decision](./.thoughts/decisions/CURRENT.md) and
 [adoption memo](./.thoughts/decisions/2026-07-25-noxlimit-direction-and-architecture-gate.md), plus
@@ -17,7 +18,10 @@ historical evidence; the [reassessment](./.thoughts/verification/2026-07-24-noxl
 and [independent reaffirmation](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
 superseded its workflow verdict. The completed
 [context/gate/architecture audit](./.thoughts/verification/2026-07-25-context-gate-and-architecture-audit.md)
-records the consistency checks.
+records the original consistency checks; the later
+[Opus 5 review reconciliation](./.thoughts/verification/2026-07-28-opus-architecture-review-reconciliation.md)
+records the user's approval and accepted corrections. The current executable result is in the
+[Prompt 3 critical-path memo](./.thoughts/verification/2026-07-28-noxlimit-critical-path.md).
 
 ## WTF in one minute
 
@@ -85,15 +89,16 @@ gift-card checkout. See the
 
 ## Selected direction: NoxLimit
 
-> **Current maturity: selected direction, `KEEP AND VERIFY` technically.** The original independent
+> **Current maturity: selected direction, `CONDITIONAL GO` technically.** The original independent
 > audit returned `DROP`; the reassessment showed that direct
 > demand is unknown rather than disproved, ordinary backends do not keep the raw threshold from
 > their operator, viewer-only decrypt avoids explicit public proofs for failed evaluations (the
 > contract-side Nox primitive subset compiles against released v0.2.4), and no formal
-> prediction-market prohibition was found. The empty `judging_criteria` API field does not erase
+> prediction-market prohibition was found. The local released-Nox, real-pool, and adapter paths
+> now execute; their combined live Sepolia trace/receipt is the remaining gate. The empty
+> `judging_criteria` API field does not erase
 > the track's explicit prediction-market originality warning. Timing and non-action may still leak
-> a failed-evaluation inference. The live released-API and real-pool path still has to pass a
-> time-boxed spike.
+> a failed-evaluation inference.
 
 NoxLimit is not a generic prediction market. It proposed one private advanced-order layer over a
 real onchain outcome-share AMM:
@@ -104,8 +109,9 @@ buy`
 
 The smallest product is one curated BTC binary market, a public fixed-size buy and outcome side,
 and a maximum price that is confidential while resting and revealed as a minimum-output bound when
-a successful finalization is submitted. The worker may learn an eligibility bit at each permitted
-evaluation. It must work after the browser closes and include cancellation, expiry, refund,
+a successful finalization is submitted. A zero candidate tells the worker `quote < minOut`; an
+eligible candidate gives it the exact `minOut` even before publication. It must work after the
+browser closes and include cancellation, expiry, refund,
 objective resolution, and redemption. Current official Nox support was found on Ethereum Sepolia
 and Arbitrum Sepolia, not production mainnet, so any delivered claim must remain testnet-honest.
 
@@ -115,8 +121,8 @@ use the [product-reality brief](./.thoughts/research/2026-07-24-noxlimit-product
 [candidate hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md),
 [hackathon-calibrated reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md),
 and [reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
-as evidence. The only authorized next technical work, after architecture review, is the bounded
-Prompt 3 spike.
+as evidence. The only authorized technical work now is the prepared live Prompt 3 run. A polished
+build remains blocked until that receipt passes and the user reviews its verdict.
 
 ## Read order for an agent
 
@@ -125,21 +131,22 @@ Prompt 3 spike.
 3. [Audit and authority gates](./.thoughts/decisions/AUDIT-GATES.md)
 4. [Canonical NoxLimit architecture](./.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md)
 5. [Agent handoff](./AGENT_HANDOFF.md)
-6. [Context/gate/architecture verification](./.thoughts/verification/2026-07-25-context-gate-and-architecture-audit.md)
-7. [NoxLimit reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
-8. [NoxLimit `DROP` reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
-9. [NoxLimit product-reality brief](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md)
-10. [NoxLimit candidate hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md)
-11. [NoxLimit independent audit — historical](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)
-12. [Docs-first correction](./.thoughts/research/2026-07-23-nox-docs-first-correction.md)
-13. [Docs-first product research](./.thoughts/research/2026-07-23-docs-first-product-research.md)
-14. [Docs-first candidate report](./.thoughts/ideas/2026-07-23-nox-docs-first-candidates.md)
-15. [Nox product/use-case map](./.thoughts/wiki/nox-use-case-map.md)
-16. [Winner and opportunity research](./.thoughts/research/2026-07-23-iexec-wtf-winners-and-opportunity-space.md)
-17. [Nox domain wiki](./.thoughts/wiki/index.md)
-18. [Known contradictions](./.thoughts/wiki/nox-known-contradictions.md)
-19. [Source manifest](./.thoughts/sources/source-manifest.md)
-20. [Prompt sequence](./prompts/README.md)
+6. [Prompt 3 critical-path evidence](./.thoughts/verification/2026-07-28-noxlimit-critical-path.md)
+7. [Context/gate/architecture verification](./.thoughts/verification/2026-07-25-context-gate-and-architecture-audit.md)
+8. [NoxLimit reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
+9. [NoxLimit `DROP` reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
+10. [NoxLimit product-reality brief](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md)
+11. [NoxLimit candidate hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md)
+12. [NoxLimit independent audit — historical](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)
+13. [Docs-first correction](./.thoughts/research/2026-07-23-nox-docs-first-correction.md)
+14. [Docs-first product research](./.thoughts/research/2026-07-23-docs-first-product-research.md)
+15. [Docs-first candidate report](./.thoughts/ideas/2026-07-23-nox-docs-first-candidates.md)
+16. [Nox product/use-case map](./.thoughts/wiki/nox-use-case-map.md)
+17. [Winner and opportunity research](./.thoughts/research/2026-07-23-iexec-wtf-winners-and-opportunity-space.md)
+18. [Nox domain wiki](./.thoughts/wiki/index.md)
+19. [Known contradictions](./.thoughts/wiki/nox-known-contradictions.md)
+20. [Source manifest](./.thoughts/sources/source-manifest.md)
+21. [Prompt sequence](./prompts/README.md)
 
 The historical idea files remain useful only as collision and rejection evidence. Their
 recommendations are superseded by the current decision record.

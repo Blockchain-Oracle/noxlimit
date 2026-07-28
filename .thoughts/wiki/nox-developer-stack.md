@@ -1,6 +1,12 @@
 # Nox developer stack
 
-Last verified: **2026-07-22**
+Last verified: **2026-07-28**
+
+> **Current use:** NoxLimit Prompt 3 is `CONDITIONAL GO`; only the funded live run remains.
+> QuietRound references below are historical examples,
+> not product routing. Current authority is [`../decisions/CURRENT.md`](../decisions/CURRENT.md) and
+> the accepted technical contract is
+> [`../architecture/2026-07-25-noxlimit-system-architecture.md`](../architecture/2026-07-25-noxlimit-system-architecture.md).
 
 ## Exact package pins
 
@@ -76,8 +82,8 @@ The published Handle SDK beta.13 auto-resolves both:
 | Ethereum Sepolia | `11155111` | `0x24Ef…77bF` |
 | Arbitrum Sepolia | `421614` | `0xd464…c229` |
 
-The docs warning that Ethereum Sepolia support is “upcoming” is stale. QuietRound should use
-Ethereum Sepolia because the hackathon requires it and the published SDK already contains its full
+The docs warning that Ethereum Sepolia support is “upcoming” is stale. NoxLimit uses Ethereum
+Sepolia because the hackathon requires it and the published SDK already contains its full
 Gateway/contract/subgraph configuration.
 
 ## Local testing baseline
@@ -86,11 +92,18 @@ Gateway/contract/subgraph configuration.
 - Docker running.
 - Hardhat 3 with either the Viem toolbox or Hardhat Ethers plugin.
 - Solidity `0.8.35`.
+- Solidity `0.5.17` in a separate compiler profile for the unchanged Gnosis contracts whose pragma
+  is `^0.5.1`; the published `solc@0.5.1` payload omits `smtchecker.js` and is not a usable CLI.
 - Local EDR network with `chainType: "op"`.
 - The first Nox test run pulls KMS, Gateway, Ingestor, Runner, NATS, and S3 images.
 - The released plugin pins its Nox service images to `0.6.0`.
 - Pin `@nomicfoundation/hardhat-node-test-runner >= 3.0.14`; the official example uses `3.0.17` to
   avoid a known hang.
+
+At Prompt 3 activation, Node `22.22.3` and the Docker CLI were installed while OrbStack was not yet
+available. OrbStack was subsequently started; `docker info`, the released plugin stack, clean
+compilation, and all 16 Nox/adapter tests pass. Gate B remains independently reproducible without
+Docker and passes all 8 market/math tests.
 
 The released plugin README says Solidity `0.8.29`; that cannot compile `Nox.sol`, whose pragma is
 `^0.8.35`. Its own example and the current docs correctly use `0.8.35`.
@@ -121,8 +134,9 @@ polish, prove this sequence locally and then on Sepolia:
 
 `encryptInput → direct fromExternal → encrypted update → allowThis → Nox.allowPublicDecryption → async resolution → publicDecrypt proof → application proof verification → one-shot external action`
 
-For QuietRound, the external action is an Allo-funded distribution. That spike is still the boundary
-between source-backed feasibility and implementation verification.
+For NoxLimit, the external action is one replay-safe, minimum-output-protected buy against the bound
+unmodified FPMM, followed by real ERC-1155 share forwarding. The active Gate A/B/C requirements are
+in [`../../prompts/03-critical-path-verification.md`](../../prompts/03-critical-path-verification.md).
 
 ## Audit and security state
 

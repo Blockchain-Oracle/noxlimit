@@ -109,5 +109,7 @@ Every decision-changing edit must update together:
 - `prompts/README.md` and the next authorized prompt;
 - a dated verification/decision memo explaining the change.
 
-Run a corpus search for stale active language such as `not selected`, `Prompt 3 disallowed`,
-`do not design architecture`, and superseded verdict commands before committing.
+Run a corpus search for stale active language such as `not selected`, `no product is selected`,
+`remain blocked`, `pending user architecture review`, `Prompt 3 blocked`, `Prompt 3 disallowed`,
+`do not design architecture`, and superseded verdict commands before committing. Dated history may
+retain old facts only when a prominent current-authority note prevents it from routing new work.

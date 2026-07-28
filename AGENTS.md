@@ -3,9 +3,12 @@
 ## Project Snapshot
 
 This repository is the context and decision corpus for an iExec WTF Hackathon product.
-**NoxLimit is the selected product direction for architecture review and bounded critical-path
-verification.** It is not yet technically verified and no polished/full build has started. The
-canonical architecture is
+**NoxLimit is the selected product direction, its canonical architecture was approved by the user
+on 2026-07-28, and Prompt 3 is at `CONDITIONAL GO`.** Gates A/B and the combined adapter are
+verified locally; the final live Ethereum Sepolia privacy trace and fill wait on a funded signer.
+The dedicated gitignored signer exists at `0xA03D26E19ee4061A06a9a097010Bc06028Bba60A` with zero
+balance; fund it only with Sepolia ETH.
+No polished/full build has started. The canonical architecture is
 `.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md`; current authority is
 `.thoughts/decisions/CURRENT.md`. The historical independent `DROP` audit was superseded after its
 decisive demand, substitute, leakage, and sponsor-fit claims were rechecked.
@@ -32,13 +35,21 @@ decisive demand, substitute, leakage, and sponsor-fit claims were rechecked.
   claims. Do not turn mainnet availability, professional auditing, formal verification, organic
   liquidity, decentralized keepers, production economic modelling, or SLA distributions into
   pre-build vetoes; record them as post-hackathon hardening.
-- Maintain the canonical architecture as the shared technical contract. Do not start the polished
-  product build until the user reviews it and the bounded Prompt 3 spike passes. A disposable
-  integration spike is allowed only when the user advances that gate.
+- Maintain the canonical architecture as the shared technical contract. The user approved it and
+  advanced Prompt 3 on 2026-07-28. The local spike passed; run only the prepared live Gate C and do
+  not start the polished product build until its receipt passes and the user reviews the verdict.
 
 ## Commands
 
-There is no application build yet.
+There is no polished application build yet. The disposable verification code lives in
+`spike/market` and `spike/nox`.
+
+```bash
+(cd spike/market && pnpm test && pnpm verify:provenance)
+(cd spike/nox && pnpm test)
+# After the dedicated address is funded with Sepolia ETH:
+(cd spike/nox && pnpm gate-c:sepolia)
+```
 
 Useful corpus checks:
 
@@ -78,6 +89,8 @@ silently guessing from memory.
   architecture, and `AGENT_HANDOFF.md`.
 - Research lives in `.thoughts/research/`.
 - Product candidates live in `.thoughts/ideas/`.
+- The accepted technical contract lives in `.thoughts/architecture/`; update the canonical file
+  named by `CURRENT.md` rather than creating a competing architecture.
 - The durable selection state lives in `.thoughts/decisions/CURRENT.md`; dated decision memos live
   beside it.
 - Nox implementation reality lives in `.thoughts/wiki/`.
@@ -85,9 +98,10 @@ silently guessing from memory.
 - Staged agent prompts live in `prompts/`.
 - `prompts/01a-hackathon-calibrated-noxlimit-reassessment.md` has run; its reaffirmation lives in
   `.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md`. Prompt 2 is waived because
-  the user selected the direction. After architecture review, the next technical step is only the
-  bounded Prompt 3 spike. The original independent audit is preserved as history.
-  `prompts/00-docs-first-product-discovery.md` remains the discovery rerun; the older
+  the user selected the direction. The user approved the architecture on 2026-07-28; Prompt 3 is
+  `CONDITIONAL GO`, with only its prepared live run after funding active. The original independent
+  audit is preserved as history. `prompts/00-docs-first-product-discovery.md` remains the discovery
+  rerun; the older
   `01-refresh-reality-and-ideas.md` is historical.
 
 ## Do Not
@@ -97,8 +111,8 @@ silently guessing from memory.
 - Do not inherit the old QuietRound recommendation without rerunning selection.
 - Do not inherit SLA Lock or either `NONE SURVIVE` verdict without reading the dated evidence. The
   newest docs-first verdict is current research state, not a selected product.
-- Do not reopen product selection or inherit NoxLimit as technically verified. The direction is
-  selected; only its live feasibility remains conditional.
+- Do not reopen product selection or call NoxLimit live-verified. The direction and local
+  architecture are established; only the combined live Sepolia feasibility remains conditional.
 - Do not create a second NoxLimit architecture. Update the canonical architecture when executable
   evidence requires a change.
 - Do not inherit the independent audit's claim that every failed evaluation needs an explicit

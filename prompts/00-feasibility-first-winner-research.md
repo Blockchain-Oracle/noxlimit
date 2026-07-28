@@ -1,5 +1,10 @@
 # Prompt 0: Feasibility-First Winner Research and Idea Discovery
 
+> **Completed historical prompt. Do not run it from the current workflow.** Product discovery was
+> later corrected, NoxLimit was selected, and Prompt 3 is now active. Follow
+> [`../.thoughts/decisions/CURRENT.md`](../.thoughts/decisions/CURRENT.md) and
+> [`../README.md`](../README.md).
+
 You are a skeptical product researcher helping one builder choose an iExec WTF Hackathon project.
 Do not behave like a brainstorming assistant. Do not begin with “what can Nox hide?” and work
 backward into a use case. Begin with real products, recurring user behavior, comparable hackathon

@@ -3,7 +3,7 @@
 **Date:** 2026-07-25  
 **Authority:** Canonical architecture for the selected hackathon direction and bounded critical-path
 verification  
-**Maturity:** Architecture consolidated from existing research; not yet executable evidence  
+**Maturity:** User-approved; local critical path verified, live Ethereum Sepolia receipt pending
 **Spike substrate:** Unmodified Gnosis Conditional Tokens + Fixed Product Market Maker on Ethereum
 Sepolia
 
@@ -18,9 +18,18 @@ NoxLimit is the current product direction:
 > protected pool buy.
 
 This document consolidates architecture that was already spread across the product hypothesis,
-market-reality brief, reassessment, and reaffirmation. It is now awaiting the user's architecture
-review. Only that checkpoint advances the already-defined bounded Prompt 3 spike. It does not claim
-that the live Nox/Gateway/FPMM path has already passed.
+market-reality brief, reassessment, and reaffirmation. The user approved it on 2026-07-28 and
+advanced the already-defined bounded Prompt 3 spike. That approval selects what to test; it does not
+claim that the live Nox/Gateway/FPMM path has already passed.
+
+## Executable Spike Status — 2026-07-28
+
+The approved topology now executes locally against the released Nox `0.2.4` stack and exact pinned
+Gnosis contracts. A clean run passes 8 Nox primitive tests, 8 combined adapter/adversarial tests,
+and 8 independent market/math tests. Live SDK encryption and input-proof validation also pass
+against Ethereum Sepolia. The remaining pre-polish gate is one funded live run that reproduces the
+quiet/withheld inference trace and mines the combined Nox-authorized FPMM buy. Until that receipt
+exists, the verdict is `CONDITIONAL GO`, not `GO`.
 
 The independent `DROP` audit is historical evidence, not current workflow authority. The current
 authority order is defined in
@@ -78,14 +87,22 @@ order, escrow, authorization, and adapter layer.
 | collateral token and fixed input amount | Public | Real escrow and pool accounting |
 | expiry, evaluation timing, fill, cancellation | Public | Onchain state transitions |
 | encrypted input and derived handles | Public handles, private values | Nox computation inputs/state |
-| exact `minOut` while genuinely resting | Confidential | Core product value |
+| exact `minOut` value while genuinely resting | Not public; encrypted/TEE-confidential under the Nox trust model | Public metadata may narrow a range; the fixed worker learns the exact value once an eligible candidate is privately decrypted |
 | evaluation quote | Public | It comes from the public FPMM |
-| worker's zero/nonzero observation | Worker learns it | Required for success-only publication |
+| worker's private candidate | Worker learns `0` when ineligible; exact `minOut` when eligible | Required for success-only publication; stronger than a single readiness bit on success |
 | `minOut` at successful publication/fill | Public | Unmodified FPMM must enforce plaintext `minOut` |
 | positions, resolution, redemption | Public | NoxLimit is not an anonymity product |
 
-Each evaluation emits observable activity. Timing and non-action can therefore leak a coarse
-ineligible inference even though a false result has no explicit public-decryption proof.
+Each evaluation emits observable activity, including viewer-grant metadata, and its public FPMM
+quote is derivable. Under an honest and timely publication assumption, a quiet evaluation is
+evidence that `quote < minOut`; worker delay, censorship, or Gateway failure creates the same
+result-neutral public event shape, so silence is not deterministic proof of that inequality.
+Repeated checks can therefore create only an assumption-dependent bracket while the order rests.
+The worker has a stronger view: it learns `quote < minOut` from a zero candidate, and it learns the
+exact `minOut` from any eligible candidate even before publication or when it withholds
+publication. The first published success makes that exact value public. Product copy must not
+claim an invisible or perfectly sealed resting order, and raw receipts must not be called
+identical—only the result-dependent public transcript after normalizing order/nonce/handle fields.
 
 ## Contract Topology
 
@@ -151,12 +168,19 @@ The TypeScript worker:
 - privately decrypts only the stored candidate for its fixed viewer key;
 - takes no result-specific onchain action when the candidate is zero; a fixed, result-neutral
   evaluation timeout reopens the order;
-- asks the application to publish only a nonzero candidate;
-- obtains the public proof and calls finalization;
+- is the only account allowed to request irreversible candidate publication and should do so only
+  after privately observing a nonzero candidate;
+- may obtain the public proof and call finalization, while finalization itself remains permissionless
+  so another account can rescue an abandoned publication;
 - deduplicates receipts, tolerates reorgs/retries, and pays its own gas.
 
-The worker can delay or censor. It cannot change an order, withdraw collateral, redirect outcome
-shares, weaken `minOut`, or make a zero candidate trade.
+The worker can delay or censor. Because the contract cannot know the candidate plaintext before a
+proof is submitted, a malicious or mistaken worker can also request publication for a zero
+candidate, force public evaluation-result disclosure, and—if no permissionless finalizer rescues
+the order before timeout—force a terminal refundable state. It cannot change an order, withdraw
+collateral, redirect outcome shares, weaken `minOut`, make a zero candidate trade, or prevent a
+third party from finalizing after publication. This is an explicit liveness/privacy trust boundary,
+not an asset-custody permission.
 
 ## Order Record
 
@@ -169,13 +193,15 @@ The exact Solidity layout is a spike decision, but every order must bind at leas
 | `amountIn` | Escrow and fixed-input quote in the deployment-bound collateral |
 | `expiresAt` | Terminal liveness boundary |
 | `encryptedMinOut` | Persistent confidential limit handle |
-| `evaluationNonce`, `candidateHandle` | Bind one active evaluation |
+| `evaluationNonce`, `candidateHandle` | Bind one active, nonce-distinct evaluation |
 | `lastEvaluationAt`, `phaseDeadline` | Enforce cadence and neutral evaluation/publication timeouts |
 | `status` | Prevent races and double-spends |
 
 Global guards must reject reused encrypted-input handles and consumed
 `(candidateHandle, plaintextResult)` pairs. Finalization loads the candidate from storage; callers
-never supply an arbitrary handle.
+never supply an arbitrary handle. Candidate handles must differ across evaluation nonces even when
+the private threshold and integer FPMM quote are identical, because public ACL grants and Gateway
+proofs bind to a handle and plaintext, not to an application order or nonce.
 
 ## Price-to-`minOut` Conversion
 
@@ -213,8 +239,10 @@ sequenceDiagram
     W->>O: requestEvaluation(orderId)
     O->>F: calcBuyAmount(amountIn, outcomeIndex)
     F-->>O: public fixed-input quote
-    O->>N: eligible = quote >= encryptedMinOut
-    O->>N: candidate = select(eligible, encryptedMinOut, 0)
+    O->>N: freshZero = sub(public nonce, same public nonce)
+    O->>N: evaluationMinOut = add(encryptedMinOut, freshZero)
+    O->>N: eligible = quote >= evaluationMinOut
+    O->>N: candidate = select(eligible, evaluationMinOut, 0)
     O->>O: persist candidate under orderId + nonce; grant fixed worker viewer
 
     W->>G: decrypt(candidate) as viewer
@@ -226,9 +254,9 @@ sequenceDiagram
         G-->>W: minOut privately
         W->>O: requestSuccessPublication(orderId, nonce)
         O->>N: allowPublicDecryption(stored candidate)
-        W->>G: publicDecrypt(stored candidate)
+        W->>G: handleClient.publicDecrypt(stored candidate)
         G-->>W: minOut + proof
-        W->>O: finalize(orderId, nonce, proof)
+        W->>O: finalize(orderId, nonce, proof); any caller may rescue
         O->>O: minOut = publicDecrypt(stored candidate, proof)
         O->>O: reject/recover zero; consume nonzero candidate; bind state
         O->>F: buy(amountIn, outcomeIndex, minOut)
@@ -238,10 +266,20 @@ sequenceDiagram
     end
 ```
 
-The contract permits only one active evaluation nonce. A minimum cadence limits worker probing.
-After a fixed evaluation timeout, anyone can reopen the order with a new nonce; the stale nonce
-remains invalid forever. The timeout path is identical whether the worker saw zero, failed, or
-disappeared, so no zero-specific transaction is emitted.
+The contract permits only one active evaluation nonce. Each evaluation creates a nonce-distinct,
+value-preserving `evaluationMinOut` by adding a fresh encrypted zero derived from the public nonce.
+The proposed v0.2.4 construction is
+`freshZero = Nox.sub(Nox.toEuint256(nonce), Nox.toEuint256(nonce))`, followed by
+`evaluationMinOut = Nox.add(encryptedMinOut, freshZero)`. The released local stack now proves that
+identical threshold/quote pairs produce distinct candidates, ACLs do not bleed between nonces, and
+an old proof fails for a new nonce. The prepared live run rechecks distinct candidates and
+cross-handle proof rejection before promotion to `GO`.
+
+A fixed cadence, contract-enforced minimum interval, and bounded evaluation count limit worker
+probing; they do not eliminate metadata inference. After a fixed evaluation timeout, anyone can
+reopen the order with a new nonce; the stale nonce remains invalid forever. The timeout path is
+identical whether the worker saw zero, failed, or disappeared, so no zero-specific transaction is
+emitted.
 
 ## State Model
 
@@ -252,9 +290,9 @@ stateDiagram-v2
     [*] --> Open: escrow + encrypted limit stored
     Open --> Evaluating: request evaluation
     Evaluating --> Open: result-neutral timeout / nonce invalidated
-    Evaluating --> PublicationPending: private result > 0
+    Evaluating --> PublicationPending: fixed worker requests irreversible publication
     PublicationPending --> Open: valid public proof = 0; no trade
-    PublicationPending --> Executing: valid public proof consumed
+    PublicationPending --> Executing: any caller submits valid nonzero proof
     PublicationPending --> DisclosedRefundable: publication timeout / expiry / owner abandons
     Executing --> Filled: pool buy + forwarding succeeds
     Executing --> DisclosedRefundable: nested execution reverts
@@ -291,12 +329,18 @@ the order.
 
 Before any external trade, finalization validates the proof. A valid zero proof—possible if a
 malicious or mistaken worker publishes an ineligible candidate—invalidates that nonce and safely
-reopens the order without moving assets. It must not merely revert and strand the order in
+reopens the order without moving assets because nonce-distinct candidate handles and ACL isolation
+now execute locally on the released stack. A publication timeout instead routes to
+`DisclosedRefundable`; neither path may merely revert and strand the order in
 `PublicationPending`.
 
-Finalization accepts only `(orderId, evaluationNonce, decryptionProof)`. It loads the stored
-candidate and obtains the sole plaintext source with
-`Nox.publicDecrypt(storedCandidate, decryptionProof)`. A caller cannot separately supply `minOut`.
+Finalization is permissionless and accepts only `(orderId, evaluationNonce, decryptionProof)`. It
+loads the stored candidate and obtains the sole plaintext source with the released v0.2.4 typed
+wrapper `Nox.publicDecrypt(storedCandidate, decryptionProof)`, which internally calls
+`INoxCompute.validateDecryptionProof`. Offchain,
+`handleClient.publicDecrypt(storedCandidate)` retrieves the value and proof after publication. A
+caller cannot separately supply `minOut`. Prompt 3 now compiles and executes this exact typed
+wrapper in both the harness and the real OrderBook path.
 
 For a nonzero result:
 
@@ -329,6 +373,8 @@ The fixed worker never receives token approval.
 - Reject any order target outside the deployment-bound pool, Conditional Tokens contract,
   collateral, condition, outcome count, and position IDs.
 - Store and load candidate handles by `(orderId, evaluationNonce)`.
+- Make the confidential evaluation graph nonce-distinct and reject any candidate handle already
+  assigned to another evaluation; verify identical-quote recurrence on the live release.
 - Reject caller-selected handles, non-current nonces, expired orders, and terminal states; handle a
   validated zero without trading and invalidate its nonce.
 - Consume candidate/result globally before the external action.
@@ -348,6 +394,8 @@ The fixed worker never receives token approval.
 
 - released Nox private-viewer and success-publication path works live;
 - false evaluation needs no explicit public proof;
+- repeated checks and a delayed-eligible control establish the honest public-inference boundary;
+- nonce-distinct candidates prevent proof or irreversible-ACL bleed across evaluations;
 - one real FPMM buy occurs through the actual adapter on Ethereum Sepolia;
 - atomic `minOut`, immutable binding, replay rejection, cancel, expiry, and refund work;
 - real outcome shares reach the immutable recipient;
@@ -384,17 +432,19 @@ This architecture consolidates:
 - [`../ideas/2026-07-24-noxlimit-product-hypothesis.md`](../ideas/2026-07-24-noxlimit-product-hypothesis.md)
 - [`../verification/2026-07-24-noxlimit-drop-verdict-reassessment.md`](../verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
 - [`../verification/2026-07-24-noxlimit-reaudit-reaffirmation.md`](../verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
+- [`../verification/2026-07-28-noxlimit-critical-path.md`](../verification/2026-07-28-noxlimit-critical-path.md)
 - [`../sources/source-manifest.md`](../sources/source-manifest.md)
 
-The pinned FPMM source already provides the required fixed-input quote and atomic minimum-output
-check. The released Nox source establishes the necessary primitives and viewer role. The combined
-live orchestration remains the bounded Prompt 3 verification target.
+The pinned FPMM source and local execution provide the required fixed-input quote and atomic
+minimum-output check. The released Nox source and local stack establish the necessary primitives,
+viewer role, and combined adapter behavior. The combined live orchestration and privacy trace
+remain the bounded Prompt 3 verification target.
 
 ## Next Authorized Action
 
-The next action is **user architecture review**, not implementation. After the user explicitly
-advances the gate and `CURRENT.md` records that checkpoint, implement only the disposable
-critical-path spike described in
-[`../../prompts/03-critical-path-verification.md`](../../prompts/03-critical-path-verification.md).
-Executable evidence may refine this architecture; it may not silently replace the product, privacy
-boundary, or hackathon risk standard.
+The user approved this architecture on 2026-07-28. Local Gates A/B and the combined adapter pass.
+The only authorized action is the funded live runner described in
+[`../../prompts/03-critical-path-verification.md`](../../prompts/03-critical-path-verification.md),
+followed by its recorded verdict and user checkpoint before any polished frontend/full
+implementation. Executable evidence may refine this architecture; it may not silently replace the
+product, privacy boundary, or hackathon risk standard.

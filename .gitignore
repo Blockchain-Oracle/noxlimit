@@ -6,6 +6,12 @@ node_modules/
 dist/
 build/
 coverage/
+artifacts/
+cache/
+.hardhat/
+.gate-c-deployer-key
+.gate-c-worker-key
+.gate-c-mover-key
 
 # Third-party research mirrors are intentionally local-only. The authored
 # manifests preserve their exact repositories and commit SHAs.

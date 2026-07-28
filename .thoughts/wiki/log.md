@@ -1,5 +1,33 @@
 # iExec-Nox wiki log
 
+This file is chronological history. Current workflow authority is
+[`../decisions/CURRENT.md`](../decisions/CURRENT.md); older statements such as “remain blocked”
+describe their dated checkpoint and do not route new work.
+
+## 2026-07-28 — Prompt 3 local critical path passed
+
+- Verified the released Nox path and combined `NoxLimitOrderBook` locally with 16 tests, including
+  nonce/ACL isolation, permissionless rescue, real FPMM execution, multi-order escrow isolation,
+  rollback/refund behavior, unsolicited ERC-1155 rejection, and oversized-revert handling.
+- Independently verified the exact Conditional Tokens/FPMM lifecycle and price-cap conversion with
+  8 clean tests and byte-identical pinned-source provenance.
+- Verified live Ethereum Sepolia RPC/Nox/Gateway/subgraph availability plus SDK input encryption
+  and proof validation without a signer.
+- Prepared a fail-closed live runner that reproduces the false/withheld/two-quiet inference trace,
+  uses real reserve-moving buys, and attempts the combined permissionless fill. Prompt 3 remains
+  `CONDITIONAL GO` only because the dedicated signer has zero Sepolia ETH.
+
+## 2026-07-28 — architecture approved and Prompt 3 activated
+
+- Recorded the user's approval of the canonical NoxLimit architecture and activation of the
+  bounded disposable Prompt 3 spike.
+- Reconciled an independent Claude Opus 5 review: accepted the worker-triggered disclosure/DoS and
+  evaluation-metadata risks, rejected the claimed released-API mismatch, and added exact Gate A
+  evidence for permissionless rescue, nonce-distinct handles, proof/ACL isolation, and public
+  inference measurement.
+- Product selection remains closed; polished implementation remains blocked until Prompt 3 passes
+  and the user reviews its verdict.
+
 ## 2026-07-23 — docs-first candidate audit completed
 
 - Investigated nine concrete products across Invoicing/Payments, DeFi/Lending, Vaults/Yield,
@@ -11,8 +39,9 @@
 - Rejected the gift card after verifying ordinary issuer-database equivalence, visible or trusted
   funding, weak independent-entitlement demand, Sigill/FHE2P collision, and consumer-card policy
   scope.
-- Recorded the final `NONE SURVIVE` verdict. Product selection, Prompt 2, architecture, and
-  implementation remain blocked pending genuinely new evidence.
+- Recorded the then-current `NONE SURVIVE` verdict. At this 2026-07-23 checkpoint, product
+  selection, Prompt 2, architecture, and implementation were blocked pending genuinely new
+  evidence; that workflow state was superseded by the later NoxLimit selection.
 
 ## 2026-07-23 — complete documentation and use-case correction
 
@@ -29,7 +58,7 @@
 
 ## 2026-07-23 — feasibility-first product reset
 
-- Retired every historical front-runner; no product is currently selected or leading.
+- Retired every historical front-runner; no product was selected or leading at this checkpoint.
 - Recorded the user's rejected product families as exclusions rather than candidates to rename.
 - Added a winner-pattern and shipping-product research prompt that makes feasibility a veto.
 - Preserved old idea reports as historical collision and rejection evidence only.

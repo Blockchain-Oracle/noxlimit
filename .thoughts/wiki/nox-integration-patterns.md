@@ -2,6 +2,12 @@
 
 Last verified: **2026-07-23**
 
+> **Routing note (2026-07-28):** NoxLimit is selected and Prompt 3 is `CONDITIONAL GO`; only its
+> funded live run remains. QuietRound/Allo names
+> below are historical integration examples only. Apply the released-API patterns to the
+> [`canonical NoxLimit architecture`](../architecture/2026-07-25-noxlimit-system-architecture.md)
+> and follow [`CURRENT.md`](../decisions/CURRENT.md).
+
 These patterns are grounded in the released packages, the live Ethereum Sepolia deployment, and
 official Nox product POCs. They are implementation guidance, not proof that QuietRound itself has
 already passed an end-to-end test.

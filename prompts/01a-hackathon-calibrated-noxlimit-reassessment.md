@@ -159,7 +159,7 @@ failures. Likewise, do not let post-hackathon hardening silently become a demo-s
 Write a dated correction or reaffirmation memo. Give one verdict:
 
 - `DROP`
-- `KEEP AND VERIFY` (unselected candidate)
+- `KEEP AND VERIFY` (candidate status at the time this historical prompt ran)
 - `RESHAPE AND VERIFY` (state the exact smaller candidate)
 
 If the verdict is `KEEP AND VERIFY` or `RESHAPE AND VERIFY`, specify one 24–36-hour disposable

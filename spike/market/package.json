@@ -1,0 +1,27 @@
+{
+  "name": "noxlimit-gate-b-market-spike",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.4",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test nodejs",
+    "verify:provenance": "diff -qr node_modules/@gnosis.pm/conditional-tokens-contracts/contracts ../../.thoughts/raw/noxlimit-substrates/conditional-tokens-contracts/contracts && diff -qr node_modules/@gnosis.pm/conditional-tokens-market-makers/contracts ../../.thoughts/raw/noxlimit-substrates/conditional-tokens-market-makers/contracts"
+  },
+  "dependencies": {
+    "@gnosis.pm/conditional-tokens-contracts": "1.0.3",
+    "@gnosis.pm/conditional-tokens-market-makers": "1.8.1",
+    "@gnosis.pm/util-contracts": "3.0.0-alpha.3",
+    "openzeppelin-solidity": "2.3.0",
+    "viem": "2.48.1"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-node-test-runner": "3.0.17",
+    "@nomicfoundation/hardhat-toolbox-viem": "5.0.7",
+    "@tsconfig/node22": "22.0.2",
+    "@types/node": "22.19.3",
+    "hardhat": "3.9.0",
+    "typescript": "5.8.3"
+  }
+}

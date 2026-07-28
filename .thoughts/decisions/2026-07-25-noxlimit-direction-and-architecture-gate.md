@@ -4,6 +4,11 @@
 **Decision owner:** User  
 **Status:** Adopted
 
+> **Checkpoint update (2026-07-28):** The user approved the canonical architecture and activated
+> the bounded Prompt 3 spike. See
+> [`../verification/2026-07-28-opus-architecture-review-reconciliation.md`](../verification/2026-07-28-opus-architecture-review-reconciliation.md)
+> and [`CURRENT.md`](./CURRENT.md).
+
 ## Decision
 
 NoxLimit is selected as the current WTF Hackathon product direction. Product discovery and
@@ -75,7 +80,7 @@ The repair is:
 
 ## Next Gate
 
-The user reviews the canonical component, sequence, state, privacy, failure, and trust-boundary
-architecture. If accepted, record that checkpoint in `CURRENT.md` and run
-[`../../prompts/03-critical-path-verification.md`](../../prompts/03-critical-path-verification.md).
-Until then, do not start the spike or full implementation.
+The architecture checkpoint passed on 2026-07-28. Run
+[`../../prompts/03-critical-path-verification.md`](../../prompts/03-critical-path-verification.md)
+as the disposable spike only. Do not start the polished/full implementation until its verdict is
+recorded and reviewed by the user.

@@ -1,0 +1,36 @@
+{
+  "name": "@noxlimit/spike-nox",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.4",
+  "engines": {
+    "node": "22.22.3"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "compile": "hardhat compile",
+    "gate-c:prepare": "node scripts/prepare-sepolia-deployer.mjs",
+    "gate-c:sepolia": "hardhat clean && hardhat compile && node --env-file-if-exists=.env.local scripts/gate-c-sepolia.mjs",
+    "test": "node scripts/strict-test.mjs",
+    "test:raw": "hardhat test"
+  },
+  "dependencies": {
+    "@gnosis.pm/conditional-tokens-contracts": "1.0.3",
+    "@gnosis.pm/conditional-tokens-market-makers": "1.8.1",
+    "@gnosis.pm/util-contracts": "3.0.0-alpha.3",
+    "@iexec-nox/handle": "0.1.0-beta.13",
+    "@iexec-nox/nox-protocol-contracts": "0.2.4",
+    "openzeppelin-solidity": "2.3.0",
+    "viem": "2.48.1"
+  },
+  "devDependencies": {
+    "@iexec-nox/nox-hardhat-plugin": "0.1.0",
+    "@nomicfoundation/hardhat-node-test-runner": "3.0.17",
+    "@nomicfoundation/hardhat-toolbox-viem": "5.0.7",
+    "@tsconfig/node22": "22.0.2",
+    "@types/node": "22.18.12",
+    "hardhat": "3.9.0",
+    "typescript": "5.8.3"
+  }
+}

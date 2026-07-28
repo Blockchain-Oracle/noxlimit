@@ -5,10 +5,12 @@ The historical prompt order is preserved below, but the active route comes only 
 [`AUDIT-GATES.md`](../.thoughts/decisions/AUDIT-GATES.md).
 
 **Active route:** NoxLimit is selected as the current direction. Prompts 0, 1, and 1A have run.
-Prompt 2 is waived by explicit user selection. After the user reviews the
-[canonical architecture](../.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md),
-run only Prompt 3's bounded disposable spike. Do not restart discovery, comparison, or architecture
-from scratch, and do not treat the spike as authorization for a polished/full build.
+Prompt 2 is waived by explicit user selection. The user approved the
+[canonical architecture](../.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md) on
+2026-07-28. Prompt 3 is now `CONDITIONAL GO`: its local Nox, market, and combined-adapter paths
+pass, and only the prepared funded Ethereum Sepolia trace/fill remains. Do not restart discovery,
+comparison, or architecture from scratch, and do not treat this as authorization for a
+polished/full build.
 
 1. [Run docs-first product discovery](./00-docs-first-product-discovery.md)
 2. [Independently audit NoxLimit and the full corpus](./01-independent-noxlimit-audit.md)
@@ -35,15 +37,16 @@ Prompt 1A has run: an independent recheck re-derived the disputed claims from th
 sources, a compile of the contract-side Nox primitive skeleton against released v0.2.4, and live
 rules/product documentation, and
 [**reaffirmed `KEEP AND VERIFY`**](../.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
-with a gate split separating demo blockers from post-hackathon hardening. The compile did not cover
-the Handle SDK, real pool, adapter, asset forwarding, expiry, or refund. Selection is now closed;
-these are the exact subjects of the bounded Prompt 3 spike.
+with a gate split separating demo blockers from post-hackathon hardening. The later
+[Prompt 3 evidence](../.thoughts/verification/2026-07-28-noxlimit-critical-path.md) now covers the
+released Handle SDK, real pool, adapter, asset forwarding, expiry, refund, and privacy trace
+locally. Selection is closed; their combined mined Sepolia path is the remaining gate.
 
 [`00-feasibility-first-winner-research.md`](./00-feasibility-first-winner-research.md) and the old
 [`01-refresh-reality-and-ideas.md`](./01-refresh-reality-and-ideas.md) are preserved only as
 historical context and must not be run. The older Prompt 0 excluded several official categories and
 incorrectly required an unchanged third-party integration even for a standalone Nox product.
 
-Run Prompt 2 only if the user explicitly reopens product comparison. Prompt 3 is allowed after
-architecture review only as the 24–36-hour disposable privacy + real-FPMM experiment. A polished
-product build still requires that spike to pass and a user checkpoint.
+Run Prompt 2 only if the user explicitly reopens product comparison. Prompt 3's only active action
+is the prepared live runner in `spike/nox`; do not rerun broad research or redesign. A polished
+product build still requires that live receipt to pass and a user checkpoint.

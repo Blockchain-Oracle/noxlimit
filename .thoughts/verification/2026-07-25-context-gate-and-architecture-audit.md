@@ -1,5 +1,13 @@
 # Verification Audit: Context Gates and NoxLimit Architecture
 
+> **Historical checkpoint.** This PASS covered the 2026-07-25 context/architecture consolidation,
+> before user approval and the independent Opus 5 review. Current dispositions and routing are in
+> [`2026-07-28-opus-architecture-review-reconciliation.md`](./2026-07-28-opus-architecture-review-reconciliation.md)
+> and [`../decisions/CURRENT.md`](../decisions/CURRENT.md).
+> The three review transcripts summarized below were not persisted in this repository, and the
+> external plugin/config/cache checks depend on machine-local paths. Treat those lines as the dated
+> author's synthesis, not independently reproducible review evidence.
+
 **Date:** 2026-07-25  
 **Scope:** Decision/routing repair, canonical architecture, and reusable context-reconciliation
 guardrails  
