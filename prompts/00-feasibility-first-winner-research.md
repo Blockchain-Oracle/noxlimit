@@ -1,7 +1,7 @@
 # Prompt 0: Feasibility-First Winner Research and Idea Discovery
 
 > **Completed historical prompt. Do not run it from the current workflow.** Product discovery was
-> later corrected, NoxLimit was selected, and Prompt 3 is now active. Follow
+> later corrected, NoxLimit was selected, and Prompt 3 completed at `GO`. Follow
 > [`../.thoughts/decisions/CURRENT.md`](../.thoughts/decisions/CURRENT.md) and
 > [`../README.md`](../README.md).
 

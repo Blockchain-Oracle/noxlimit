@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 
 import { createViemHandleClient } from "@iexec-nox/handle";
 import {
+  BaseError,
+  ContractFunctionRevertedError,
   createPublicClient,
   createWalletClient,
   getContract,
@@ -29,11 +31,16 @@ const EVALUATION_TIMEOUT = 45n;
 const PUBLICATION_TIMEOUT = 600n;
 const ORDER_LIFETIME = 3_600n;
 const WORKER_TARGET_BALANCE = 5_000_000_000_000_000n;
-const MINIMUM_DEPLOYER_BALANCE = 30_000_000_000_000_000n;
+const FINALIZER_TARGET_BALANCE = 10_000_000_000_000_000n;
+const MINIMUM_FRESH_DEPLOYER_BALANCE = 30_000_000_000_000_000n;
+const MINIMUM_RESUME_DEPLOYER_BALANCE = 15_000_000_000_000_000n;
 const CONFIGURED_PRICE_TICK = 100_000_000_000_000n;
 const deployerKeyPath = fileURLToPath(new URL("../.gate-c-deployer-key", import.meta.url));
 const workerKeyPath = fileURLToPath(new URL("../.gate-c-worker-key", import.meta.url));
 const moverKeyPath = fileURLToPath(new URL("../.gate-c-mover-key", import.meta.url));
+const setupCheckpointPath = fileURLToPath(
+  new URL("../evidence/sepolia-gate-c-setup.json", import.meta.url),
+);
 const evidencePath = fileURLToPath(
   new URL("../evidence/sepolia-gate-c.json", import.meta.url),
 );
@@ -49,6 +56,14 @@ const STATUS = {
 };
 
 const NOX_PUBLIC_ABI = [
+  {
+    type: "error",
+    name: "InvalidProof",
+    inputs: [
+      { name: "proof", type: "bytes" },
+      { name: "reason", type: "string" },
+    ],
+  },
   {
     type: "function",
     name: "isPubliclyDecryptable",
@@ -72,6 +87,17 @@ function assertEqual(actual, expected, label) {
   if (actual !== expected) {
     throw new Error(`${label}: expected ${expected}, got ${actual}`);
   }
+}
+
+function hasContractRevert(error, expectedErrorName) {
+  if (!(error instanceof BaseError)) return false;
+  const reverted = error.walk(
+    (cause) => cause instanceof ContractFunctionRevertedError,
+  );
+  return (
+    reverted instanceof ContractFunctionRevertedError &&
+    reverted.data?.errorName === expectedErrorName
+  );
 }
 
 function ceilDiv(numerator, denominator) {
@@ -144,6 +170,14 @@ async function waitForChainTimestamp(publicClient, targetTimestamp, timeoutMs = 
   throw new Error(`chain timestamp did not reach ${targetTimestamp} before timeout`);
 }
 
+async function waitForSuccessfulReceipt(publicClient, hash, label) {
+  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  if (receipt.status !== "success") {
+    throw new Error(`${label} transaction reverted: ${hash}`);
+  }
+  return receipt;
+}
+
 async function loadOrCreateActor(keyPath) {
   if (existsSync(keyPath)) {
     const saved = (await readFile(keyPath, "utf8")).trim();
@@ -200,6 +234,13 @@ async function observePublicEvaluation({
 
 async function main() {
   const rpcUrl = process.env.SEPOLIA_RPC_URL?.trim() || DEFAULT_RPC;
+  const shouldResumeSetup = process.env.GATE_C_REUSE_SETUP === "1";
+  if (shouldResumeSetup && !existsSync(setupCheckpointPath)) {
+    throw new Error(`GATE_C_REUSE_SETUP=1 but checkpoint is missing: ${setupCheckpointPath}`);
+  }
+  const setupCheckpoint = shouldResumeSetup
+    ? JSON.parse(await readFile(setupCheckpointPath, "utf8"))
+    : undefined;
   const deployer = privateKeyToAccount(await requiredPrivateKey());
   const publicClient = createPublicClient({ chain: sepolia, transport: http(rpcUrl) });
   const deployerWallet = createWalletClient({
@@ -215,14 +256,49 @@ async function main() {
     throw new Error("live NoxCompute code is missing");
   }
   const deployerBalance = await publicClient.getBalance({ address: deployer.address });
-  if (deployerBalance < MINIMUM_DEPLOYER_BALANCE) {
+  const minimumDeployerBalance = shouldResumeSetup
+    ? MINIMUM_RESUME_DEPLOYER_BALANCE
+    : MINIMUM_FRESH_DEPLOYER_BALANCE;
+  if (deployerBalance < minimumDeployerBalance) {
     throw new Error(
-      `deployer ${deployer.address} needs at least 0.03 Sepolia ETH; current balance is ${deployerBalance}`,
+      `deployer ${deployer.address} needs at least ${minimumDeployerBalance} wei for this ${shouldResumeSetup ? "resumed" : "fresh"} run; current balance is ${deployerBalance}`,
     );
   }
 
   const worker = await loadOrCreateActor(workerKeyPath);
   const mover = await loadOrCreateActor(moverKeyPath);
+  const roleAddresses = [deployer.address, worker.address, mover.address].map((address) =>
+    address.toLowerCase(),
+  );
+  if (new Set(roleAddresses).size !== roleAddresses.length) {
+    throw new Error("deployer, worker, and mover must be pairwise distinct");
+  }
+  if (
+    setupCheckpoint !== undefined &&
+    (setupCheckpoint.chainId !== chainId ||
+      setupCheckpoint.roles?.deployer?.toLowerCase() !== deployer.address.toLowerCase() ||
+      setupCheckpoint.roles?.worker?.toLowerCase() !== worker.address.toLowerCase() ||
+      setupCheckpoint.roles?.mover?.toLowerCase() !== mover.address.toLowerCase())
+  ) {
+    throw new Error("setup checkpoint chain or role binding does not match this run");
+  }
+  if (setupCheckpoint !== undefined) {
+    const checkpointTransactions = Object.entries(setupCheckpoint.transactions ?? {});
+    if (checkpointTransactions.length === 0) {
+      throw new Error("setup checkpoint has no transaction provenance");
+    }
+    await Promise.all(
+      checkpointTransactions.map(async ([label, hash]) => {
+        if (typeof hash !== "string" || !/^0x[0-9a-fA-F]{64}$/.test(hash)) {
+          throw new Error(`setup checkpoint ${label} transaction hash is invalid`);
+        }
+        const receipt = await publicClient.getTransactionReceipt({ hash });
+        if (receipt.status !== "success") {
+          throw new Error(`setup checkpoint ${label} transaction did not succeed`);
+        }
+      }),
+    );
+  }
   const workerWallet = createWalletClient({
     account: worker,
     chain: sepolia,
@@ -240,11 +316,11 @@ async function main() {
       to: actor.address,
       value: WORKER_TARGET_BALANCE - balance,
     });
-    await publicClient.waitForTransactionReceipt({ hash });
+    await waitForSuccessfulReceipt(publicClient, hash, "actor funding");
     return hash;
   }
-  const workerFundingHash = await fundActor(worker);
-  const moverFundingHash = await fundActor(mover);
+  let workerFundingHash = setupCheckpoint?.transactions?.workerFunding;
+  let moverFundingHash = setupCheckpoint?.transactions?.moverFunding;
 
   const [
     collateralArtifact,
@@ -262,7 +338,7 @@ async function main() {
     artifact("contracts/NoxLimitOrderBook.sol/NoxLimitOrderBook.json"),
   ]);
 
-  const deploymentTxs = {};
+  let deploymentTxs = {};
   async function deploy(label, contractArtifact, args = [], gas) {
     const hash = await deployerWallet.deployContract({
       abi: contractArtifact.abi,
@@ -278,9 +354,35 @@ async function main() {
     return receipt.contractAddress;
   }
 
-  const collateralAddress = await deploy("collateral", collateralArtifact);
-  const conditionalTokensAddress = await deploy("conditionalTokens", conditionalTokensArtifact);
-  const factoryAddress = await deploy("fpmmFactory", factoryArtifact);
+  let collateralAddress;
+  let conditionalTokensAddress;
+  let factoryAddress;
+  if (setupCheckpoint === undefined) {
+    collateralAddress = await deploy("collateral", collateralArtifact);
+    conditionalTokensAddress = await deploy("conditionalTokens", conditionalTokensArtifact);
+    factoryAddress = await deploy("fpmmFactory", factoryArtifact);
+  } else {
+    ({
+      collateral: collateralAddress,
+      conditionalTokens: conditionalTokensAddress,
+      fpmmFactory: factoryAddress,
+    } = setupCheckpoint.addresses);
+    deploymentTxs = {
+      collateral: setupCheckpoint.transactions.collateral,
+      conditionalTokens: setupCheckpoint.transactions.conditionalTokens,
+      fpmmFactory: setupCheckpoint.transactions.fpmmFactory,
+    };
+    for (const [label, address] of Object.entries({
+      collateral: collateralAddress,
+      conditionalTokens: conditionalTokensAddress,
+      fpmmFactory: factoryAddress,
+    })) {
+      const code = await publicClient.getCode({ address });
+      if (code === undefined || code === "0x") {
+        throw new Error(`checkpoint ${label} code is missing at ${address}`);
+      }
+    }
+  }
   const collateral = getContract({
     address: collateralAddress,
     abi: collateralArtifact.abi,
@@ -302,18 +404,35 @@ async function main() {
     client: { public: publicClient, wallet: deployerWallet },
   });
 
-  const questionId = keccak256(toBytes(`noxlimit-gate-c-${Date.now()}`));
-  const prepareHash = await conditionalTokens.write.prepareCondition([
-    deployer.address,
-    questionId,
-    2n,
-  ]);
-  await publicClient.waitForTransactionReceipt({ hash: prepareHash });
-  const conditionId = await conditionalTokens.read.getConditionId([
-    deployer.address,
-    questionId,
-    2n,
-  ]);
+  let questionId;
+  let prepareHash;
+  let conditionId;
+  let createMarketHash;
+  let marketAddress;
+  if (setupCheckpoint === undefined) {
+    questionId = keccak256(toBytes(`noxlimit-gate-c-${Date.now()}`));
+    prepareHash = await conditionalTokens.write.prepareCondition([
+      deployer.address,
+      questionId,
+      2n,
+    ]);
+    await waitForSuccessfulReceipt(publicClient, prepareHash, "prepare condition");
+    conditionId = await conditionalTokens.read.getConditionId([
+      deployer.address,
+      questionId,
+      2n,
+    ]);
+  } else {
+    questionId = setupCheckpoint.questionId;
+    prepareHash = setupCheckpoint.transactions.prepareCondition;
+    conditionId = setupCheckpoint.conditionId;
+    const recoveredConditionId = await conditionalTokens.read.getConditionId([
+      deployer.address,
+      questionId,
+      2n,
+    ]);
+    assertEqual(recoveredConditionId, conditionId, "checkpoint condition id");
+  }
   const positionIds = await Promise.all(
     [1n, 2n].map(async (indexSet) => {
       const collectionId = await conditionalTokens.read.getCollectionId([
@@ -325,23 +444,39 @@ async function main() {
     }),
   );
 
-  const createMarketHash = await factory.write.createFixedProductMarketMaker([
-    conditionalTokensAddress,
-    collateralAddress,
-    [conditionId],
-    FEE,
-  ]);
-  const createMarketReceipt = await publicClient.waitForTransactionReceipt({
-    hash: createMarketHash,
-  });
-  const [marketCreated] = parseEventLogs({
-    abi: factoryArtifact.abi,
-    eventName: "FixedProductMarketMakerCreation",
-    logs: createMarketReceipt.logs,
-    strict: true,
-  });
-  if (marketCreated === undefined) throw new Error("FPMM creation event missing");
-  const marketAddress = marketCreated.args.fixedProductMarketMaker;
+  if (setupCheckpoint === undefined) {
+    createMarketHash = await factory.write.createFixedProductMarketMaker([
+      conditionalTokensAddress,
+      collateralAddress,
+      [conditionId],
+      FEE,
+    ]);
+    const createMarketReceipt = await waitForSuccessfulReceipt(
+      publicClient,
+      createMarketHash,
+      "create market",
+    );
+    const [marketCreated] = parseEventLogs({
+      abi: factoryArtifact.abi,
+      eventName: "FixedProductMarketMakerCreation",
+      logs: createMarketReceipt.logs,
+      strict: true,
+    });
+    if (marketCreated === undefined) throw new Error("FPMM creation event missing");
+    marketAddress = marketCreated.args.fixedProductMarketMaker;
+  } else {
+    createMarketHash = setupCheckpoint.transactions.createMarket;
+    marketAddress = setupCheckpoint.addresses.fpmm;
+    const marketCode = await publicClient.getCode({ address: marketAddress });
+    if (marketCode === undefined || marketCode === "0x") {
+      throw new Error(`checkpoint FPMM code is missing at ${marketAddress}`);
+    }
+    if (
+      positionIds.map(String).join(",") !== setupCheckpoint.positionIds.map(String).join(",")
+    ) {
+      throw new Error("checkpoint position ids do not match the recovered condition");
+    }
+  }
   const market = getContract({
     address: marketAddress,
     abi: marketArtifact.abi,
@@ -352,21 +487,112 @@ async function main() {
     abi: marketArtifact.abi,
     client: { public: publicClient, wallet: moverWallet },
   });
+  const [
+    boundConditionalTokens,
+    boundCollateral,
+    boundCondition,
+    boundFee,
+    outcomeSlotCount,
+  ] = await Promise.all([
+    market.read.conditionalTokens(),
+    market.read.collateralToken(),
+    market.read.conditionIds([0n]),
+    market.read.fee(),
+    conditionalTokens.read.getOutcomeSlotCount([conditionId]),
+  ]);
+  assertEqual(
+    boundConditionalTokens.toLowerCase(),
+    conditionalTokensAddress.toLowerCase(),
+    "FPMM conditional tokens binding",
+  );
+  assertEqual(
+    boundCollateral.toLowerCase(),
+    collateralAddress.toLowerCase(),
+    "FPMM collateral binding",
+  );
+  assertEqual(boundCondition, conditionId, "FPMM condition binding");
+  assertEqual(boundFee, FEE, "FPMM fee binding");
+  assertEqual(outcomeSlotCount, 2n, "condition outcome count");
 
-  const mintOwnerHash = await collateral.write.mint([
-    deployer.address,
-    SEED + ORDER_AMOUNT,
-  ]);
-  await publicClient.waitForTransactionReceipt({ hash: mintOwnerHash });
-  const mintMoverHash = await collateral.write.mint([
-    mover.address,
-    ORDER_AMOUNT + FIRST_MOVE + SECOND_MOVE,
-  ]);
-  await publicClient.waitForTransactionReceipt({ hash: mintMoverHash });
-  const approveSeedHash = await collateral.write.approve([marketAddress, SEED]);
-  await publicClient.waitForTransactionReceipt({ hash: approveSeedHash });
-  const fundHash = await market.write.addFunding([SEED, []]);
-  await publicClient.waitForTransactionReceipt({ hash: fundHash });
+  let mintOwnerHash;
+  let mintMoverHash;
+  let approveSeedHash;
+  let fundHash;
+  if (setupCheckpoint === undefined) {
+    mintOwnerHash = await collateral.write.mint([
+      deployer.address,
+      SEED + ORDER_AMOUNT,
+    ]);
+    await waitForSuccessfulReceipt(publicClient, mintOwnerHash, "mint owner collateral");
+    mintMoverHash = await collateral.write.mint([
+      mover.address,
+      ORDER_AMOUNT + FIRST_MOVE + SECOND_MOVE,
+    ]);
+    await waitForSuccessfulReceipt(publicClient, mintMoverHash, "mint mover collateral");
+    approveSeedHash = await collateral.write.approve([marketAddress, SEED]);
+    await waitForSuccessfulReceipt(publicClient, approveSeedHash, "approve seed collateral");
+    fundHash = await market.write.addFunding([SEED, []]);
+    await waitForSuccessfulReceipt(publicClient, fundHash, "fund market");
+    workerFundingHash = (await fundActor(worker)) ?? workerFundingHash;
+    moverFundingHash = (await fundActor(mover)) ?? moverFundingHash;
+    await mkdir(new URL("../evidence/", import.meta.url), { recursive: true });
+    await writeFile(
+      setupCheckpointPath,
+      `${JSON.stringify(
+        {
+          setupCompletedAt: new Date().toISOString(),
+          checkpointReconstructedFromPublicReceipts: false,
+          chainId,
+          roles: {
+            deployer: deployer.address,
+            worker: worker.address,
+            mover: mover.address,
+          },
+          addresses: {
+            collateral: collateralAddress,
+            conditionalTokens: conditionalTokensAddress,
+            fpmmFactory: factoryAddress,
+            fpmm: marketAddress,
+          },
+          questionId,
+          conditionId,
+          positionIds: positionIds.map(String),
+          transactions: {
+            workerFunding: workerFundingHash,
+            moverFunding: moverFundingHash,
+            ...deploymentTxs,
+            prepareCondition: prepareHash,
+            createMarket: createMarketHash,
+            mintOwnerCollateral: mintOwnerHash,
+            mintMoverCollateral: mintMoverHash,
+            approveSeed: approveSeedHash,
+            fundMarket: fundHash,
+          },
+        },
+        null,
+        2,
+      )}\n`,
+    );
+  } else {
+    ({
+      mintOwnerCollateral: mintOwnerHash,
+      mintMoverCollateral: mintMoverHash,
+      approveSeed: approveSeedHash,
+      fundMarket: fundHash,
+    } = setupCheckpoint.transactions);
+    const recoveredPoolBalances = await Promise.all(
+      positionIds.map((positionId) =>
+        conditionalTokens.read.balanceOf([marketAddress, positionId]),
+      ),
+    );
+    if (recoveredPoolBalances.some((balance) => balance !== SEED)) {
+      throw new Error(
+        `checkpoint FPMM is not at the untouched seeded state: ${recoveredPoolBalances.join(",")}`,
+      );
+    }
+    workerFundingHash = (await fundActor(worker)) ?? workerFundingHash;
+    moverFundingHash = (await fundActor(mover)) ?? moverFundingHash;
+  }
 
   const orderBookAddress = await deploy(
     "orderBook",
@@ -382,7 +608,6 @@ async function main() {
       0n,
       3,
     ],
-    20_000_000n,
   );
   const orderBook = getContract({
     address: orderBookAddress,
@@ -417,12 +642,12 @@ async function main() {
   const moverHandleClient = await createViemHandleClient(moverWallet);
   const workerHandleClient = await createViemHandleClient(workerWallet);
   const approveTargetHash = await collateral.write.approve([orderBookAddress, ORDER_AMOUNT]);
-  await publicClient.waitForTransactionReceipt({ hash: approveTargetHash });
+  await waitForSuccessfulReceipt(publicClient, approveTargetHash, "approve target order");
   const approveControlHash = await moverCollateral.write.approve([
     orderBookAddress,
     ORDER_AMOUNT,
   ]);
-  await publicClient.waitForTransactionReceipt({ hash: approveControlHash });
+  await waitForSuccessfulReceipt(publicClient, approveControlHash, "approve control order");
   const orderExpiry = (await publicClient.getBlock()).timestamp + ORDER_LIFETIME;
 
   async function createOrder({ walletOrderBook, handleClient, recipient, minOut }) {
@@ -439,7 +664,7 @@ async function main() {
       encrypted.handle,
       encrypted.handleProof,
     ]);
-    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+    const receipt = await waitForSuccessfulReceipt(publicClient, hash, "create order");
     const [created] = parseEventLogs({
       abi: orderBookArtifact.abi,
       eventName: "OrderCreated",
@@ -468,7 +693,7 @@ async function main() {
   async function evaluateAndObserve(orderId, expectedQuote, expectedPrivateResult) {
     const started = Date.now();
     const hash = await workerOrderBook.write.requestEvaluation([orderId]);
-    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+    const receipt = await waitForSuccessfulReceipt(publicClient, hash, "request evaluation");
     const candidate = await orderBook.read.candidateOf([orderId]);
     const decrypted = await waitForValue(() => workerHandleClient.decrypt(candidate));
     assertEqual(decrypted.value, expectedPrivateResult, "worker private result");
@@ -508,15 +733,19 @@ async function main() {
   const firstTimeoutTarget = (await publicClient.getBlock()).timestamp + EVALUATION_TIMEOUT + 1n;
   await waitForChainTimestamp(publicClient, firstTimeoutTarget);
   const expireFirstHash = await moverOrderBook.write.expireEvaluation([targetOrder.id]);
-  const expireFirstReceipt = await publicClient.waitForTransactionReceipt({
-    hash: expireFirstHash,
-  });
+  const expireFirstReceipt = await waitForSuccessfulReceipt(
+    publicClient,
+    expireFirstHash,
+    "expire first target evaluation",
+  );
   const expireControlHash = await moverOrderBook.write.expireEvaluation([
     delayedEligibleControl.id,
   ]);
-  const expireControlReceipt = await publicClient.waitForTransactionReceipt({
-    hash: expireControlHash,
-  });
+  const expireControlReceipt = await waitForSuccessfulReceipt(
+    publicClient,
+    expireControlHash,
+    "expire control evaluation",
+  );
   const normalizedTimeoutShape = (receipt) =>
     receipt.logs.map((log) => `${log.address.toLowerCase()}:${log.topics[0] ?? "0x"}`);
   if (
@@ -526,9 +755,9 @@ async function main() {
     throw new Error("false and withheld-eligible timeout event shapes differ");
   }
   const cancelControlHash = await moverOrderBook.write.cancel([delayedEligibleControl.id]);
-  await publicClient.waitForTransactionReceipt({ hash: cancelControlHash });
+  await waitForSuccessfulReceipt(publicClient, cancelControlHash, "cancel control order");
   const refundControlHash = await moverOrderBook.write.refund([delayedEligibleControl.id]);
-  await publicClient.waitForTransactionReceipt({ hash: refundControlHash });
+  await waitForSuccessfulReceipt(publicClient, refundControlHash, "refund control order");
   assertEqual(
     Number(await orderBook.read.statusOf([delayedEligibleControl.id])),
     STATUS.Refunded,
@@ -537,11 +766,10 @@ async function main() {
 
   async function movePool(amountIn) {
     const approveHash = await moverCollateral.write.approve([marketAddress, amountIn]);
-    await publicClient.waitForTransactionReceipt({ hash: approveHash });
+    await waitForSuccessfulReceipt(publicClient, approveHash, "approve reserve move");
     const minOut = await market.read.calcBuyAmount([amountIn, 0n]);
     const hash = await moverMarket.write.buy([amountIn, 0n, minOut]);
-    const receipt = await publicClient.waitForTransactionReceipt({ hash });
-    if (receipt.status !== "success") throw new Error("reserve-moving FPMM buy failed");
+    await waitForSuccessfulReceipt(publicClient, hash, "execute reserve move");
     return { approveHash, hash, outcomeTokens: minOut };
   }
 
@@ -553,7 +781,11 @@ async function main() {
     (await publicClient.getBlock()).timestamp + EVALUATION_TIMEOUT + 1n;
   await waitForChainTimestamp(publicClient, secondTimeoutTarget);
   const expireSecondHash = await moverOrderBook.write.expireEvaluation([targetOrder.id]);
-  await publicClient.waitForTransactionReceipt({ hash: expireSecondHash });
+  await waitForSuccessfulReceipt(
+    publicClient,
+    expireSecondHash,
+    "expire second target evaluation",
+  );
 
   const secondMove = await movePool(SECOND_MOVE);
   const liveQ3 = await market.read.calcBuyAmount([ORDER_AMOUNT, 1n]);
@@ -578,7 +810,7 @@ async function main() {
   }
 
   const publishHash = await workerOrderBook.write.requestPublication([targetOrder.id, 3]);
-  await publicClient.waitForTransactionReceipt({ hash: publishHash });
+  await waitForSuccessfulReceipt(publicClient, publishHash, "request publication");
   const publicationStarted = Date.now();
   const published = await waitForValue(() =>
     moverHandleClient.publicDecrypt(successfulEvaluation.candidate),
@@ -608,7 +840,8 @@ async function main() {
       functionName: "validateDecryptionProof",
       args: [firstFalse.candidate, published.decryptionProof],
     });
-  } catch {
+  } catch (error) {
+    if (!hasContractRevert(error, "InvalidProof")) throw error;
     crossHandleProofRejected = true;
   }
   if (!crossHandleProofRejected) {
@@ -632,12 +865,26 @@ async function main() {
   const adapterCollateralBefore = await collateral.read.balanceOf([orderBookAddress]);
   assertEqual(adapterCollateralBefore, ORDER_AMOUNT, "target escrow before finalization");
 
+  const moverBalanceBeforeFinalize = await publicClient.getBalance({ address: mover.address });
+  let finalizerTopUpHash;
+  let finalizerTopUpAmount = 0n;
+  if (moverBalanceBeforeFinalize < FINALIZER_TARGET_BALANCE) {
+    finalizerTopUpAmount = FINALIZER_TARGET_BALANCE - moverBalanceBeforeFinalize;
+    finalizerTopUpHash = await deployerWallet.sendTransaction({
+      to: mover.address,
+      value: finalizerTopUpAmount,
+    });
+    await waitForSuccessfulReceipt(publicClient, finalizerTopUpHash, "finalizer top-up");
+  }
   const finalizeHash = await moverOrderBook.write.finalize(
     [targetOrder.id, 3, published.decryptionProof],
     { gas: 3_000_000n },
   );
-  const finalizeReceipt = await publicClient.waitForTransactionReceipt({ hash: finalizeHash });
-  if (finalizeReceipt.status !== "success") throw new Error("finalize transaction reverted");
+  const finalizeReceipt = await waitForSuccessfulReceipt(
+    publicClient,
+    finalizeHash,
+    "finalize order",
+  );
   const [fill] = parseEventLogs({
     abi: orderBookArtifact.abi,
     eventName: "Filled",
@@ -708,7 +955,8 @@ async function main() {
     await orderBook.simulate.finalize([targetOrder.id, 3, published.decryptionProof], {
       account: mover,
     });
-  } catch {
+  } catch (error) {
+    if (!hasContractRevert(error, "InvalidStatus")) throw error;
     replayRejected = true;
   }
   if (!replayRejected) throw new Error("finalization replay unexpectedly succeeded");
@@ -808,6 +1056,7 @@ async function main() {
       secondReserveMove: secondMove.hash,
       requestTargetEvaluation3: successfulEvaluation.hash,
       requestPublication: publishHash,
+      finalizerTopUp: finalizerTopUpHash,
       finalize: finalizeHash,
     },
     result: {
@@ -831,7 +1080,13 @@ async function main() {
         (balance - poolPositionsBefore[index]).toString(),
       ),
       replayRejected,
-      ownerKeyRequiredAfterTargetCreation: false,
+      ownerAuthorizationRequiredAfterTargetCreation: false,
+      ownerKeyUsedForFinalizerGasFundingAfterTargetCreation:
+        finalizerTopUpHash !== undefined,
+      finalizerGasFundingAfterTargetCreation: {
+        transactionHash: finalizerTopUpHash,
+        value: finalizerTopUpAmount.toString(),
+      },
       objectiveResolutionIncluded: false,
     },
   };

@@ -3,7 +3,8 @@
 **Date:** 2026-07-25  
 **Authority:** Canonical architecture for the selected hackathon direction and bounded critical-path
 verification  
-**Maturity:** User-approved; local critical path verified, live Ethereum Sepolia receipt pending
+**Maturity:** User-approved; local and live Ethereum Sepolia critical path verified (`GO`);
+awaiting the user's polished-build checkpoint
 **Spike substrate:** Unmodified Gnosis Conditional Tokens + Fixed Product Market Maker on Ethereum
 Sepolia
 
@@ -19,17 +20,17 @@ NoxLimit is the current product direction:
 
 This document consolidates architecture that was already spread across the product hypothesis,
 market-reality brief, reassessment, and reaffirmation. The user approved it on 2026-07-28 and
-advanced the already-defined bounded Prompt 3 spike. That approval selects what to test; it does not
-claim that the live Nox/Gateway/FPMM path has already passed.
+advanced the already-defined bounded Prompt 3 spike. The later executable result now verifies that
+the live Nox/Gateway/FPMM path passed without changing this architecture.
 
 ## Executable Spike Status — 2026-07-28
 
-The approved topology now executes locally against the released Nox `0.2.4` stack and exact pinned
+The approved topology executes locally against the released Nox `0.2.4` stack and exact pinned
 Gnosis contracts. A clean run passes 8 Nox primitive tests, 8 combined adapter/adversarial tests,
-and 8 independent market/math tests. Live SDK encryption and input-proof validation also pass
-against Ethereum Sepolia. The remaining pre-polish gate is one funded live run that reproduces the
-quiet/withheld inference trace and mines the combined Nox-authorized FPMM buy. Until that receipt
-exists, the verdict is `CONDITIONAL GO`, not `GO`.
+and 8 independent market/math tests. Prompt 3 then reproduced the quiet/withheld inference trace
+and mined the combined Nox-authorized FPMM buy on Ethereum Sepolia. The final receipt
+`0xbae85703bb59878fa63838e03c1bc57cdcdc46f6e2f74ac701b38fc85d088caa`
+passed every terminal postcondition, so the bounded technical verdict is `GO`.
 
 The independent `DROP` audit is historical evidence, not current workflow authority. The current
 authority order is defined in
@@ -272,8 +273,9 @@ The proposed v0.2.4 construction is
 `freshZero = Nox.sub(Nox.toEuint256(nonce), Nox.toEuint256(nonce))`, followed by
 `evaluationMinOut = Nox.add(encryptedMinOut, freshZero)`. The released local stack now proves that
 identical threshold/quote pairs produce distinct candidates, ACLs do not bleed between nonces, and
-an old proof fails for a new nonce. The prepared live run rechecks distinct candidates and
-cross-handle proof rejection before promotion to `GO`.
+an old proof fails for a new nonce. The live run also produced four distinct candidates, kept the
+three earlier/withheld candidates non-public, and rejected the successful proof against an earlier
+handle.
 
 A fixed cadence, contract-enforced minimum interval, and bounded evaluation count limit worker
 probing; they do not eliminate metadata inference. After a fixed evaluation timeout, anyone can
@@ -390,17 +392,28 @@ The fixed worker never receives token approval.
 
 ## Hackathon Gate Versus Production Hardening
 
-### Must pass before the polished build
+### Passed by Prompt 3 before the polished build
+
+The following bounded technical gates passed locally and, where service integration matters, on
+live Ethereum Sepolia:
 
 - released Nox private-viewer and success-publication path works live;
 - false evaluation needs no explicit public proof;
 - repeated checks and a delayed-eligible control establish the honest public-inference boundary;
 - nonce-distinct candidates prevent proof or irreversible-ACL bleed across evaluations;
 - one real FPMM buy occurs through the actual adapter on Ethereum Sepolia;
-- atomic `minOut`, immutable binding, replay rejection, cancel, expiry, and refund work;
+- successful-bound `minOut`, immutable binding, share forwarding, and replay rejection work live;
+  adverse-bound rollback, cancel, expiry, and refund work in the local adversarial suite;
 - real outcome shares reach the immutable recipient;
-- no mock price, share, proof, execution, or second human is used on the judge path;
-- privacy copy accurately discloses worker knowledge and public metadata.
+- no mock quote, share, proof, or execution is used in the bounded Gate C trace.
+
+### Still required in the polished build and submission gate
+
+- a self-serve judge path without local setup, faucet hunting, owner-operated gas top-ups, or a
+  second human;
+- objective BTC/USD resolution and redemption through the product UI;
+- durable worker/finalizer gas provisioning and restart recovery;
+- privacy copy that accurately discloses worker knowledge, TEE trust, and public metadata.
 
 ### Important after the hackathon, not a pre-build veto
 
@@ -437,14 +450,16 @@ This architecture consolidates:
 
 The pinned FPMM source and local execution provide the required fixed-input quote and atomic
 minimum-output check. The released Nox source and local stack establish the necessary primitives,
-viewer role, and combined adapter behavior. The combined live orchestration and privacy trace
-remain the bounded Prompt 3 verification target.
+viewer role, and combined adapter behavior. The live Prompt 3 evidence adds the bounded recovered
+orchestration, success-only publication, independent proof rescue, real FPMM action, asset deltas,
+and terminal cleanup on Ethereum Sepolia. The owner/deployer funded finalizer gas after order
+creation, so durable product-operated gas provisioning remains build work.
 
 ## Next Authorized Action
 
-The user approved this architecture on 2026-07-28. Local Gates A/B and the combined adapter pass.
-The only authorized action is the funded live runner described in
-[`../../prompts/03-critical-path-verification.md`](../../prompts/03-critical-path-verification.md),
-followed by its recorded verdict and user checkpoint before any polished frontend/full
-implementation. Executable evidence may refine this architecture; it may not silently replace the
-product, privacy boundary, or hackathon risk standard.
+The user approved this architecture on 2026-07-28, and local Gates A/B plus live Gate C now pass.
+The next authorized action is the user's polished-build checkpoint. If the user authorizes that
+phase, implementation must derive from this architecture and the recorded Prompt 3 evidence rather
+than restarting discovery or creating a competing design. Executable evidence may refine this
+architecture; it may not silently replace the product, privacy boundary, or hackathon risk
+standard.

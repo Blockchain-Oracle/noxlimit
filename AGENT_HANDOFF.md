@@ -4,8 +4,9 @@
 
 Use this repository to verify and then build the selected iExec WTF Hackathon direction.
 **NoxLimit is selected, the user approved its canonical architecture on 2026-07-28, and the bounded
-Prompt 3 spike is at `CONDITIONAL GO`: all local paths pass, while its final live Sepolia privacy
-trace and fill wait on funding the dedicated local signer. The polished build has not started.** Do not reopen product
+Prompt 3 spike is `GO`: all local paths pass, and live Gate C completed the Nox privacy trace plus
+one real Sepolia FPMM fill. The polished build has not started; work is stopped at the user's build
+checkpoint.** Do not reopen product
 discovery
 or inherit QuietRound, SLA Lock, Proofline, AgentDispute, or another historical idea unless the
 user explicitly reopens selection or executable evidence kills a load-bearing NoxLimit assumption.
@@ -25,8 +26,8 @@ six major lanes, and adversarially killed its two initial near-survivors. Preser
 Use [`prompts/00-docs-first-product-discovery.md`](./prompts/00-docs-first-product-discovery.md) for
 an independent rerun or when new evidence appears; do not treat its existence as evidence that
 discovery is still unfinished. The Prompt 1A reassessment has run and is retained as evidence.
-Prompt 2 is waived by the user's selection. The architecture checkpoint passed on 2026-07-28; only
-the prepared funded live Prompt 3 run and verdict update are now authorized.
+Prompt 2 is waived by the user's selection. The architecture checkpoint and Prompt 3 passed on
+2026-07-28; the next workflow action is the user's polished-build checkpoint.
 
 An independent or future discovery pass should produce a cited evidence and candidate report with:
 
@@ -43,7 +44,7 @@ rule does not prohibit maintaining the already-authorized canonical NoxLimit arc
 
 ### Current decision state
 
-NoxLimit is selected and locally verified, but remains live-Sepolia conditional. The two strongest
+NoxLimit is selected and its bounded critical path is locally and live verified. The two strongest
 docs-first near-misses still failed and remain in the graveyard:
 
 - **Private Quote-to-Pay:** PaySec already exposes the same product surface; current shared
@@ -60,8 +61,9 @@ Generic native prediction markets remain excluded because DarkOdds already built
 Research identified a narrower product-shaped hypothesis, **NoxLimit**: one fixed-size confidential
 buy limit against a real onchain outcome-share AMM.
 
-**Current outcome (2026-07-28): selected, architecture approved, local Gates A/B/adapter verified;
-technical maturity `CONDITIONAL GO` pending one funded live run.**
+**Current outcome (2026-07-28): selected, architecture approved, local Gates A/B verified, live
+Gate C verified; technical critical-path maturity `GO`, awaiting the user's polished-build
+checkpoint.**
 
 - Conditional execution is a shipping workflow, and public onchain order flow has structural
   pre-trade exposure. Direct evidence that prediction traders specifically value hiding only this
@@ -79,17 +81,15 @@ technical maturity `CONDITIONAL GO` pending one funded live run.**
   Arbitrum Sepolia; no production mainnet exists, but Ethereum Sepolia is the required hackathon
   chain.
 
-Prompt 2 is waived. Prompt 3's local privacy + real-pool verification passes: 16 released-Nox and
-combined-adapter tests plus 8 independent market/math tests. The dedicated gitignored deployer is
-`0xA03D26E19ee4061A06a9a097010Bc06028Bba60A`; fund it with at least 0.03 **Sepolia ETH only**, then
-run `cd spike/nox && pnpm gate-c:sepolia`. The official Nox demo points to the
-[Google Cloud Ethereum Sepolia faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia).
-Do not start the polished product until that receipt
-passes and the user reviews its verdict.
+Prompt 2 is waived. Prompt 3 passes: 16 released-Nox/combined-adapter tests, 8 independent
+market/math tests, and the bounded recovered live Sepolia trace. Final transaction
+[`0xbae857…88caa`](https://eth-sepolia.blockscout.com/tx/0xbae85703bb59878fa63838e03c1bc57cdcdc46f6e2f74ac701b38fc85d088caa)
+filled the order and forwarded exact outcome shares with zero adapter dust/allowance. Public
+evidence is in `spike/nox/evidence/sepolia-gate-c.json`. Do not start the polished product until the
+user advances the current checkpoint.
 
-Prompt 3 activated at `2026-07-27 23:40 UTC`, targets a verdict by
-`2026-07-28 23:40 UTC`, and has an absolute stop at `2026-07-29 11:40 UTC`. Gates A and B run in
-parallel; Gate C starts immediately after both pass. The detailed post-spike reserve is recorded in
+Prompt 3 activated at `2026-07-27 23:40 UTC` and completed live at `2026-07-28 06:59 UTC`, ahead of
+its target and absolute stop. The detailed post-spike route is recorded in
 [`CURRENT.md`](./.thoughts/decisions/CURRENT.md).
 
 ## Canonical facts to inherit
@@ -217,9 +217,9 @@ self-serve product action. Zero survivors is a valid research result.
 ## NoxLimit verification boundary (`KEEP AND VERIFY`, historical 2026-07-24 checkpoint)
 
 > **Current correction:** the Handle SDK, real pool, adapter, asset forwarding, expiry, refund,
-> and local inference experiment now pass. See the
-> [Prompt 3 memo](./.thoughts/verification/2026-07-28-noxlimit-critical-path.md); only its funded
-> combined live run remains.
+> and local inference experiment pass, and the combined live Sepolia path also passes. See the
+> [Prompt 3 memo](./.thoughts/verification/2026-07-28-noxlimit-critical-path.md) and public
+> `spike/nox/evidence/sepolia-gate-c.json`.
 
 > The independent audit returned `DROP`, but its decisive privacy claim—that every failed
 > evaluation must have an explicit public proof—is contradicted by released source: Handle SDK
@@ -227,7 +227,8 @@ self-serve product action. Zero survivors is a valid research result.
 > proof, and a contract-side Nox primitive skeleton compiles against released v0.2.4. The fixture
 > did not cover the Handle SDK, real pool, adapter, asset forwarding, expiry, or refund. Public
 > observers may still infer a failed evaluation from timing and non-action (each evaluation emits
-> a public `ViewerAdded` event), so the complete live boundary remains spike-required. Demand
+> a public `ViewerAdded` event), which is why the live boundary required the now-completed
+> Prompt 3 measurement. Demand
 > remains unvalidated and the privacy boundary remains narrow. See the
 > [independent audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md), the
 > [reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md), and
@@ -263,9 +264,9 @@ The worker must not receive the raw resting threshold before an eligible evaluat
 immutable order fields, fill worse than the committed limit, redirect proceeds, or steal
 collateral. It may delay, censor,
 or request irreversible publication for the wrong candidate and thereby force disclosure and,
-absent permissionless rescue, a terminal refund. If the browser must remain open, if the live
-viewer path forces failed evaluations public, if nonce-distinct candidate isolation fails, or if
-the proof cannot safely cause one real action, stop with the Prompt 3 verdict.
+absent permissionless rescue, a terminal refund. Gate C verified browser-off evaluation,
+private failed candidates, nonce-distinct isolation, and one safe proof-authorized real action;
+those properties remain regression requirements for the polished build.
 
 A decrypted `ready` boolean plus a generic slippage setting does not enforce the secret limit after
 Nox's asynchronous delay. The likely exact design must reveal a threshold-derived minimum output at

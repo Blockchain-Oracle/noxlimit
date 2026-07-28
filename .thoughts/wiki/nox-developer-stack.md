@@ -2,7 +2,8 @@
 
 Last verified: **2026-07-28**
 
-> **Current use:** NoxLimit Prompt 3 is `CONDITIONAL GO`; only the funded live run remains.
+> **Current use:** NoxLimit Prompt 3 is `GO`; the bounded recovered live Sepolia trace passed. The active
+> route is the user's polished-build checkpoint.
 > QuietRound references below are historical examples,
 > not product routing. Current authority is [`../decisions/CURRENT.md`](../decisions/CURRENT.md) and
 > the accepted technical contract is
@@ -135,8 +136,13 @@ polish, prove this sequence locally and then on Sepolia:
 `encryptInput → direct fromExternal → encrypted update → allowThis → Nox.allowPublicDecryption → async resolution → publicDecrypt proof → application proof verification → one-shot external action`
 
 For NoxLimit, the external action is one replay-safe, minimum-output-protected buy against the bound
-unmodified FPMM, followed by real ERC-1155 share forwarding. The active Gate A/B/C requirements are
-in [`../../prompts/03-critical-path-verification.md`](../../prompts/03-critical-path-verification.md).
+unmodified FPMM, followed by real ERC-1155 share forwarding. This sequence now passes locally and
+on Ethereum Sepolia; the final receipt is
+[`0xbae857…88caa`](https://eth-sepolia.blockscout.com/tx/0xbae85703bb59878fa63838e03c1bc57cdcdc46f6e2f74ac701b38fc85d088caa).
+The historical Gate A/B/C requirements remain reproducible in
+[`../../prompts/03-critical-path-verification.md`](../../prompts/03-critical-path-verification.md),
+and exact public evidence is in
+[`../../spike/nox/evidence/sepolia-gate-c.json`](../../spike/nox/evidence/sepolia-gate-c.json).
 
 ## Audit and security state
 

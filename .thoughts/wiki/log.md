@@ -4,6 +4,23 @@ This file is chronological history. Current workflow authority is
 [`../decisions/CURRENT.md`](../decisions/CURRENT.md); older statements such as “remain blocked”
 describe their dated checkpoint and do not route new work.
 
+## 2026-07-28 — live Gate C passed on Ethereum Sepolia
+
+- Completed the false/withheld/two-quiet privacy trace against the live Nox release with four
+  nonce-distinct candidates. The three earlier/withheld candidates remain private; only the
+  successful candidate became public.
+- Deployed the actual OrderBook at `0x5AfFd32C5e8Fc0B61d99a1a7AAD505cCC4947d28` and finalized one
+  real Nox-authorized FPMM buy in transaction
+  `0xbae85703bb59878fa63838e03c1bc57cdcdc46f6e2f74ac701b38fc85d088caa`.
+- Verified exact recipient share delivery, pool deltas, result consumption, zero adapter
+  collateral/shares/allowance, and replay rejection. Independent audits found all 33 recorded
+  transactions successful.
+- Preserved two operational interruptions honestly: an invalid 20M deployment gas override before
+  OrderBook broadcast, then insufficient mover gas reservation after publication. The validated
+  setup and same order were resumed; neither interruption was a contract or architecture failure.
+- Prompt 3 is `GO`. Objective BTC/USD resolution, polished UX, onboarding, and submission readiness
+  remain build work. The active route is the user's polished-build checkpoint.
+
 ## 2026-07-28 — Prompt 3 local critical path passed
 
 - Verified the released Nox path and combined `NoxLimitOrderBook` locally with 16 tests, including

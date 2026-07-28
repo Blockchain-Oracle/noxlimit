@@ -4,8 +4,9 @@
 **Decision owner:** User  
 **Status:** Adopted
 
-> **Checkpoint update (2026-07-28):** The user approved the canonical architecture and activated
-> the bounded Prompt 3 spike. See
+> **Checkpoint update (2026-07-28):** The user approved the canonical architecture, and the bounded
+> Prompt 3 spike later completed at `GO`. The active route is the user's polished-build checkpoint.
+> See
 > [`../verification/2026-07-28-opus-architecture-review-reconciliation.md`](../verification/2026-07-28-opus-architecture-review-reconciliation.md)
 > and [`CURRENT.md`](./CURRENT.md).
 
@@ -80,7 +81,8 @@ The repair is:
 
 ## Next Gate
 
-The architecture checkpoint passed on 2026-07-28. Run
-[`../../prompts/03-critical-path-verification.md`](../../prompts/03-critical-path-verification.md)
-as the disposable spike only. Do not start the polished/full implementation until its verdict is
-recorded and reviewed by the user.
+The architecture checkpoint and Prompt 3 passed on 2026-07-28. Stop for the user's polished-build
+checkpoint. If the user authorizes that phase, derive the implementation plan from the
+[canonical architecture](../architecture/2026-07-25-noxlimit-system-architecture.md) and
+[live critical-path evidence](../verification/2026-07-28-noxlimit-critical-path.md); do not rerun
+selection or Prompt 3.

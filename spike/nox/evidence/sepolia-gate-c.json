@@ -1,0 +1,156 @@
+{
+  "generatedAt": "2026-07-28T06:59:14.371Z",
+  "verdict": "GO",
+  "chainId": 11155111,
+  "blockNumber": "11366991",
+  "recovery": {
+    "setupReused": true,
+    "initialSetupTransactionsAllSucceeded": true,
+    "firstInterruption": "local runner supplied a 20,000,000 gas limit above Sepolia's 16,777,216 cap; no order-book transaction was broadcast",
+    "secondInterruption": "the independent mover lacked the explicit 3,000,000-gas upfront reservation; publication and proof recovery had already succeeded",
+    "contractOrArchitectureFailure": false,
+    "initialFinalizerTopUp": "0xa3ef7583e1ff12d51e77c510a925a4f08aace93565c0ee1439de01df3e99c897",
+    "recoveryTopUp": "0xacab1c45767ea7c2f6d7a889b3b44bc4c6b5df012293fc543032e823aaf79ef2",
+    "ownerGasFundingAfterTargetCreation": [
+      {
+        "transactionHash": "0xa3ef7583e1ff12d51e77c510a925a4f08aace93565c0ee1439de01df3e99c897",
+        "value": "5000000000000000"
+      },
+      {
+        "transactionHash": "0xacab1c45767ea7c2f6d7a889b3b44bc4c6b5df012293fc543032e823aaf79ef2",
+        "value": "1034886706645132"
+      }
+    ]
+  },
+  "roles": {
+    "deployerOwnerRecipientAndInitialLiquidityProvider": "0xA03D26E19ee4061A06a9a097010Bc06028Bba60A",
+    "fixedWorkerEvaluatorAndPublisher": "0x393b05351089dE5BBF6c85A21d72FC370bb19a09",
+    "independentControlOwnerQuoteMoverAndPermissionlessRescuer": "0xc160cE812cdDEe10CDe0BDE47a18396b2FcBbF6a"
+  },
+  "addresses": {
+    "noxCompute": "0x24Ef36Ec5b626D7DCD09a98F3083c2758F0F77bF",
+    "collateral": "0x61098B5813fD6859c08181f5be25f8443e04F953",
+    "conditionalTokens": "0x5f3198E99F74A9AaA82386e275395D57401C953D",
+    "fpmmFactory": "0xC3ab21B6339b4AAbA14915FC34794DbB12a8901C",
+    "fpmm": "0x1F27ab555663e7885fc0BABCc63a28539df717eB",
+    "orderBook": "0x5AfFd32C5e8Fc0B61d99a1a7AAD505cCC4947d28"
+  },
+  "questionId": "0x0cfcb09600f186d2c0b5c406ee4c6a2c5cd3672622772756a1ce10c964cf4fea",
+  "conditionId": "0xced292a6e32745b94cefd341c3a2fdec13fc582b8a1f5116253f2cf41e7ae75e",
+  "positionIds": [
+    "47851724305661218213542738712818665838278903185639596816704808856024688108531",
+    "18694681296674261032335780237064041439688274053645287907523667566341983900399"
+  ],
+  "parameters": {
+    "amountIn": "100000000000000000",
+    "q1": "198415803439706129",
+    "q2": "218963599791513448",
+    "q3": "265808343013365627",
+    "thresholdRevealedAtSuccess": "242385971402439537"
+  },
+  "publicInferenceTrace": {
+    "observerUsedOnlyPublicRpcData": true,
+    "sameQ1NormalizedEventShape": true,
+    "sameQ1NormalizedTimeoutShape": true,
+    "firstFalse": {
+      "transactionHash": "0x9c457fc5d500e81bb49fae7f7705730c0d905b126c9791e3945b74b464e14868",
+      "blockNumber": "11366950",
+      "orderId": "1",
+      "nonce": 1,
+      "quote": "198415803439706129",
+      "candidate": "0x0000aa36a72301a03fe57c8c9511e06baa48e452e1ba86189150152781662bd2"
+    },
+    "withheldEligible": {
+      "transactionHash": "0x3bd154723b8081b437a0c85cd7e5b39edd68be74830fead079d9a1047ff3beb1",
+      "blockNumber": "11366952",
+      "orderId": "2",
+      "nonce": 1,
+      "quote": "198415803439706129",
+      "candidate": "0x0000aa36a72301d24a5f4ba8b851cc15f08c7d9b8fae6f40ac799de0f6bbb2ab"
+    },
+    "secondFalse": {
+      "transactionHash": "0x8083040c76e5f382141870c354f50737667c6fd1dc57aebccb291e7c4886b17e",
+      "blockNumber": "11366962",
+      "orderId": "1",
+      "nonce": 2,
+      "quote": "218963599791513448",
+      "candidate": "0x0000aa36a723011f728c499df6d38392b3deb85c61a50bc50d2011b5ccddd586"
+    },
+    "success": {
+      "transactionHash": "0xcb52c6245c60637fb67cc1c083c4ca69f9b1081bc1c11b55f106cb690ae03149",
+      "blockNumber": "11366969",
+      "orderId": "1",
+      "nonce": 3,
+      "quote": "265808343013365627",
+      "candidate": "0x0000aa36a72301960877178f4e5c4d74d89cbbd1d595d3fa9125bbe67c7a5e91",
+      "publicationTransactionHash": "0x1e9a6a7717d3c14024a1deb9c57bf7fc3a322be2cdf7417926bbdc2f429e2a7d"
+    },
+    "interruptedRunnerAssertedPrivateResultsBeforePublication": {
+      "firstTargetCheck": "0",
+      "delayedEligibleControl": "198415803439706129",
+      "secondTargetCheck": "0",
+      "successfulTargetCheckExactMinOut": "242385971402439537"
+    },
+    "privateDecryptTimingsLostWhenTheProcessExitedBeforeFinalization": true,
+    "publicDecryptMs": 2574,
+    "earlierAndWithheldCandidatesStillPrivate": true,
+    "successfulCandidatePubliclyDecryptable": true,
+    "crossHandleProofRejected": true
+  },
+  "transactions": {
+    "workerFunding": "0x178e6dc33609ff71b45379b0a6df035d812e71084a3495b9aa289e05f2cde8b2",
+    "moverFunding": "0x127c3c03e59cb449cbe7f702a49ed26367d0bf22df9fbc0095ee5bc855d817b1",
+    "collateral": "0x0e268a5ffe69560f1bdfe6c39330480cb825e695267dc42f6dcfbd0fdc2e6f1c",
+    "conditionalTokens": "0x9b86f08242ce305332b3b1cbc9bd5903ef962d775fd794a7965de6b88f77fae5",
+    "fpmmFactory": "0xcb6b933bd8d9a8268afe85884c4025bc6c21de28e78fec90f1e257d47e6e5f58",
+    "prepareCondition": "0x2fd34c0940e816819fcf418beffe3b64cb82096e0d54bb521453b1410a6afa16",
+    "createMarket": "0x43fd6666bba6646b2312e108bc911cf950d01bcce77b0da684c0cce958532093",
+    "mintOwnerCollateral": "0x02bec5ed911eae3ab1aceadcf8f3be560ac44ffe9096ce616fba4bd13c05e3a1",
+    "mintMoverCollateral": "0x21e44cc24b7878244ee47b6d8b87233eb6feeddf6980dd40213d701bfa532e42",
+    "approveSeed": "0xcb09c678ca194422790ac307009c5c2fbb6e2a4c009bbee3073b025195812355",
+    "fundMarket": "0x0036a176936b0adb3dc0673e6b51973193923d96d779fe696fb2c25be4d9b29e",
+    "orderBook": "0x9b0163277b4664c4c89a5b4794c63872b9334ea46d4bab156046475d76c86480",
+    "approveTargetOrder": "0xaf88a3864c967e84fd25fc3ac38f2ab6f61c9e3ba94887ccbeffe958499fdb8e",
+    "approveControlOrder": "0x39b0a90bbc8baec1b345cbd5b222b1a037e4fb1d4d426e65581e8c911458de46",
+    "createTargetOrder": "0x54bf33195373a1fd62a254ba3120c800d814d49dbc8ba84f72d6087670043adc",
+    "createDelayedEligibleControl": "0x1a58b7751e5fa704cd14553a7086691c75dd489ae0e5092b003334e8645e6e7d",
+    "requestTargetEvaluation1": "0x9c457fc5d500e81bb49fae7f7705730c0d905b126c9791e3945b74b464e14868",
+    "requestControlEvaluation": "0x3bd154723b8081b437a0c85cd7e5b39edd68be74830fead079d9a1047ff3beb1",
+    "expireTargetEvaluation1": "0x819ce7a8d4f4ef20cb5b18b0bb849732aa2109b3fd8ccfa44d7900cf83af4ac6",
+    "expireControlEvaluation": "0xe59a53cf0fd77da81aaf032dae44f0396a529f21deebc35eacd71e04701a530b",
+    "cancelControl": "0xfce4be8b6784db50430008c5b07e96f56bc3c498292a0e86e4bae7c1d846d238",
+    "refundControl": "0x9eafb1c4d1d3e5b31be802895deb7721347edf32cd8eb63c697f5224dae66d02",
+    "approveFirstReserveMove": "0xeafe8d0d7c03396223fad871f0ad6113e0b4f3d7b4768e69c27a7485e5c0a3fc",
+    "firstReserveMove": "0xeacb399a3eb6b072192f905e5bb80980ee41e33fe85204c0a4acce64166bb624",
+    "requestTargetEvaluation2": "0x8083040c76e5f382141870c354f50737667c6fd1dc57aebccb291e7c4886b17e",
+    "expireTargetEvaluation2": "0x4dfd54464ca1d8df9a9e6b81976f97aa48d568bb1abb8442002779eb59429d2d",
+    "approveSecondReserveMove": "0x167534b3c3d55ed2520faf7d76e561863461f23513739b4804116f421abe45ae",
+    "secondReserveMove": "0xf880878214d3b71ad10fd0efd33d87f079745681e35fb13888a6d6ae5e93dc18",
+    "requestTargetEvaluation3": "0xcb52c6245c60637fb67cc1c083c4ca69f9b1081bc1c11b55f106cb690ae03149",
+    "requestPublication": "0x1e9a6a7717d3c14024a1deb9c57bf7fc3a322be2cdf7417926bbdc2f429e2a7d",
+    "initialFinalizerTopUp": "0xa3ef7583e1ff12d51e77c510a925a4f08aace93565c0ee1439de01df3e99c897",
+    "recoveryFinalizerTopUp": "0xacab1c45767ea7c2f6d7a889b3b44bc4c6b5df012293fc543032e823aaf79ef2",
+    "finalize": "0xbae85703bb59878fa63838e03c1bc57cdcdc46f6e2f74ac701b38fc85d088caa"
+  },
+  "result": {
+    "finalReceiptStatus": "success",
+    "finalizeGasUsed": "363532",
+    "outcomeTokensBought": "265808343013365627",
+    "outcomeTokensForwarded": "265808343013365627",
+    "recipientShareDelta": "265808343013365627",
+    "storedOutcomeTokens": "265808343013365627",
+    "adapterShares": "0",
+    "adapterCollateral": "0",
+    "fpmmAllowance": "0",
+    "poolCollateralDelta": "300000000000000",
+    "poolPositionDeltas": [
+      "99700000000000000",
+      "-166108343013365627"
+    ],
+    "replayRejected": true,
+    "ownerAuthorizationRequiredAfterTargetCreation": false,
+    "ownerKeyUsedOnlyForFinalizerGasTopUpsAfterTargetCreation": true,
+    "independentNonOwnerFinalizer": "0xc160cE812cdDEe10CDe0BDE47a18396b2FcBbF6a",
+    "objectiveResolutionIncluded": false
+  }
+}

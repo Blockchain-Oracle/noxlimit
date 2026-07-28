@@ -1,8 +1,9 @@
 # Prompt 3: Verify NoxLimit's Critical Path
 
-The user approved
-`.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md` on 2026-07-28. Run this only
-while `.thoughts/decisions/CURRENT.md` marks Prompt 3 active.
+> **Completed at `GO` on 2026-07-28. Do not rerun from the current workflow.** The user approved
+> `.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md`, and the resulting local/live
+> evidence is recorded in `.thoughts/verification/2026-07-28-noxlimit-critical-path.md`. Follow
+> `.thoughts/decisions/CURRENT.md`; the active route is the user's polished-build checkpoint.
 
 ## Reconcile before acting
 

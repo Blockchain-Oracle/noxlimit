@@ -1,5 +1,9 @@
 # NoxLimit Architecture Approval and Opus 5 Review Reconciliation
 
+> **Historical checkpoint:** This memo activated Prompt 3. Prompt 3 later completed at `GO`; follow
+> [`CURRENT.md`](../decisions/CURRENT.md) and the
+> [critical-path verification](./2026-07-28-noxlimit-critical-path.md) for active routing.
+
 **Date:** 2026-07-28
 **Gate:** Architecture review → bounded hackathon critical-path verification
 **Decision owner:** User
@@ -114,7 +118,7 @@ released behavior requires stronger disclosure.
 - Active spike:
   [`../../prompts/03-critical-path-verification.md`](../../prompts/03-critical-path-verification.md)
 
-## Next Authorized Action
+## Historical Next Action — Completed
 
-Run Prompt 3 only. Return `GO`, `CONDITIONAL GO`, or `NO-GO`, update current routing and evidence,
-and stop for the user's polished-build checkpoint.
+Prompt 3 was run, returned `GO`, and updated current routing and evidence. The repository is now
+stopped for the user's polished-build checkpoint.

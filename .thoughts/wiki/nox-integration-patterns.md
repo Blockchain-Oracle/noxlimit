@@ -2,8 +2,8 @@
 
 Last verified: **2026-07-23**
 
-> **Routing note (2026-07-28):** NoxLimit is selected and Prompt 3 is `CONDITIONAL GO`; only its
-> funded live run remains. QuietRound/Allo names
+> **Routing note (2026-07-28):** NoxLimit is selected and Prompt 3 is `GO`; the live Sepolia path
+> passed and the user build checkpoint is active. QuietRound/Allo names
 > below are historical integration examples only. Apply the released-API patterns to the
 > [`canonical NoxLimit architecture`](../architecture/2026-07-25-noxlimit-system-architecture.md)
 > and follow [`CURRENT.md`](../decisions/CURRENT.md).

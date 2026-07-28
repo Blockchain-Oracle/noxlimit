@@ -1,7 +1,7 @@
 # Nox repository map
 
-> **Routing note (2026-07-28):** NoxLimit is selected and Prompt 3 is `CONDITIONAL GO`; only its
-> funded live run remains. The table's
+> **Routing note (2026-07-28):** NoxLimit is selected and Prompt 3 is `GO`; the live Sepolia path
+> passed and the user build checkpoint is active. The table's
 > QuietRound column is retained as dated implementation history, not current product direction.
 > Follow [`CURRENT.md`](../decisions/CURRENT.md) and the
 > [`canonical architecture`](../architecture/2026-07-25-noxlimit-system-architecture.md).

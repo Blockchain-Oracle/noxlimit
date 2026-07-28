@@ -16,9 +16,9 @@ live/released behavior from forward-looking `main` code and from contradictory d
 - [Prompt 3 critical-path evidence](../verification/2026-07-28-noxlimit-critical-path.md)
 
 NoxLimit is selected, its canonical architecture was approved by the user on 2026-07-28, and the
-bounded Prompt 3 spike is at `CONDITIONAL GO`. Local Nox, real-market, and combined-adapter paths
-pass; a funded live Sepolia trace/fill remains, and no polished build is authorized. Some technical
-pages below retain QuietRound examples because they are
+bounded Prompt 3 spike is `GO`. Local Nox, real-market, and combined-adapter paths pass, and the
+bounded recovered live Sepolia trace/fill also passes. No polished build has started; the active route is the
+user's build checkpoint. Some technical pages below retain QuietRound examples because they are
 concrete illustrations of Nox integration constraints, not because the product is a backup or
 recommendation. Current authority remains
 [`CURRENT.md`](../decisions/CURRENT.md).

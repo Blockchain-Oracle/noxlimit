@@ -1,0 +1,35 @@
+{
+  "setupCompletedAt": "2026-07-28T06:42:00.000Z",
+  "checkpointReconstructedFromPublicReceipts": true,
+  "chainId": 11155111,
+  "roles": {
+    "deployer": "0xA03D26E19ee4061A06a9a097010Bc06028Bba60A",
+    "worker": "0x393b05351089dE5BBF6c85A21d72FC370bb19a09",
+    "mover": "0xc160cE812cdDEe10CDe0BDE47a18396b2FcBbF6a"
+  },
+  "addresses": {
+    "collateral": "0x61098B5813fD6859c08181f5be25f8443e04F953",
+    "conditionalTokens": "0x5f3198E99F74A9AaA82386e275395D57401C953D",
+    "fpmmFactory": "0xC3ab21B6339b4AAbA14915FC34794DbB12a8901C",
+    "fpmm": "0x1F27ab555663e7885fc0BABCc63a28539df717eB"
+  },
+  "questionId": "0x0cfcb09600f186d2c0b5c406ee4c6a2c5cd3672622772756a1ce10c964cf4fea",
+  "conditionId": "0xced292a6e32745b94cefd341c3a2fdec13fc582b8a1f5116253f2cf41e7ae75e",
+  "positionIds": [
+    "47851724305661218213542738712818665838278903185639596816704808856024688108531",
+    "18694681296674261032335780237064041439688274053645287907523667566341983900399"
+  ],
+  "transactions": {
+    "workerFunding": "0x178e6dc33609ff71b45379b0a6df035d812e71084a3495b9aa289e05f2cde8b2",
+    "moverFunding": "0x127c3c03e59cb449cbe7f702a49ed26367d0bf22df9fbc0095ee5bc855d817b1",
+    "collateral": "0x0e268a5ffe69560f1bdfe6c39330480cb825e695267dc42f6dcfbd0fdc2e6f1c",
+    "conditionalTokens": "0x9b86f08242ce305332b3b1cbc9bd5903ef962d775fd794a7965de6b88f77fae5",
+    "fpmmFactory": "0xcb6b933bd8d9a8268afe85884c4025bc6c21de28e78fec90f1e257d47e6e5f58",
+    "prepareCondition": "0x2fd34c0940e816819fcf418beffe3b64cb82096e0d54bb521453b1410a6afa16",
+    "createMarket": "0x43fd6666bba6646b2312e108bc911cf950d01bcce77b0da684c0cce958532093",
+    "mintOwnerCollateral": "0x02bec5ed911eae3ab1aceadcf8f3be560ac44ffe9096ce616fba4bd13c05e3a1",
+    "mintMoverCollateral": "0x21e44cc24b7878244ee47b6d8b87233eb6feeddf6980dd40213d701bfa532e42",
+    "approveSeed": "0xcb09c678ca194422790ac307009c5c2fbb6e2a4c009bbee3073b025195812355",
+    "fundMarket": "0x0036a176936b0adb3dc0673e6b51973193923d96d779fe696fb2c25be4d9b29e"
+  }
+}

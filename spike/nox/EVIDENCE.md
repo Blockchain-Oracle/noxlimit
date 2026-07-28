@@ -2,10 +2,10 @@
 
 Last run: **2026-07-28**
 
-This directory is a disposable verification spike. It proves the released local Nox path and a
-combined local Nox-authorized FPMM asset transition. It does **not** yet claim a live Ethereum
-Sepolia Gate C transaction; the final live privacy trace and fill are blocked only on funding the
-dedicated Sepolia-only signer.
+This directory is a disposable verification spike. It proves the released Nox path and a combined
+Nox-authorized FPMM asset transition locally and on live Ethereum Sepolia. Prompt 3 is **GO**. This
+is not a claim that the polished product, objective BTC/USD settlement, production security,
+organic liquidity, or submission path is complete.
 
 ## Exact toolchain
 
@@ -149,7 +149,7 @@ q3        2.658083430133656270 shares
   the eligible control and success candidate even before publication. The public learned the exact
   threshold only on successful publication. Product copy must preserve those caveats.
 
-## Live Ethereum Sepolia evidence obtained without a signer
+## Live preflight evidence obtained before the funded run
 
 At block `11,365,008` on chain `11155111`:
 
@@ -161,38 +161,95 @@ At block `11,365,008` on chain `11155111`:
 - a second run encrypted and successfully simulated live `validateInputProof` against the proxy in
   `1,660 ms`; the same proof with the wrong owner was rejected.
 
-These are live read/encryption/proof-validation facts, not a substitute for a mined application
-transaction, candidate computation, private decrypt, publication, or FPMM buy.
+These facts were useful preflight evidence but were not treated as a substitute for the later mined
+application trace.
 
-## Remaining Gate C blocker
+## Live Ethereum Sepolia Gate C — GO
 
-`scripts/gate-c-sepolia.mjs` is a fail-closed end-to-end runner. It clean-compiles the current
-sources, deploys real test collateral, the exact pinned CTF/FPMM factory and clone, and the actual
-OrderBook, then funds separate fixed-worker and independent mover/rescuer accounts. It performs a
-false evaluation, a same-quote eligible-but-withheld control, a second false evaluation after a
-real reserve-moving buy, and a successful third evaluation after another real buy. The worker
-publishes; the non-owner/non-worker rescuer obtains the public proof and finalizes. The runner
-asserts emitter-bound events, exact recipient/pool/adapter balance deltas, ACL isolation,
-cross-handle proof rejection, replay rejection, and zero adapter allowance/dust. It writes only
-public evidence to `evidence/sepolia-gate-c.json`; generated actor keys stay in gitignored
-mode-`0600` files.
+The bounded recovered Gate C trace finished at block `11,366,991` on chain `11155111`.
 
-`pnpm gate-c:prepare` created a dedicated mode-`0600`, gitignored deployer without printing its
-private key. Its public address is `0xA03D26E19ee4061A06a9a097010Bc06028Bba60A`. After a clean
-local compile, the current preflight stops before any onchain mutation with:
+| Role or contract | Address |
+|---|---|
+| owner / recipient / initial LP | `0xA03D26E19ee4061A06a9a097010Bc06028Bba60A` |
+| fixed worker | `0x393b05351089dE5BBF6c85A21d72FC370bb19a09` |
+| independent control owner / mover / rescuer | `0xc160cE812cdDEe10CDe0BDE47a18396b2FcBbF6a` |
+| live NoxCompute | `0x24Ef36Ec5b626D7DCD09a98F3083c2758F0F77bF` |
+| exact pinned FPMM clone | `0x1F27ab555663e7885fc0BABCc63a28539df717eB` |
+| actual NoxLimitOrderBook | `0x5AfFd32C5e8Fc0B61d99a1a7AAD505cCC4947d28` |
+
+The 0.1-collateral target order followed this real quote path:
 
 ```text
-deployer 0xA03D26E19ee4061A06a9a097010Bc06028Bba60A needs at least 0.03 Sepolia ETH; current balance is 0
+q1        0.198415803439706129 shares  -> private zero
+control   0.198415803439706129 shares  -> eligible but publication withheld
+q2        0.218963599791513448 shares  -> private zero
+threshold 0.242385971402439537 shares
+q3        0.265808343013365627 shares  -> eligible and published
 ```
 
-Fund that address with at least 0.03 **Sepolia ETH only** (the official Nox demo links the
-[Google Cloud Ethereum Sepolia faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia)),
-then run:
+The four candidate handles are nonce/order-distinct. At creation, none was public; the OrderBook
+retained admin access and, among external role accounts, only the worker had viewer access. The
+owner, mover, and unrelated account were not viewers. The first false, withheld-eligible control,
+and second false candidates remain non-public after finalization; only the nonce-3 success candidate
+became public. The same-`q1` false and withheld-eligible receipts have matching normalized
+evaluation and timeout shapes, while raw receipts are honestly not claimed identical. The
+interrupted runner asserted the
+worker's private plaintext results before proceeding; those private-decrypt timings were lost when
+the process later exited. The recovered public decrypt took `2,574 ms`, which is one observation,
+not an SLA.
 
-```bash
-pnpm gate-c:sepolia
-```
+The worker published in transaction
+[`0x1e9a6a…e2a7d`](https://eth-sepolia.blockscout.com/tx/0x1e9a6a7717d3c14024a1deb9c57bf7fc3a322be2cdf7417926bbdc2f429e2a7d).
+The independent non-owner/non-worker mover then signed
+[`finalize(1, 3, proof)`](https://eth-sepolia.blockscout.com/tx/0xbae85703bb59878fa63838e03c1bc57cdcdc46f6e2f74ac701b38fc85d088caa).
+That receipt emitted exactly one OrderBook `Filled` and one bound-pool `FPMMBuy`:
 
-The runner also supports an existing Sepolia-only key through gitignored `.env.local`, but no key
-needs to be shared. Until the dedicated address is funded and the runner succeeds, Gate C remains
-**Not verified**.
+- `minOut`: `242385971402439537`;
+- outcome shares bought and forwarded: `265808343013365627`;
+- recipient target-position delta: `265808343013365627`;
+- adapter target shares, collateral escrow, and FPMM allowance after fill: all zero;
+- pool collateral delta: `300000000000000`;
+- pool position deltas: `+99700000000000000` and `-166108343013365627`;
+- consumed result and terminal order status: `Filled`;
+- exact-calldata replay: rejected.
+
+Independent RPC audits verified all 33 recorded transaction receipts, historical/current Nox ACLs,
+event emitters and arguments, contract bindings, pre/post state deltas, and replay behavior.
+
+## Operational recovery disclosed
+
+The live evidence is one continuous onchain state history recovered across three local processes,
+not one uninterrupted CLI invocation:
+
+1. The first process mined the real collateral, Conditional Tokens, FPMM factory/clone, condition,
+   and 10/10 builder-seeded pool. It then supplied a `20,000,000` OrderBook deployment gas limit,
+   above Sepolia's `16,777,216` transaction cap, so no OrderBook transaction was broadcast.
+2. The checkpoint was reconstructed from the 11 successful public setup receipts and validated
+   against code, roles, condition/position IDs, market bindings, and untouched reserves. Viem's
+   live estimate then deployed the OrderBook using `2,970,180` gas.
+3. The second process completed every confidential evaluation, publication, and public proof
+   recovery, but the mover had insufficient ETH for Viem's padded explicit 3M-gas reservation.
+   After target-order creation, the owner/deployer key's only further use was to fund mover gas
+   twice (`0.005` ETH and
+   `0.001034886706645132` ETH); no owner protocol authorization was required. The same independent
+   mover then signed the terminal call, which used `363,532` gas.
+
+Neither interruption was a contract revert or architecture contradiction. No order, candidate,
+threshold, condition, or pool was recreated after it existed.
+
+## Public artifacts and reproduction
+
+- `evidence/sepolia-gate-c-setup.json` — public setup checkpoint and its 11 receipts;
+- `evidence/sepolia-gate-c.json` — bounded public trace, recovery disclosure, transactions, and
+  terminal assertions;
+- `scripts/gate-c-sepolia.mjs` — fresh runner with guarded checkpoint reuse, deployment gas
+  estimation, and a pre-funded finalizer gas reserve;
+- `scripts/finish-gate-c-sepolia.mjs` — one-shot, deployment-bound recovery/finalization provenance
+  preserved after the second interruption.
+
+The final public evidence JSON SHA-256 is
+`a3f15d7af84c797537a3909e74603ae3ff186405f6480a96f9f165bee12060a9`.
+
+The generated deployer, worker, and mover keys remain only in gitignored mode-`0600` files and were
+never printed or committed. Objective BTC/USD resolution is explicitly `false` in the live artifact
+and remains polished-build work.

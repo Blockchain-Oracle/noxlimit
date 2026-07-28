@@ -4,11 +4,10 @@
 
 This repository is the context and decision corpus for an iExec WTF Hackathon product.
 **NoxLimit is the selected product direction, its canonical architecture was approved by the user
-on 2026-07-28, and Prompt 3 is at `CONDITIONAL GO`.** Gates A/B and the combined adapter are
-verified locally; the final live Ethereum Sepolia privacy trace and fill wait on a funded signer.
-The dedicated gitignored signer exists at `0xA03D26E19ee4061A06a9a097010Bc06028Bba60A` with zero
-balance; fund it only with Sepolia ETH.
-No polished/full build has started. The canonical architecture is
+on 2026-07-28, and Prompt 3 is `GO`.** Gates A/B pass locally, and live Gate C completed the Nox
+privacy trace plus a real FPMM fill on Ethereum Sepolia. Public evidence is in
+`spike/nox/evidence/sepolia-gate-c.json`. No polished/full build has started; the repository is
+stopped at the user's build checkpoint. The canonical architecture is
 `.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md`; current authority is
 `.thoughts/decisions/CURRENT.md`. The historical independent `DROP` audit was superseded after its
 decisive demand, substitute, leakage, and sponsor-fit claims were rechecked.
@@ -36,8 +35,8 @@ decisive demand, substitute, leakage, and sponsor-fit claims were rechecked.
   liquidity, decentralized keepers, production economic modelling, or SLA distributions into
   pre-build vetoes; record them as post-hackathon hardening.
 - Maintain the canonical architecture as the shared technical contract. The user approved it and
-  advanced Prompt 3 on 2026-07-28. The local spike passed; run only the prepared live Gate C and do
-  not start the polished product build until its receipt passes and the user reviews the verdict.
+  advanced Prompt 3 on 2026-07-28. Local Gates A/B and live Gate C passed. Do not rerun discovery
+  or start the polished product build until the user explicitly advances the current checkpoint.
 
 ## Commands
 
@@ -47,7 +46,7 @@ There is no polished application build yet. The disposable verification code liv
 ```bash
 (cd spike/market && pnpm test && pnpm verify:provenance)
 (cd spike/nox && pnpm test)
-# After the dedicated address is funded with Sepolia ETH:
+# Historical/reproduction only; live Gate C already passed:
 (cd spike/nox && pnpm gate-c:sepolia)
 ```
 
@@ -99,8 +98,8 @@ silently guessing from memory.
 - `prompts/01a-hackathon-calibrated-noxlimit-reassessment.md` has run; its reaffirmation lives in
   `.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md`. Prompt 2 is waived because
   the user selected the direction. The user approved the architecture on 2026-07-28; Prompt 3 is
-  `CONDITIONAL GO`, with only its prepared live run after funding active. The original independent
-  audit is preserved as history. `prompts/00-docs-first-product-discovery.md` remains the discovery
+  `GO`, with the user's polished-build checkpoint now active. The original independent audit is
+  preserved as history. `prompts/00-docs-first-product-discovery.md` remains the discovery
   rerun; the older
   `01-refresh-reality-and-ideas.md` is historical.
 
@@ -111,8 +110,9 @@ silently guessing from memory.
 - Do not inherit the old QuietRound recommendation without rerunning selection.
 - Do not inherit SLA Lock or either `NONE SURVIVE` verdict without reading the dated evidence. The
   newest docs-first verdict is current research state, not a selected product.
-- Do not reopen product selection or call NoxLimit live-verified. The direction and local
-  architecture are established; only the combined live Sepolia feasibility remains conditional.
+- Do not reopen product selection or rerun Prompt 3. The bounded technical critical path is
+  live-verified; the polished product, objective settlement, fresh-user onboarding, and submission
+  path are not yet built or verified.
 - Do not create a second NoxLimit architecture. Update the canonical architecture when executable
   evidence requires a change.
 - Do not inherit the independent audit's claim that every failed evaluation needs an explicit

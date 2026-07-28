@@ -6,9 +6,12 @@ three winners, a live competitor scan, a revised product-idea menu, and prompts 
 agent can inherit without restarting discovery.
 
 **Current state:** **NoxLimit is selected, the user approved its canonical architecture on
-2026-07-28, and Prompt 3 is at `CONDITIONAL GO`.** The released Nox path, real FPMM lifecycle, and
-combined adapter pass locally; the final live Ethereum Sepolia privacy trace and fill wait on a
-0.03 Sepolia ETH top-up to the dedicated local signer. No polished/full implementation has started. The architecture that was previously
+2026-07-28, and Prompt 3 is `GO`.** The released Nox path, real FPMM lifecycle, and combined
+adapter pass locally, and the bounded recovered Gate C trace passes on Ethereum Sepolia. The final transaction
+[`0xbae857…88caa`](https://eth-sepolia.blockscout.com/tx/0xbae85703bb59878fa63838e03c1bc57cdcdc46f6e2f74ac701b38fc85d088caa)
+filled the encrypted order and forwarded real outcome shares with zero adapter dust or allowance.
+No polished/full implementation has started; the repository is stopped at the user's build
+checkpoint. The architecture that was previously
 scattered across several reports is now consolidated in the
 [canonical system architecture](./.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md).
 See the [current decision](./.thoughts/decisions/CURRENT.md) and
@@ -89,13 +92,13 @@ gift-card checkout. See the
 
 ## Selected direction: NoxLimit
 
-> **Current maturity: selected direction, `CONDITIONAL GO` technically.** The original independent
+> **Current maturity: selected direction, `GO` on the bounded technical gate.** The original independent
 > audit returned `DROP`; the reassessment showed that direct
 > demand is unknown rather than disproved, ordinary backends do not keep the raw threshold from
 > their operator, viewer-only decrypt avoids explicit public proofs for failed evaluations (the
 > contract-side Nox primitive subset compiles against released v0.2.4), and no formal
 > prediction-market prohibition was found. The local released-Nox, real-pool, and adapter paths
-> now execute; their combined live Sepolia trace/receipt is the remaining gate. The empty
+> execute, and the combined live Sepolia trace/fill now passes. The empty
 > `judging_criteria` API field does not erase
 > the track's explicit prediction-market originality warning. Timing and non-action may still leak
 > a failed-evaluation inference.
@@ -121,8 +124,10 @@ use the [product-reality brief](./.thoughts/research/2026-07-24-noxlimit-product
 [candidate hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md),
 [hackathon-calibrated reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md),
 and [reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
-as evidence. The only authorized technical work now is the prepared live Prompt 3 run. A polished
-build remains blocked until that receipt passes and the user reviews its verdict.
+as evidence. The public live record is
+[`spike/nox/evidence/sepolia-gate-c.json`](./spike/nox/evidence/sepolia-gate-c.json). The next action
+is the user's polished-build checkpoint; implementation should start only after that checkpoint and
+must inherit the canonical architecture rather than reopening discovery.
 
 ## Read order for an agent
 
