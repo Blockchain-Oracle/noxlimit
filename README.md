@@ -6,17 +6,22 @@ three winners, a live competitor scan, a revised product-idea menu, and prompts 
 agent can inherit without restarting discovery.
 
 **Current state:** **NoxLimit is selected, the user approved its canonical architecture on
-2026-07-28, and Prompt 3 is `GO`.** The released Nox path, real FPMM lifecycle, and combined
+2026-07-28, Prompt 3 is `GO`, and the user has authorized the polished build.** The released Nox path, real FPMM lifecycle, and combined
 adapter pass locally, and the bounded recovered Gate C trace passes on Ethereum Sepolia. The final transaction
 [`0xbae857…88caa`](https://eth-sepolia.blockscout.com/tx/0xbae85703bb59878fa63838e03c1bc57cdcdc46f6e2f74ac701b38fc85d088caa)
 filled the encrypted order and forwarded real outcome shares with zero adapter dust or allowance.
-No polished/full implementation has started; the repository is stopped at the user's build
-checkpoint. The architecture that was previously
+Prompt 4 is active. Product stories, the exhaustive screen/state map, and the designer handoff now
+form the UX contract, and the
+[research-backed implementation plan](./.thoughts/plans/2026-07-28-noxlimit-polished-product-plan.md)
+is complete and active. The architecture that was previously
 scattered across several reports is now consolidated in the
 [canonical system architecture](./.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md).
 It now includes the user's DeepBook-inspired terminal direction: real BTC/USD and ETH/USD market
 bundles, SOL/USD after a dedicated Pyth adapter test, 1h/4h/24h horizons, a truthful FPMM quote
 ladder, private order ticket, Orders, Positions, Activity, and a typed wallet-signed client path.
+Discovery uses the separately adopted hybrid: a TikTok-like vertical Market Stream on mobile and
+as the desktop terminal rail, followed by the complete analytical/review flow before signing. See
+the [Market Stream decision](./.thoughts/decisions/2026-07-28-noxlimit-market-stream-experience.md).
 See the [current decision](./.thoughts/decisions/CURRENT.md) and
 [adoption memo](./.thoughts/decisions/2026-07-25-noxlimit-direction-and-architecture-gate.md), plus
 the [audit/authority gates](./.thoughts/decisions/AUDIT-GATES.md). The original `DROP` audit remains
@@ -31,6 +36,9 @@ records the user's approval and first accepted corrections. The
 [product-surface/post-gate reconciliation](./.thoughts/verification/2026-07-28-noxlimit-product-surface-and-opus-reconciliation.md)
 record the latest refinement. The current executable result is in the
 [Prompt 3 critical-path memo](./.thoughts/verification/2026-07-28-noxlimit-critical-path.md).
+The shareable product/UX brief is [`DESIGNER_HANDOFF.md`](./DESIGNER_HANDOFF.md).
+The parallel AI-designer workflow is
+[`prompts/05-designer-agent-handoff.md`](./prompts/05-designer-agent-handoff.md).
 
 ## WTF in one minute
 
@@ -116,10 +124,12 @@ real onchain outcome-share AMM:
 application-bound proof → one-shot state transition → real minimum-output-protected outcome-share
 buy`
 
-The product is a direct trading terminal over curated BTC/USD and ETH/USD bundles plus SOL/USD
-after its Pyth adapter passes a live test, across 1h/4h/24h horizons. Each order has a public side
+The product combines a deterministic vertical Market Stream with a direct trading terminal over
+curated BTC/USD and ETH/USD bundles plus SOL/USD after its Pyth adapter passes a live test, across
+1h/4h/24h horizons. Each order has a public side
 and variable amount that becomes immutable at creation, plus a maximum price that is confidential
-while resting and revealed as a minimum-output bound when a successful finalization is submitted.
+while resting and becomes publicly retrievable as a minimum-output bound when public decryption is
+granted at `Publication pending`, before final pool execution.
 The central liquidity view is a real FPMM quote ladder, not a fake order book. A zero candidate
 tells the worker `quote < minOut`; an
 eligible candidate gives it the exact `minOut` even before publication. It must work after the
@@ -134,13 +144,12 @@ use the [product-reality brief](./.thoughts/research/2026-07-24-noxlimit-product
 [hackathon-calibrated reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md),
 and [reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
 as evidence. The public live record is
-[`spike/nox/evidence/sepolia-gate-c.json`](./spike/nox/evidence/sepolia-gate-c.json). The next action
-is the user's polished-build checkpoint; implementation should start only after that checkpoint and
-must inherit the canonical architecture rather than reopening discovery.
-The staged implementation handoff is
+[`spike/nox/evidence/sepolia-gate-c.json`](./spike/nox/evidence/sepolia-gate-c.json). The active
+implementation must inherit the canonical architecture rather than reopening discovery.
+The authorized implementation handoff is
 [`prompts/04-polished-product-implementation.md`](./prompts/04-polished-product-implementation.md);
-it is not authorized to run until the user advances the checkpoint. The user controls pacing;
-historical project clocks and submission dates are not implementation authority.
+the user advanced its checkpoint on 2026-07-28. The user controls pacing; historical project clocks
+and submission dates are not implementation authority.
 
 ## Read order for an agent
 
@@ -148,25 +157,27 @@ historical project clocks and submission dates are not implementation authority.
 2. [Selection and architecture-gate memo](./.thoughts/decisions/2026-07-25-noxlimit-direction-and-architecture-gate.md)
 3. [Audit and authority gates](./.thoughts/decisions/AUDIT-GATES.md)
 4. [Canonical NoxLimit architecture](./.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md)
-5. [Agent handoff](./AGENT_HANDOFF.md)
-6. [Prompt 3 critical-path evidence](./.thoughts/verification/2026-07-28-noxlimit-critical-path.md)
-7. [DeepBook patterns for NoxLimit](./.thoughts/research/2026-07-28-deepbook-patterns-for-noxlimit.md)
-8. [Product-surface and post-gate review reconciliation](./.thoughts/verification/2026-07-28-noxlimit-product-surface-and-opus-reconciliation.md)
-9. [Context/gate/architecture verification](./.thoughts/verification/2026-07-25-context-gate-and-architecture-audit.md)
-10. [NoxLimit reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
-11. [NoxLimit `DROP` reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
-12. [NoxLimit product-reality brief](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md)
-13. [NoxLimit candidate hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md)
-14. [NoxLimit independent audit — historical](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)
-15. [Docs-first correction](./.thoughts/research/2026-07-23-nox-docs-first-correction.md)
-16. [Docs-first product research](./.thoughts/research/2026-07-23-docs-first-product-research.md)
-17. [Docs-first candidate report](./.thoughts/ideas/2026-07-23-nox-docs-first-candidates.md)
-18. [Nox product/use-case map](./.thoughts/wiki/nox-use-case-map.md)
-19. [Winner and opportunity research](./.thoughts/research/2026-07-23-iexec-wtf-winners-and-opportunity-space.md)
-20. [Nox domain wiki](./.thoughts/wiki/index.md)
-21. [Known contradictions](./.thoughts/wiki/nox-known-contradictions.md)
-22. [Source manifest](./.thoughts/sources/source-manifest.md)
-23. [Prompt sequence](./prompts/README.md)
+5. [Market Stream experience decision](./.thoughts/decisions/2026-07-28-noxlimit-market-stream-experience.md)
+6. [Active implementation plan](./.thoughts/plans/2026-07-28-noxlimit-polished-product-plan.md)
+7. [Agent handoff](./AGENT_HANDOFF.md)
+8. [Prompt 3 critical-path evidence](./.thoughts/verification/2026-07-28-noxlimit-critical-path.md)
+9. [DeepBook patterns for NoxLimit](./.thoughts/research/2026-07-28-deepbook-patterns-for-noxlimit.md)
+10. [Product-surface and post-gate review reconciliation](./.thoughts/verification/2026-07-28-noxlimit-product-surface-and-opus-reconciliation.md)
+11. [Context/gate/architecture verification](./.thoughts/verification/2026-07-25-context-gate-and-architecture-audit.md)
+12. [NoxLimit reaffirmation recheck](./.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md)
+13. [NoxLimit `DROP` reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md)
+14. [NoxLimit product-reality brief](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md)
+15. [NoxLimit candidate hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md)
+16. [NoxLimit independent audit — historical](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)
+17. [Docs-first correction](./.thoughts/research/2026-07-23-nox-docs-first-correction.md)
+18. [Docs-first product research](./.thoughts/research/2026-07-23-docs-first-product-research.md)
+19. [Docs-first candidate report](./.thoughts/ideas/2026-07-23-nox-docs-first-candidates.md)
+20. [Nox product/use-case map](./.thoughts/wiki/nox-use-case-map.md)
+21. [Winner and opportunity research](./.thoughts/research/2026-07-23-iexec-wtf-winners-and-opportunity-space.md)
+22. [Nox domain wiki](./.thoughts/wiki/index.md)
+23. [Known contradictions](./.thoughts/wiki/nox-known-contradictions.md)
+24. [Source manifest](./.thoughts/sources/source-manifest.md)
+25. [Prompt sequence](./prompts/README.md)
 
 The historical idea files remain useful only as collision and rejection evidence. Their
 recommendations are superseded by the current decision record.

@@ -47,7 +47,7 @@ newer adopted decision.
 | Product direction | Is this the problem/product Abu wants to pursue? | Select, reshape, or graveyard a direction |
 | Hackathon critical path | Can the smallest honest, real Sepolia loop work? | User architecture review authorizes the bounded spike; its verdict authorizes or blocks the polished build |
 | Implementation readiness | Are architecture, scope, integrations, and tests concrete enough? | Authorize a phase or identify exact missing decisions |
-| Submission readiness | Does the judged path work and satisfy the published rules? | Authorize submission work |
+| Submission readiness | Does the complete normal user path work, and does its evidence satisfy the published rules? | Authorize submission work |
 | Production hardening | Is this safe and economic for real mainnet capital? | Create a post-hackathon backlog; do not retroactively veto the hackathon unless the same issue obviously breaks or loses assets in the demo |
 
 An audit must name the gate it is judging. It cannot turn lack of product-market-fit proof into a
@@ -81,7 +81,7 @@ Before the polished build can begin, the disposable spike must prove:
 
 Before submission, the built product must additionally prove:
 
-- a self-serve judge path without local setup, faucet hunt, or a second human;
+- a universal self-serve user path without local setup, faucet hunt, or a second human;
 - real funding/onboarding or an honestly documented product-provided testnet path;
 - a functional frontend and the current published submission requirements.
 

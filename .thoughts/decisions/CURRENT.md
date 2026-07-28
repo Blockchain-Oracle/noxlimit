@@ -1,18 +1,24 @@
 # Current Product Decision
 
-- **Status:** **NoxLimit is the user-selected product direction and its canonical architecture was
-  approved by the user on 2026-07-28. Prompt 3 is now `GO`: Gates A and B pass locally, and Gate C
-  completed the real Nox privacy trace plus one Nox-authorized FPMM fill on Ethereum Sepolia.**
-  Product selection is closed unless the user reopens it or new executable evidence invalidates a
-  load-bearing assumption. The repository is stopped at the user's polished-build checkpoint; no
-  polished/full implementation has started. The canonical architecture now includes the user's
-  DeepBook-inspired multi-asset terminal direction and the accepted post-gate Opus corrections.
+- **Status:** **NoxLimit is selected, its canonical architecture is user-approved, Prompt 3 is
+  `GO`, and the user explicitly authorized Codex to plan and build the polished product on
+  2026-07-28.** Gates A and B pass locally, and Gate C completed the real Nox privacy trace plus one
+  Nox-authorized FPMM fill on Ethereum Sepolia. Product selection is closed unless the user reopens
+  it or new executable evidence invalidates a load-bearing assumption. Prompt 4 is now the active
+  implementation contract. The product/user-flow package is being developed in parallel with the
+  build; it is not another approval checkpoint.
 - **Canonical architecture:**
   [`../architecture/2026-07-25-noxlimit-system-architecture.md`](../architecture/2026-07-25-noxlimit-system-architecture.md)
 - **Audit and authority policy:**
   [`AUDIT-GATES.md`](./AUDIT-GATES.md)
 - **Selection and architecture-gate decision:**
   [`2026-07-25-noxlimit-direction-and-architecture-gate.md`](./2026-07-25-noxlimit-direction-and-architecture-gate.md)
+- **Polished-build authorization:**
+  [`2026-07-28-noxlimit-polished-build-authorization.md`](./2026-07-28-noxlimit-polished-build-authorization.md)
+- **Market-discovery experience decision:**
+  [`2026-07-28-noxlimit-market-stream-experience.md`](./2026-07-28-noxlimit-market-stream-experience.md)
+- **Active implementation plan:**
+  [`../plans/2026-07-28-noxlimit-polished-product-plan.md`](../plans/2026-07-28-noxlimit-polished-product-plan.md)
 - **Context/gate/architecture verification:**
   [`../verification/2026-07-25-context-gate-and-architecture-audit.md`](../verification/2026-07-25-context-gate-and-architecture-audit.md)
 - **Architecture approval and Opus 5 review reconciliation:**
@@ -67,10 +73,27 @@
   [`2026-07-23-docs-first-product-research.md`](../research/2026-07-23-docs-first-product-research.md)
 - **Candidate report:**
   [`2026-07-23-nox-docs-first-candidates.md`](../ideas/2026-07-23-nox-docs-first-candidates.md)
-- **Product surface:** A direct trading terminal over curated, real Ethereum Sepolia market bundles:
-  BTC/USD and ETH/USD, plus SOL/USD after its Pyth resolver test; 1h/4h/24h horizons; real FPMM
-  quotes/liquidity; a wallet-encrypted private maximum-price order; durable Orders, Positions, and
-  Activity. It borrows DeepBook's terminal/API grammar, not its CLOB mechanics.
+- **Product surface:** A hybrid discovery-and-trading experience over curated, real Ethereum
+  Sepolia market bundles: a TikTok-like vertical **Market Stream** for fast one-market-at-a-time
+  discovery, followed by a DeepBook-like full terminal for analysis, private-order review, and
+  durable ownership. Mobile opens into the snap-scroll stream; desktop keeps the terminal primary
+  and turns its left rail into the stream. BTC/USD and ETH/USD, plus SOL/USD after its Pyth resolver
+  test; 1h/4h/24h horizons; real FPMM quotes/liquidity; a Nox-encrypted private maximum-price
+  order; durable Orders, Positions, and Activity. The stream is deterministic and contains only
+  verified/deployed/seeded bundles—no personalized `For You`, fake inventory, social mechanics, or
+  one-tap execution. DeepBook supplies terminal/API grammar, not CLOB mechanics.
+- **UX/design contract:** [`../../DESIGNER_HANDOFF.md`](../../DESIGNER_HANDOFF.md),
+  [`../stories/2026-07-28-noxlimit-product-stories.md`](../stories/2026-07-28-noxlimit-product-stories.md),
+  and [`../design/2026-07-28-noxlimit-product-surface-map.md`](../design/2026-07-28-noxlimit-product-surface-map.md).
+  The 30-second entry principle is the normal experience for every user, not an evaluation-only
+  shortcut. One wallet receives sponsored Sepolia ETH plus NoxLimit Test USDC through the product;
+  balances remain real, never auto-refill, and only explicit low-balance refills are capped by
+  target/cooldown/lifetime policy. The central terminal includes real oracle/outcome charts and a
+  real FPMM quote ladder over discrete rolling asset/horizon market bundles.
+- **Privacy UX boundary:** the initial limit travels directly from the browser to the official Nox
+  Gateway, bypassing the NoxLimit API/database/analytics. The evaluator sees zero on an ineligible
+  check and the exact derived limit on an eligible one. `Publication pending`, not `Filled`, marks
+  the point where the candidate is publicly retrievable.
 - **Post-gate Opus 5 verdict:** Exact `claude-opus-5`, max effort, exit 0, no fallback: `GO` remains
   valid and the reviewer recommends building after the adopted A1–A3/F1–F3 corrections. These
   prohibit owner abandonment after publication, preserve nonce/check coupling, expose exhausted
@@ -78,17 +101,22 @@
   semantics. The final consistency pass also requires onchain market-close enforcement, composite
   order references plus explicit refund, and non-cherry-pickable first-observation settlement.
   These do not reopen selection or Gate C.
-- **Next workflow:** Present the revised architecture and stop for the polished-build checkpoint.
-  If the user authorizes the build, derive the implementation plan from the canonical architecture
-  and live evidence; do not restart discovery or repeat Prompt 3.
+- **Next workflow:** Execute the existing implementation plan from the canonical architecture,
+  live evidence, product stories, surface map, and adopted Market Stream decision. Start with the
+  product contract/shared-domain foundation, then the Market Stream/terminal,
+  worker/indexer/catalog, and final live user path. Do not derive a competing plan, restart
+  discovery, or repeat Prompt 3.
 - **Prompt 4:** [`../../prompts/04-polished-product-implementation.md`](../../prompts/04-polished-product-implementation.md)
-  is the staged implementation handoff. It is not authorized to run until the user explicitly
-  advances the polished-build checkpoint.
+  is authorized and active as the implementation handoff.
+- **Prompt 5:** [`../../prompts/05-designer-agent-handoff.md`](../../prompts/05-designer-agent-handoff.md)
+  is the parallel designer-agent workflow. It requires three comparable visual directions and a
+  user choice before full design batches. Every direction must preserve the adopted mobile Market
+  Stream + desktop terminal hybrid; that interaction decision is not one of the alternatives.
 - **Prompt 2:** Waived by explicit user selection; do not run a new comparison loop.
 - **Prompt 3 state:** **GO — LIVE GATE C VERIFIED.** Final transaction
   `0xbae85703bb59878fa63838e03c1bc57cdcdc46f6e2f74ac701b38fc85d088caa`
-  succeeded at Sepolia block `11,366,991`. The only active workflow action is the user's
-  polished-build checkpoint.
+  succeeded at Sepolia block `11,366,991`. It is accepted evidence for the active polished build,
+  not a gate to rerun.
 - **Scheduling authority:** The user controls pacing and phase authorization. Historical project or
   spike dates do not route work, force deployment, or justify reducing correctness. Market trading
   close, market resolution, order expiry, and internal recovery timeouts are protocol concepts,
@@ -174,5 +202,5 @@ Nox production mainnet exists, but that is not a hackathon blocker because Ether
 required chain.
 
 `KEEP AND VERIFY` is the historical 2026-07-24 maturity label. The current status is
-`GO`: local and live executable evidence exists. The user checkpoint remains before polished
-implementation begins.
+`GO`: local and live executable evidence exists. The polished implementation is user-authorized
+and active.

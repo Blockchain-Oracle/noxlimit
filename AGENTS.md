@@ -4,15 +4,17 @@
 
 This repository is the context and decision corpus for an iExec WTF Hackathon product.
 **NoxLimit is the selected product direction, its canonical architecture was approved by the user
-on 2026-07-28, and Prompt 3 is `GO`.** Gates A/B pass locally, and live Gate C completed the Nox
+on 2026-07-28, Prompt 3 is `GO`, and the polished build is explicitly authorized.** Gates A/B pass locally, and live Gate C completed the Nox
 privacy trace plus a real FPMM fill on Ethereum Sepolia. Public evidence is in
-`spike/nox/evidence/sepolia-gate-c.json`. No polished/full build has started; the repository is
-stopped at the user's build checkpoint. The canonical architecture is
+`spike/nox/evidence/sepolia-gate-c.json`. Prompt 4 is active; the product stories, surface map, and
+designer handoff are implementation inputs. The canonical architecture is
 `.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md`; current authority is
 `.thoughts/decisions/CURRENT.md`. The historical independent `DROP` audit was superseded after its
 decisive demand, substitute, leakage, and sponsor-fit claims were rechecked. The architecture now
 includes the user-directed DeepBook-inspired BTC/ETH/verified-SOL terminal, 1h/4h/24h horizons,
-truthful FPMM quote ladder, typed client boundary, and accepted post-gate Opus corrections.
+truthful FPMM quote ladder, typed client boundary, and accepted post-gate Opus corrections. The
+user also adopted the hybrid discovery contract: a TikTok-like vertical Market Stream on mobile,
+the same stream as the desktop terminal rail, and full analysis/review before any order action.
 
 ## Working Rules
 
@@ -37,16 +39,17 @@ truthful FPMM quote ladder, typed client boundary, and accepted post-gate Opus c
   liquidity, decentralized keepers, production economic modelling, or SLA distributions into
   pre-build vetoes; record them as post-hackathon hardening.
 - Maintain the canonical architecture as the shared technical contract. The user approved it and
-  advanced Prompt 3 on 2026-07-28. Local Gates A/B and live Gate C passed. Do not rerun discovery
-  or start the polished product build until the user explicitly advances the current checkpoint.
+  advanced Prompt 3 on 2026-07-28. Local Gates A/B and live Gate C passed, and the user explicitly
+  advanced the polished-build checkpoint. Do not rerun discovery or Gate C; execute Prompt 4 and
+  reconcile executable changes back into the canonical contract.
 - The user controls pacing. Historical hackathon dates, spike clocks, and agent estimates do not
   force deployment, scope cuts, or correctness tradeoffs. Keep protocol times—trading close,
   resolution, order expiry, and recovery timeouts—distinct from project scheduling.
 
 ## Commands
 
-There is no polished application build yet. The disposable verification code lives in
-`spike/market` and `spike/nox`.
+The polished product build is active. Until its new packages land, the disposable verification
+code remains in `spike/market` and `spike/nox`.
 
 ```bash
 (cd spike/market && pnpm test && pnpm verify:provenance)
@@ -82,7 +85,9 @@ silently guessing from memory.
 
 - Every product claim has a source or is labeled as an inference.
 - Candidate ideas avoid previous-winner and visible-current-project collision.
-- The judge path has no local setup, faucet hunt, or second-wallet dependency.
+- Every user's first-use path has no local setup, faucet hunt, or second-wallet dependency.
+- Discovery uses only verified/deployed/seeded market cards, deterministic visible sorting, and no
+  one-tap execution, fake personalization, social mechanics, or silent loss of an edited ticket.
 - Nox is indispensable to a real state transition.
 - Any selected concept must verify:
   `encryptInput → fromExternal → confidential compute → persisted handle → allowPublicDecryption → public proof → one-shot real action`.
@@ -109,9 +114,10 @@ silently guessing from memory.
 - `prompts/01a-hackathon-calibrated-noxlimit-reassessment.md` has run; its reaffirmation lives in
   `.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md`. Prompt 2 is waived because
   the user selected the direction. The user approved the architecture on 2026-07-28; Prompt 3 is
-  `GO`, with the user's polished-build checkpoint now active. The original independent audit is
-  preserved as history. `prompts/04-polished-product-implementation.md` is the staged build handoff
-  and must not run until the user explicitly advances the checkpoint.
+  `GO`, and the user advanced the polished-build checkpoint. The original independent audit is
+  preserved as history. `prompts/04-polished-product-implementation.md` is the active build
+  handoff. `prompts/05-designer-agent-handoff.md` is the parallel design workflow and inherits the
+  adopted Market Stream + terminal decision; its visual directions cannot remove that hybrid.
   `prompts/00-docs-first-product-discovery.md` remains the discovery
   rerun; the older
   `01-refresh-reality-and-ideas.md` is historical.

@@ -5,18 +5,26 @@
 Use this repository to verify and then build the selected iExec WTF Hackathon direction.
 **NoxLimit is selected, the user approved its canonical architecture on 2026-07-28, and the bounded
 Prompt 3 spike is `GO`: all local paths pass, and live Gate C completed the Nox privacy trace plus
-one real Sepolia FPMM fill. The polished build has not started; work is stopped at the user's build
-checkpoint.** Do not reopen product
+one real Sepolia FPMM fill. The user explicitly authorized Codex to plan and build the polished
+product on 2026-07-28; Prompt 4 is active.** Do not reopen product
 discovery or inherit QuietRound, SLA Lock, Proofline, AgentDispute, or another historical idea unless the
 user explicitly reopens selection or executable evidence kills a load-bearing NoxLimit assumption.
 The user controls pacing: historical submission dates, spike clocks, and reviewer estimates do not
 route work or justify weakening the product. Protocol trading-close, resolution, order-expiry, and
 recovery times remain distinct technical concepts.
 
+The user has also adopted the UX structure: a TikTok-like vertical **Market Stream** for discovery
+on mobile, the same stream as the desktop terminal rail, and a DeepBook-like full terminal for
+analysis and explicit private-order review. This is not a social/personalized feed and cannot become
+one-tap execution. Only verified/deployed/seeded bundles appear live. The governing decision is
+[the Market Stream experience memo](./.thoughts/decisions/2026-07-28-noxlimit-market-stream-experience.md).
+
 Start with the [current decision](./.thoughts/decisions/CURRENT.md),
 [selection/adoption memo](./.thoughts/decisions/2026-07-25-noxlimit-direction-and-architecture-gate.md),
 [audit and authority gates](./.thoughts/decisions/AUDIT-GATES.md), and
-[canonical architecture](./.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md).
+[canonical architecture](./.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md), then
+the [Market Stream decision](./.thoughts/decisions/2026-07-28-noxlimit-market-stream-experience.md)
+and [active implementation plan](./.thoughts/plans/2026-07-28-noxlimit-polished-product-plan.md).
 The [independent `DROP` audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)
 is historical evidence. Its workflow verdict was superseded by the
 [reassessment](./.thoughts/verification/2026-07-24-noxlimit-drop-verdict-reassessment.md) and
@@ -31,9 +39,11 @@ reported and reconciled, not used to start a broad discovery loop automatically.
 prompt's existence as evidence that discovery is unfinished. The Prompt 1A reassessment has run
 and is retained as evidence.
 Prompt 2 is waived by the user's selection. The architecture checkpoint and Prompt 3 passed on
-2026-07-28. The DeepBook-informed product/API refinement and accepted post-gate Opus corrections
-are now part of the canonical architecture. The next workflow action is the user's polished-build
-checkpoint; `prompts/04-polished-product-implementation.md` is staged but not yet authorized.
+2026-07-28. The DeepBook-informed product/API refinement, adopted Market Stream discovery layer,
+and accepted post-gate Opus corrections are now part of the canonical architecture. Product
+stories, the product surface map, and the designer handoff are accepted implementation inputs. The
+next workflow action is execution of
+`prompts/04-polished-product-implementation.md`, which is authorized.
 
 An independent or future discovery pass should produce a cited evidence and candidate report with:
 
@@ -68,8 +78,7 @@ Research identified a narrower product-shaped hypothesis, **NoxLimit**: a public
 per order plus a confidential maximum-price buy limit against a real onchain outcome-share AMM.
 
 **Current outcome (2026-07-28): selected, architecture approved, local Gates A/B verified, live
-Gate C verified; technical critical-path maturity `GO`, awaiting the user's polished-build
-checkpoint.**
+Gate C verified; technical critical-path maturity `GO`, polished build authorized and active.**
 
 - Conditional execution is a shipping workflow, and public onchain order flow has structural
   pre-trade exposure. Direct evidence that prediction traders specifically value hiding only this
@@ -79,8 +88,9 @@ checkpoint.**
   gas-paying signing path.
 - Unchanged `FPMM.buy` takes plaintext `minOutcomeTokensToBuy`, so the limit-equivalent is public at
   fill. Released Nox `select + addViewer` and Handle SDK private `decrypt` now execute locally in
-  the success-only publication flow; failed evaluations do not inherently need explicit public
-  proofs, although public timing/non-action inference remains.
+  the observed honest-worker nonzero-only publication flow; failed evaluations do not inherently
+  need explicit public proofs, although the contract still handles a published zero safely and
+  public timing/non-action inference remains.
 - Prediction markets are “already seen,” creating a heavy originality burden, but are not banned.
   Creativity is tied with end-to-end/no-mock at the highest displayed weight.
 - `FPMM.buy` natively enforces atomic minimum output. Nox is live only on Ethereum Sepolia and
@@ -91,8 +101,8 @@ Prompt 2 is waived. Prompt 3 passes: 16 released-Nox/combined-adapter tests, 8 i
 market/math tests, and the bounded recovered live Sepolia trace. Final transaction
 [`0xbae857…88caa`](https://eth-sepolia.blockscout.com/tx/0xbae85703bb59878fa63838e03c1bc57cdcdc46f6e2f74ac701b38fc85d088caa)
 filled the order and forwarded exact outcome shares with zero adapter dust/allowance. Public
-evidence is in `spike/nox/evidence/sepolia-gate-c.json`. Do not start the polished product until the
-user advances the current checkpoint.
+evidence is in `spike/nox/evidence/sepolia-gate-c.json`. Do not rerun that gate; build the product
+from the canonical architecture and active Prompt 4.
 
 The post-gate exact Opus 5 review kept `GO` and recommended building, but found three canonical
 corrections now adopted: no owner abandonment after publication is requested; an evaluation
@@ -265,10 +275,11 @@ the order's limit is executable. The bounded spike uses unchanged Gnosis Conditi
 Seer outcomes with Uniswap V3 remain historical comparison evidence, not a competing branch.
 
 The historical verification slice used one curated BTC market. The approved product surface is a
-terminal over real BTC/USD and ETH/USD bundles plus SOL/USD after its Pyth adapter passes a live
-test, with 1h/4h/24h horizons. Every order has a public variable amount that becomes immutable when
-created, a public side, and one confidential buy limit, plus cancellation, expiry, refund,
-resolution, positions, and redemption. A genuine two-threshold stop-limit, hidden side or size,
+deterministic Market Stream feeding a terminal over real BTC/USD and ETH/USD bundles plus SOL/USD
+after its Pyth adapter passes a live test, with 1h/4h/24h horizons. Every order has a public variable
+amount that becomes immutable when created, a public side, and one confidential buy limit, plus
+cancellation, expiry, refund, resolution, positions, and redemption. A genuine two-threshold
+stop-limit, hidden side or size,
 sell orders, LP tooling, a CLOB, and a permissionless market factory remain out of first scope.
 
 The final action must remain:
@@ -305,6 +316,9 @@ reverts, the order is disclosed/refundable rather than confidential-pending agai
 - [Selection and architecture-gate memo](./.thoughts/decisions/2026-07-25-noxlimit-direction-and-architecture-gate.md)
 - [Audit and authority gates](./.thoughts/decisions/AUDIT-GATES.md)
 - [Canonical NoxLimit architecture](./.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md)
+- [Market Stream experience decision](./.thoughts/decisions/2026-07-28-noxlimit-market-stream-experience.md)
+- [Designer handoff](./DESIGNER_HANDOFF.md)
+- [Product surface map](./.thoughts/design/2026-07-28-noxlimit-product-surface-map.md)
 - [Prompt 3 critical-path evidence](./.thoughts/verification/2026-07-28-noxlimit-critical-path.md)
 - [Context/gate/architecture verification](./.thoughts/verification/2026-07-25-context-gate-and-architecture-audit.md)
 - [Architecture approval and Opus 5 review reconciliation](./.thoughts/verification/2026-07-28-opus-architecture-review-reconciliation.md)
@@ -330,4 +344,4 @@ reverts, the order is disclosed/refundable rather than confidential-pending agai
 - [Source manifest](./.thoughts/sources/source-manifest.md)
 
 Use [the staged prompts](./prompts/README.md) rather than improvising a broad “find an idea” prompt.
-Prompt 4 is the implementation handoff only after the user explicitly advances the checkpoint.
+Prompt 4 is now the active implementation handoff.
