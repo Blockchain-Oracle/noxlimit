@@ -14,11 +14,15 @@ live/released behavior from forward-looking `main` code and from contradictory d
 - [Current product decision](../decisions/CURRENT.md)
 - [Agent handoff](../../AGENT_HANDOFF.md)
 - [Prompt 3 critical-path evidence](../verification/2026-07-28-noxlimit-critical-path.md)
+- [DeepBook patterns for NoxLimit](../research/2026-07-28-deepbook-patterns-for-noxlimit.md)
+- [Product-surface and post-gate reconciliation](../verification/2026-07-28-noxlimit-product-surface-and-opus-reconciliation.md)
 
 NoxLimit is selected, its canonical architecture was approved by the user on 2026-07-28, and the
 bounded Prompt 3 spike is `GO`. Local Nox, real-market, and combined-adapter paths pass, and the
-bounded recovered live Sepolia trace/fill also passes. No polished build has started; the active route is the
-user's build checkpoint. Some technical pages below retain QuietRound examples because they are
+bounded recovered live Sepolia trace/fill also passes. The canonical architecture now includes the
+DeepBook-informed BTC/ETH/verified-SOL terminal and valid post-gate Opus corrections. No polished
+build has started; the active route is the user's build checkpoint. User direction—not historical
+project clocks—controls pacing. Some technical pages below retain QuietRound examples because they are
 concrete illustrations of Nox integration constraints, not because the product is a backup or
 recommendation. Current authority remains
 [`CURRENT.md`](../decisions/CURRENT.md).

@@ -4,6 +4,12 @@
 > [`CURRENT.md`](../decisions/CURRENT.md) and the
 > [critical-path verification](./2026-07-28-noxlimit-critical-path.md) for active routing.
 
+> **User scheduling correction (2026-07-28):** Finding 3 and the clock section below describe only
+> how the completed disposable spike was run. They are superseded as workflow advice. Do not pass
+> their project-clock pressure into a new review, force deployment, cut approved scope, or weaken
+> correctness because of them. The user controls pacing; protocol close/resolution/expiry/recovery
+> times remain separate technical requirements.
+
 **Date:** 2026-07-28
 **Gate:** Architecture review → bounded hackathon critical-path verification
 **Decision owner:** User
@@ -44,7 +50,7 @@ factually rejected, while its narrower executable-evidence concern is retained.
 |---:|---|---|---|---|
 | 1 | Fixed worker can kill an order by requesting publication and abandoning it | **Accept, narrowed** | The contract cannot know candidate plaintext before proof. After `allowPublicDecryption`, however, public proof retrieval is open and finalization can be permissionless. | Document worker-forced disclosure/terminal-refund power; restrict publication request to the worker, make finalization permissionless, and test third-party rescue plus full refund. |
 | 2 | Repeated evaluations bracket the private threshold | **Accept risk; reject deterministic two-sided claim** | `ViewerAdded` and evaluation timing are public, but silence is also consistent with worker/Gateway failure or censorship. A zero candidate gives the worker one inequality; an eligible candidate gives it exact `minOut` even before publication. A public observer gets only assumption-dependent evidence until success publishes exact `minOut`. | Add honest privacy copy and a public-only Gate A watcher with a delayed-eligible control and tick-width measurement. |
-| 3 | No remaining-time reckoning | **Accept** | The verified deadline is 2026-08-01 21:59 UTC and fewer than five days remained when Prompt 3 was activated. | Treat 24–36 hours as a ceiling, run Gates A/B in parallel, attempt C immediately after both pass, and stop early on contradiction. |
+| 3 | No remaining-time reckoning | **Historical only; superseded by the user's scheduling correction** | This observation affected the already-completed Prompt 3 sequence. | Retain as provenance only; it has no authority over product architecture, deployment, or current pacing. |
 | 4 | Wiki log/index contain stale active routing | **Accept** | `wiki/index.md` said no product was selected; `wiki/log.md` said work remained blocked. | Point both to current authority, add the 2026-07-28 checkpoint, and widen mandatory stale-language searches. |
 | 5 | Architecture uses a Nox API not covered by compile evidence | **Reject API mismatch; accept evidence gap** | Released v0.2.4 `Nox.publicDecrypt(euint256, proof)` exists and calls `INoxCompute.validateDecryptionProof`. The earlier skeleton exercised only the underlying verifier path. | Keep the correct typed API and require Prompt 3 to compile and execute that exact imported wrapper in the OrderBook path. |
 | 6 | Prior verification memo self-graded PASS without durable sub-review links | **Accept provenance weakness** | The memo summarizes three reviews but does not link their raw outputs. | Mark it as a historical checkpoint and make this external-review reconciliation the new exact-gate record. |
@@ -88,7 +94,10 @@ terminal/refundable rather than reopenable.
 This statement is a test target, not a passed product claim. Gate A must determine whether any
 released behavior requires stronger disclosure.
 
-## Time-Aware Execution
+## Historical Gate C Schedule — Superseded as Workflow Authority
+
+The bullets below are retained solely to explain the completed spike. They must not route current
+work or be treated as a recommendation for the polished build.
 
 - Prompt 3 activated at **2026-07-27 23:40 UTC**.
 - Target the verdict by **2026-07-28 23:40 UTC**; the absolute spike stop is

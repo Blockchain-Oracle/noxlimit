@@ -6,8 +6,11 @@
 
 > **Checkpoint update (2026-07-28):** The user approved the canonical architecture, and the bounded
 > Prompt 3 spike later completed at `GO`. The active route is the user's polished-build checkpoint.
+> The later DeepBook/post-gate review refined the product into a BTC/ETH/verified-SOL terminal with
+> multiple horizons; its user-controlled pacing rule supersedes the historical spike timebox below.
 > See
 > [`../verification/2026-07-28-opus-architecture-review-reconciliation.md`](../verification/2026-07-28-opus-architecture-review-reconciliation.md)
+> [`../verification/2026-07-28-noxlimit-product-surface-and-opus-reconciliation.md`](../verification/2026-07-28-noxlimit-product-surface-and-opus-reconciliation.md),
 > and [`CURRENT.md`](./CURRENT.md).
 
 ## Decision
@@ -16,11 +19,15 @@ NoxLimit is selected as the current WTF Hackathon product direction. Product dis
 adversarial comparison are closed unless the user explicitly reopens them or executable evidence
 contradicts a load-bearing assumption.
 
-The selected first product remains:
+The selected execution primitive remains:
 
-> One public fixed-size `YES` or `NO` buy against a real outcome-share AMM, with a confidential
-> minimum-output threshold while resting, browser-off Nox evaluation, one replay-safe atomic trade,
-> and real cancel, expiry, refund, resolution, and redemption behavior.
+> One public `YES` or `NO` buy whose variable amount becomes immutable at order creation, against a
+> real outcome-share AMM, with a confidential minimum-output threshold while resting, browser-off
+> Nox evaluation, one replay-safe atomic trade, and real cancel, expiry, refund, resolution, and
+> redemption behavior.
+
+The current product composes that primitive across curated BTC/USD and ETH/USD bundles plus
+SOL/USD after its Pyth adapter test, with 1h/4h/24h horizons and a DeepBook-inspired direct terminal.
 
 The selected disposable-spike substrate is the pinned, unmodified Gnosis Conditional Tokens +
 FPMM stack on Ethereum Sepolia. This is not an irreversible production-stack commitment.

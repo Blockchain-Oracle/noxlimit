@@ -53,6 +53,20 @@ newer adopted decision.
 An audit must name the gate it is judging. It cannot turn lack of product-market-fit proof into a
 smart-contract failure, or production-grade hardening into a hackathon selection veto.
 
+## Scheduling Is User-Controlled
+
+The user controls when a phase starts, stops, or ships. A historical hackathon date, reviewer
+estimate, timebox, or agent-generated clock cannot become workflow authority unless the user
+explicitly adopts it for the current phase.
+
+- Do not force deployment, cut an approved product surface, or weaken correctness because an old
+  memo mentions remaining hours or days.
+- Do not treat a missed agent estimate as a product or feasibility failure.
+- Do preserve protocol time semantics—market trading close, market resolution, user order expiry,
+  evaluation recovery, and publication recovery—and name them distinctly from project scheduling.
+- If the user asks for schedule-aware tradeoffs later, record that new instruction in `CURRENT.md`
+  before applying it.
+
 ## Current Hackathon Risk Standard
 
 Before the polished build can begin, the disposable spike must prove:
@@ -79,7 +93,8 @@ Record, but do not use as automatic pre-build vetoes:
 - organic liquidity;
 - production manipulation economics;
 - latency SLA distributions;
-- complete multi-market/order-type breadth.
+- permissionless market creation and richer order-type breadth. This does not demote the user's
+  approved curated BTC/ETH/verified-SOL catalog from the polished-product scope.
 
 ## Reviewer Disagreement
 
@@ -111,5 +126,6 @@ Every decision-changing edit must update together:
 
 Run a corpus search for stale active language such as `not selected`, `no product is selected`,
 `remain blocked`, `pending user architecture review`, `Prompt 3 blocked`, `Prompt 3 disallowed`,
-`do not design architecture`, and superseded verdict commands before committing. Dated history may
-retain old facts only when a prominent current-authority note prevents it from routing new work.
+`do not design architecture`, active `Clock`/deadline routing, and superseded verdict commands
+before committing. Dated history may retain old facts only when a prominent current-authority note
+prevents it from routing new work.

@@ -7,9 +7,11 @@ Use this repository to verify and then build the selected iExec WTF Hackathon di
 Prompt 3 spike is `GO`: all local paths pass, and live Gate C completed the Nox privacy trace plus
 one real Sepolia FPMM fill. The polished build has not started; work is stopped at the user's build
 checkpoint.** Do not reopen product
-discovery
-or inherit QuietRound, SLA Lock, Proofline, AgentDispute, or another historical idea unless the
+discovery or inherit QuietRound, SLA Lock, Proofline, AgentDispute, or another historical idea unless the
 user explicitly reopens selection or executable evidence kills a load-bearing NoxLimit assumption.
+The user controls pacing: historical submission dates, spike clocks, and reviewer estimates do not
+route work or justify weakening the product. Protocol trading-close, resolution, order-expiry, and
+recovery times remain distinct technical concepts.
 
 Start with the [current decision](./.thoughts/decisions/CURRENT.md),
 [selection/adoption memo](./.thoughts/decisions/2026-07-25-noxlimit-direction-and-architecture-gate.md),
@@ -23,11 +25,15 @@ is historical evidence. Its workflow verdict was superseded by the
 The corrected docs-first discovery is complete and historically returned `NONE SURVIVE`. It read the
 component-rendered use-case catalog, allowed standalone products, researched nine candidates across
 six major lanes, and adversarially killed its two initial near-survivors. Preserve both graveyards.
-Use [`prompts/00-docs-first-product-discovery.md`](./prompts/00-docs-first-product-discovery.md) for
-an independent rerun or when new evidence appears; do not treat its existence as evidence that
-discovery is still unfinished. The Prompt 1A reassessment has run and is retained as evidence.
+Keep [`prompts/00-docs-first-product-discovery.md`](./prompts/00-docs-first-product-discovery.md)
+dormant unless the user explicitly reopens product selection; new contradictory evidence should be
+reported and reconciled, not used to start a broad discovery loop automatically. Do not treat the
+prompt's existence as evidence that discovery is unfinished. The Prompt 1A reassessment has run
+and is retained as evidence.
 Prompt 2 is waived by the user's selection. The architecture checkpoint and Prompt 3 passed on
-2026-07-28; the next workflow action is the user's polished-build checkpoint.
+2026-07-28. The DeepBook-informed product/API refinement and accepted post-gate Opus corrections
+are now part of the canonical architecture. The next workflow action is the user's polished-build
+checkpoint; `prompts/04-polished-product-implementation.md` is staged but not yet authorized.
 
 An independent or future discovery pass should produce a cited evidence and candidate report with:
 
@@ -58,8 +64,8 @@ docs-first near-misses still failed and remain in the graveyard:
 
 Generic native prediction markets remain excluded because DarkOdds already built them.
 
-Research identified a narrower product-shaped hypothesis, **NoxLimit**: one fixed-size confidential
-buy limit against a real onchain outcome-share AMM.
+Research identified a narrower product-shaped hypothesis, **NoxLimit**: a public amount immutable
+per order plus a confidential maximum-price buy limit against a real onchain outcome-share AMM.
 
 **Current outcome (2026-07-28): selected, architecture approved, local Gates A/B verified, live
 Gate C verified; technical critical-path maturity `GO`, awaiting the user's polished-build
@@ -88,9 +94,23 @@ filled the order and forwarded exact outcome shares with zero adapter dust/allow
 evidence is in `spike/nox/evidence/sepolia-gate-c.json`. Do not start the polished product until the
 user advances the current checkpoint.
 
-Prompt 3 activated at `2026-07-27 23:40 UTC` and completed live at `2026-07-28 06:59 UTC`, ahead of
-its target and absolute stop. The detailed post-spike route is recorded in
-[`CURRENT.md`](./.thoughts/decisions/CURRENT.md).
+The post-gate exact Opus 5 review kept `GO` and recommended building, but found three canonical
+corrections now adopted: no owner abandonment after publication is requested; an evaluation
+timeout consumes the current nonce/check and the next request increments the nonce; and exhausted
+`Open` must be exposed as non-executable `MonitoringExhausted`. It also requires resolver-first
+per-market bundles, deterministic market identity, versioned catalog provenance, named API
+statuses, status-aware candidate reads, and stronger boundary/mutation tests. Follow the latest
+[reconciliation](./.thoughts/verification/2026-07-28-noxlimit-product-surface-and-opus-reconciliation.md),
+not raw reviewer wording.
+
+The final consistency pass also made three polished-build invariants explicit: bind and enforce
+market trading close in the OrderBook; use composite order references and expose separate
+cancel/expire/refund actions; and prove the selected Chainlink observation is the first one at or
+after resolution so a caller cannot cherry-pick a later price.
+
+The detailed post-spike route is recorded in [`CURRENT.md`](./.thoughts/decisions/CURRENT.md).
+Historical Gate C clock values remain in its dated evidence only and are not current planning
+authority.
 
 ## Canonical facts to inherit
 
@@ -103,11 +123,10 @@ its target and absolute stop. The detailed post-spike route is recorded in
 - A live end-to-end path without mock data.
 - Ethereum Sepolia deployment, a functional frontend, a public repository, complete documentation,
   `feedback.md`, an X post, and a four-minute maximum video.
-- Deadline verified 2026-07-24 from the DoraHacks API `end_time` epoch 1785621540 =
-  **2026-08-01 21:59:00 UTC** (`is_extended:false`). Required chain: **Ethereum Sepolia** (⭐⭐
-  criterion) — note prior winners were on Arbitrum Sepolia. Required: functional frontend, public
-  repo + docs, `feedback.md`, X post tagging `@iEx_ec`, ≤4-min demo video, end-to-end without mock
-  data.
+- Required chain: **Ethereum Sepolia** (⭐⭐ criterion) — note prior winners were on Arbitrum
+  Sepolia. Required: functional frontend, public repo + docs, `feedback.md`, X post tagging
+  `@iEx_ec`, ≤4-min demo video, end-to-end without mock data. Historical schedule evidence remains
+  in the dated research and does not route implementation.
 - On 2026-07-24 the API showed 13 BUIDLs and 80 hackers (81 at the evening recheck), but the
   submission list is private. DoraHacks challenged the default command-line request; a browser-like
   user agent reached the official API, and a rendered browser can inspect the page.
@@ -238,17 +257,19 @@ The audited product question was not “should we build a prediction market?” 
 
 > Does an active outcome-share trader have a valuable need for a confidential resting threshold,
 > and can the current released Nox stack turn that threshold into one safe, browser-off, real pool
-> trade before the deadline?
+> trade while the order rests and before its user-selected expiry?
 
 An onchain outcome-share pool holds redeemable `YES` and `NO` assets and quotes trades from its
 reserves. A prediction oracle resolves which asset wins; the AMM quote separately decides whether
 the order's limit is executable. The bounded spike uses unchanged Gnosis Conditional Tokens/FPMM.
 Seer outcomes with Uniswap V3 remain historical comparison evidence, not a competing branch.
 
-The smallest credible version is one curated BTC market, one public fixed order size and side, one
-confidential buy limit, cancellation, expiry, refund, resolution, and redemption. A genuine
-two-threshold stop-limit, hidden side or size, sell orders, multiple markets, LP tooling, a CLOB,
-and a market factory are out of first scope.
+The historical verification slice used one curated BTC market. The approved product surface is a
+terminal over real BTC/USD and ETH/USD bundles plus SOL/USD after its Pyth adapter passes a live
+test, with 1h/4h/24h horizons. Every order has a public variable amount that becomes immutable when
+created, a public side, and one confidential buy limit, plus cancellation, expiry, refund,
+resolution, positions, and redemption. A genuine two-threshold stop-limit, hidden side or size,
+sell orders, LP tooling, a CLOB, and a permissionless market factory remain out of first scope.
 
 The final action must remain:
 
@@ -287,6 +308,8 @@ reverts, the order is disclosed/refundable rather than confidential-pending agai
 - [Prompt 3 critical-path evidence](./.thoughts/verification/2026-07-28-noxlimit-critical-path.md)
 - [Context/gate/architecture verification](./.thoughts/verification/2026-07-25-context-gate-and-architecture-audit.md)
 - [Architecture approval and Opus 5 review reconciliation](./.thoughts/verification/2026-07-28-opus-architecture-review-reconciliation.md)
+- [DeepBook patterns for NoxLimit](./.thoughts/research/2026-07-28-deepbook-patterns-for-noxlimit.md)
+- [Product surface and post-gate review reconciliation](./.thoughts/verification/2026-07-28-noxlimit-product-surface-and-opus-reconciliation.md)
 - [NoxLimit product and market reality](./.thoughts/research/2026-07-24-noxlimit-product-and-market-reality.md)
 - [NoxLimit product hypothesis](./.thoughts/ideas/2026-07-24-noxlimit-product-hypothesis.md)
 - [Independent NoxLimit audit](./.thoughts/verification/2026-07-24-noxlimit-independent-audit.md)
@@ -307,3 +330,4 @@ reverts, the order is disclosed/refundable rather than confidential-pending agai
 - [Source manifest](./.thoughts/sources/source-manifest.md)
 
 Use [the staged prompts](./prompts/README.md) rather than improvising a broad “find an idea” prompt.
+Prompt 4 is the implementation handoff only after the user explicitly advances the checkpoint.

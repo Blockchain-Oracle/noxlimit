@@ -5,7 +5,8 @@
   completed the real Nox privacy trace plus one Nox-authorized FPMM fill on Ethereum Sepolia.**
   Product selection is closed unless the user reopens it or new executable evidence invalidates a
   load-bearing assumption. The repository is stopped at the user's polished-build checkpoint; no
-  polished/full implementation has started.
+  polished/full implementation has started. The canonical architecture now includes the user's
+  DeepBook-inspired multi-asset terminal direction and the accepted post-gate Opus corrections.
 - **Canonical architecture:**
   [`../architecture/2026-07-25-noxlimit-system-architecture.md`](../architecture/2026-07-25-noxlimit-system-architecture.md)
 - **Audit and authority policy:**
@@ -16,6 +17,10 @@
   [`../verification/2026-07-25-context-gate-and-architecture-audit.md`](../verification/2026-07-25-context-gate-and-architecture-audit.md)
 - **Architecture approval and Opus 5 review reconciliation:**
   [`../verification/2026-07-28-opus-architecture-review-reconciliation.md`](../verification/2026-07-28-opus-architecture-review-reconciliation.md)
+- **DeepBook product/API research:**
+  [`../research/2026-07-28-deepbook-patterns-for-noxlimit.md`](../research/2026-07-28-deepbook-patterns-for-noxlimit.md)
+- **Product-surface and post-gate review reconciliation:**
+  [`../verification/2026-07-28-noxlimit-product-surface-and-opus-reconciliation.md`](../verification/2026-07-28-noxlimit-product-surface-and-opus-reconciliation.md)
 - **Prompt 3 executable evidence and verdict:**
   [`../verification/2026-07-28-noxlimit-critical-path.md`](../verification/2026-07-28-noxlimit-critical-path.md)
 - **Public live trace:** [`../../spike/nox/evidence/sepolia-gate-c.json`](../../spike/nox/evidence/sepolia-gate-c.json)
@@ -62,21 +67,37 @@
   [`2026-07-23-docs-first-product-research.md`](../research/2026-07-23-docs-first-product-research.md)
 - **Candidate report:**
   [`2026-07-23-nox-docs-first-candidates.md`](../ideas/2026-07-23-nox-docs-first-candidates.md)
-- **Next workflow:** Present the `GO` evidence to the user and stop for the polished-build
-  checkpoint. If the user authorizes the build, derive the implementation plan from the canonical
-  architecture and the live evidence; do not restart discovery or repeat Prompt 3.
+- **Product surface:** A direct trading terminal over curated, real Ethereum Sepolia market bundles:
+  BTC/USD and ETH/USD, plus SOL/USD after its Pyth resolver test; 1h/4h/24h horizons; real FPMM
+  quotes/liquidity; a wallet-encrypted private maximum-price order; durable Orders, Positions, and
+  Activity. It borrows DeepBook's terminal/API grammar, not its CLOB mechanics.
+- **Post-gate Opus 5 verdict:** Exact `claude-opus-5`, max effort, exit 0, no fallback: `GO` remains
+  valid and the reviewer recommends building after the adopted A1–A3/F1–F3 corrections. These
+  prohibit owner abandonment after publication, preserve nonce/check coupling, expose exhausted
+  monitoring, require resolver-first versioned market bundles, and strengthen product tests/API
+  semantics. The final consistency pass also requires onchain market-close enforcement, composite
+  order references plus explicit refund, and non-cherry-pickable first-observation settlement.
+  These do not reopen selection or Gate C.
+- **Next workflow:** Present the revised architecture and stop for the polished-build checkpoint.
+  If the user authorizes the build, derive the implementation plan from the canonical architecture
+  and live evidence; do not restart discovery or repeat Prompt 3.
+- **Prompt 4:** [`../../prompts/04-polished-product-implementation.md`](../../prompts/04-polished-product-implementation.md)
+  is the staged implementation handoff. It is not authorized to run until the user explicitly
+  advances the polished-build checkpoint.
 - **Prompt 2:** Waived by explicit user selection; do not run a new comparison loop.
 - **Prompt 3 state:** **GO — LIVE GATE C VERIFIED.** Final transaction
   `0xbae85703bb59878fa63838e03c1bc57cdcdc46f6e2f74ac701b38fc85d088caa`
   succeeded at Sepolia block `11,366,991`. The only active workflow action is the user's
   polished-build checkpoint.
-- **Clock:** Activated **2026-07-27 23:40 UTC** and completed live at **2026-07-28 06:59 UTC**,
-  ahead of the target verdict and absolute spike stop. The post-gate build schedule starts only
-  after the user's checkpoint.
+- **Scheduling authority:** The user controls pacing and phase authorization. Historical project or
+  spike dates do not route work, force deployment, or justify reducing correctness. Market trading
+  close, market resolution, order expiry, and internal recovery timeouts are protocol concepts,
+  not project schedules.
 
-## Verified state at audit time (2026-07-24)
+## Historical verified state at audit time (2026-07-24; not active routing)
 
-- WTF deadline: **2026-08-01 21:59 UTC** (8 days out; re-verified through the official page/API).
+- The then-published WTF submission date was re-verified through the official page/API. It is
+  retained in the dated research, not as an active architecture or implementation constraint.
   DoraHacks challenged a default command-line request, but a browser-like user agent reached the
   official API. Required chain: **Ethereum Sepolia** (prior winners were on
   Arbitrum Sepolia — do not inherit their chain). 13 BUIDLs, 81 hackers at the evening recheck. The
@@ -136,7 +157,8 @@ remain crowded or user-excluded.
 > [reassessment](../verification/2026-07-24-noxlimit-drop-verdict-reassessment.md).
 
 NoxLimit is a narrower prediction-market order-management hypothesis, not a reversal of the generic
-market rejection. It proposes a fixed-size private buy limit against an unchanged real
+market rejection. It proposes a public amount that is immutable per order plus a private buy limit
+against an unchanged real
 outcome-share AMM:
 
 `encrypt threshold → persist → compare with the fixed-input quote sampled in the evaluation request

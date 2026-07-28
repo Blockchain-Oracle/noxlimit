@@ -9,13 +9,16 @@ Prompt 2 is waived by explicit user selection. The user approved the
 [canonical architecture](../.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md) on
 2026-07-28. Prompt 3 is complete at `GO`: its local Nox, market, and combined-adapter paths pass,
 and the bounded recovered Ethereum Sepolia trace/fill also passes. Do not restart discovery, comparison, or
-architecture from scratch. The active route is the user's polished-build checkpoint.
+architecture from scratch. The canonical architecture now includes the DeepBook-informed
+multi-asset terminal and post-gate Opus corrections. The active route is the user's polished-build
+checkpoint; Prompt 4 is staged but not authorized to run.
 
 1. [Run docs-first product discovery](./00-docs-first-product-discovery.md)
 2. [Independently audit NoxLimit and the full corpus](./01-independent-noxlimit-audit.md)
 3. [Reassess the disputed `DROP` under the hackathon standard](./01a-hackathon-calibrated-noxlimit-reassessment.md)
 4. [Adversarially choose one concept](./02-adversarial-selection.md)
 5. [Verify the chosen concept's critical path](./03-critical-path-verification.md)
+6. [Build the polished NoxLimit product](./04-polished-product-implementation.md)
 
 Prompt 0 is the canonical discovery prompt **only if the user and `CURRENT.md` explicitly reopen
 discovery**. It recovers the official Nox product catalog that `llms-full.txt` omits, distinguishes
@@ -48,4 +51,6 @@ incorrectly required an unchanged third-party integration even for a standalone 
 
 Run Prompt 2 only if the user explicitly reopens product comparison. Do not rerun Prompt 3, broad
 research, or architecture redesign. A polished product build begins only after the user's current
-checkpoint.
+checkpoint. When the user explicitly advances it, Prompt 4 is the active implementation handoff.
+Historical project clocks and submission dates are not implementation authority; user direction
+controls pacing.

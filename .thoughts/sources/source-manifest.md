@@ -132,6 +132,37 @@ architecture. These source trees must not be committed or republished.
 | Seer monorepo | [`af50f523`](https://github.com/seer-pm/demo/tree/af50f523e6fd47bfc150f66b1db712ebd81d68d5) | MIT; modern market and wrapped-outcome alternative |
 | Nox Handle SDK beta.13 networks | [`e552f6a`](https://github.com/iExec-Nox/nox-handle-sdk/blob/e552f6a3b297bc5bc7d1afd514c96e7b9b30cea0/src/config/networks.ts) | Released configuration used to recheck public network support |
 
+### DeepBook product and API references
+
+Added on 2026-07-28 to inform NoxLimit's terminal, market-catalog, position, quote, and typed-client
+surface. DeepBook mechanics are not a NoxLimit substrate.
+
+| Component | Exact source | License/relevance |
+|---|---|---|
+| Official DeepBook V3 + Predict | [`2e0a88f`](https://github.com/MystenLabs/deepbookv3/tree/2e0a88f860f1ae64f709b3978f1e206a91771169) | Apache-2.0; official Spot CLOB and current-mainline Predict architecture/SDK reference |
+| User's DeepBookie | [`4b9e918`](https://github.com/Blockchain-Oracle/deepbookie/tree/4b9e918204bb91fec2b206920aba96e9edc25059) | Product/UX/API inspection of the mature `feat/docs-site` worktree; no root license was found, so do not copy source without confirming permission |
+
+The official source is cloned under ignored `.thoughts/raw/deepbookv3/`. The user's existing local
+worktree was inspected in place and was not copied into this repository. Its older `feat/spot-tools`
+worktree documents an unfinished plan; it is not shipped-terminal evidence.
+
+### Multi-asset settlement references
+
+| Subject | Verified source/value |
+|---|---|
+| Chainlink BTC/USD, Ethereum Sepolia | `0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43` |
+| Chainlink ETH/USD, Ethereum Sepolia | `0x694AA1769357215DE4FAC081bf1f309aDC325306` |
+| Pyth contract, Ethereum Sepolia | `0xDd24F84d36BF92C65F92307595335bdFab5Bbd21` from [official EVM addresses](https://docs.pyth.network/price-feeds/core/contract-addresses/evm) |
+| Pyth SOL/USD feed ID | `0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d` |
+| Pyth BTC/USD feed ID | `0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43` |
+| Pyth ETH/USD feed ID | `0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace` |
+| Pyth historical update model | [Historical price data](https://docs.pyth.network/price-feeds/core/use-historical-price-data) and [timestamp API](https://docs.pyth.network/api-reference/pyth-core/hermes/timestamp_price_updates) |
+
+These addresses and feed IDs were verified from current official documentation on 2026-07-28 and
+must be rechecked before a final deployment. No official Chainlink SOL/USD feed on Ethereum Sepolia
+was found in the inspected official directory; absence is a dated search result, not a permanent
+claim.
+
 ### Current primary documentation
 
 | Subject | Source |
@@ -191,6 +222,9 @@ history.
 | Uniswap developer documentation | `/websites/developers_uniswap` |
 | Current iExec/DataProtector documentation | `/websites/iex_ec` |
 | iExec documentation repository | `/iexecblockchaincomputing/documentation` |
+| DeepBook V3 | `/mystenlabs/deepbookv3` |
+| Chainlink documentation | `/smartcontractkit/documentation` |
+| Pyth Network documentation | `/websites/pyth_network` |
 
 ## Evidence precedence
 

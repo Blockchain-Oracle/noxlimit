@@ -4,6 +4,22 @@ This file is chronological history. Current workflow authority is
 [`../decisions/CURRENT.md`](../decisions/CURRENT.md); older statements such as “remain blocked”
 describe their dated checkpoint and do not route new work.
 
+## 2026-07-28 — DeepBook-informed product architecture adopted
+
+- Kept NoxLimit's verified FPMM/confidential-order mechanic and borrowed only truthful DeepBook
+  product patterns: direct terminal, market catalog, quote preview, typed unsigned-transaction
+  client, durable receipts, Orders, Positions, and Activity.
+- Expanded the intended catalog from a BTC-only verification slice to BTC/USD and ETH/USD plus
+  SOL/USD after a dedicated Pyth settlement-adapter test, with 1h/4h/24h horizons.
+- Kept one immutable single-market OrderBook per deployed bundle and prohibited fake CLOB depth;
+  the liquidity view is a real FPMM quote ladder.
+- Adopted post-gate Opus corrections for an explicit check budget, `MonitoringExhausted`,
+  status-aware candidate reads, resolver-first deployment, stronger mutation/error tests, truthful
+  recovery provenance, and final cadence guards.
+- Recorded the user's scheduling correction: historical hackathon/spike clocks do not route work,
+  force deployment, or justify lowering correctness. Prompt 4 is staged but awaits explicit build
+  authorization.
+
 ## 2026-07-28 — live Gate C passed on Ethereum Sepolia
 
 - Completed the false/withheld/two-quiet privacy trace against the live Nox release with four

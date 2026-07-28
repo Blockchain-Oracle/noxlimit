@@ -10,7 +10,9 @@ privacy trace plus a real FPMM fill on Ethereum Sepolia. Public evidence is in
 stopped at the user's build checkpoint. The canonical architecture is
 `.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md`; current authority is
 `.thoughts/decisions/CURRENT.md`. The historical independent `DROP` audit was superseded after its
-decisive demand, substitute, leakage, and sponsor-fit claims were rechecked.
+decisive demand, substitute, leakage, and sponsor-fit claims were rechecked. The architecture now
+includes the user-directed DeepBook-inspired BTC/ETH/verified-SOL terminal, 1h/4h/24h horizons,
+truthful FPMM quote ladder, typed client boundary, and accepted post-gate Opus corrections.
 
 ## Working Rules
 
@@ -37,6 +39,9 @@ decisive demand, substitute, leakage, and sponsor-fit claims were rechecked.
 - Maintain the canonical architecture as the shared technical contract. The user approved it and
   advanced Prompt 3 on 2026-07-28. Local Gates A/B and live Gate C passed. Do not rerun discovery
   or start the polished product build until the user explicitly advances the current checkpoint.
+- The user controls pacing. Historical hackathon dates, spike clocks, and agent estimates do not
+  force deployment, scope cuts, or correctness tradeoffs. Keep protocol times—trading close,
+  resolution, order expiry, and recovery timeouts—distinct from project scheduling.
 
 ## Commands
 
@@ -81,6 +86,12 @@ silently guessing from memory.
 - Nox is indispensable to a real state transition.
 - Any selected concept must verify:
   `encryptInput → fromExternal → confidential compute → persisted handle → allowPublicDecryption → public proof → one-shot real action`.
+- Preserve the adopted post-gate corrections: no owner abandonment from `PublicationPending`;
+  nonce/check coupling across timeouts; explicit `MonitoringExhausted`; resolver-first immutable
+  market bundles; deterministic market IDs; named API statuses; and product-strength boundary and
+  mutation tests. The polished contract/client must also enforce market close onchain, use
+  composite order references with an explicit refund action, and prevent settlement-round
+  cherry-picking.
 
 ## Context Workflow
 
@@ -99,7 +110,9 @@ silently guessing from memory.
   `.thoughts/verification/2026-07-24-noxlimit-reaudit-reaffirmation.md`. Prompt 2 is waived because
   the user selected the direction. The user approved the architecture on 2026-07-28; Prompt 3 is
   `GO`, with the user's polished-build checkpoint now active. The original independent audit is
-  preserved as history. `prompts/00-docs-first-product-discovery.md` remains the discovery
+  preserved as history. `prompts/04-polished-product-implementation.md` is the staged build handoff
+  and must not run until the user explicitly advances the checkpoint.
+  `prompts/00-docs-first-product-discovery.md` remains the discovery
   rerun; the older
   `01-refresh-reality-and-ideas.md` is historical.
 
