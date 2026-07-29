@@ -53,6 +53,7 @@ test("funds one wallet, creates one private order, closes, and reopens after a w
   // Node worker until the private maximum is deliberately entered into the in-memory form.
   delete process.env.LIVE_SEPOLIA_PRIVATE_KEY;
   delete process.env.LIVE_SEPOLIA_PRIVATE_MAXIMUM;
+  delete process.env.LIVE_SEPOLIA_RPC_URL;
   await assertEvidenceTargetFresh(settings);
   const publicClient = createPublicClient({ chain: sepolia, transport: http(settings.rpcUrl) });
   const [health, market] = await Promise.all([

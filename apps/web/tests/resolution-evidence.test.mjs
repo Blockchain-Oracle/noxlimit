@@ -23,10 +23,18 @@ function clientFixture({
   settlementObservedAt = 0n,
   settlementRoundId = 0n,
   predecessorRoundId = 0n,
+  safeBlockNumber = 123n,
+  safeBlockHash = `0x${"ab".repeat(32)}`,
+  blockRequests = [],
+  contractBlockNumbers = [],
 }) {
   return {
-    async getBlock() { return { timestamp: now }; },
-    async readContract({ address, functionName, args = [] }) {
+    async getBlock(input) {
+      blockRequests.push(input);
+      return { timestamp: now, number: safeBlockNumber, hash: safeBlockHash };
+    },
+    async readContract({ address, functionName, args = [], blockNumber }) {
+      contractBlockNumbers.push(blockNumber);
       if (address === RESOLVER) {
         if (functionName === "resolved") return resolved;
         if (functionName === "resolvedYes") return resolvedYes;
@@ -45,13 +53,13 @@ function clientFixture({
       if (address === FEED) {
         if (functionName === "latestRoundData") {
           const round = rounds.get(latestRoundId);
-          return [latestRoundId, round.answer, 0n, round.updatedAt, latestRoundId];
+          return [latestRoundId, round.answer, 0n, round.updatedAt, round.answeredInRound ?? latestRoundId];
         }
         if (functionName === "getRoundData") {
           const id = args[0];
           const round = rounds.get(id);
           if (!round) throw new Error(`missing round ${id}`);
-          return [id, round.answer, 0n, round.updatedAt, id];
+          return [round.returnedId ?? id, round.answer, 0n, round.updatedAt, round.answeredInRound ?? id];
         }
         if (functionName === "phaseAggregators") return PRIOR_AGGREGATOR;
       }
@@ -72,11 +80,17 @@ test("selects the first same-phase Chainlink observation at or after resolution"
     [r11, { answer: 65_100_00000000n, updatedAt: 105n }],
     [r12, { answer: 65_200_00000000n, updatedAt: 115n }],
   ]);
-  const evidence = await findResolutionEvidence({ client: clientFixture({ latestRoundId: r12, rounds }), resolver: RESOLVER, strikeUsd: "65000", oracleSource: "Chainlink" });
+  const blockRequests = [], contractBlockNumbers = [];
+  const evidence = await findResolutionEvidence({ client: clientFixture({ latestRoundId: r12, rounds, blockRequests, contractBlockNumbers }), resolver: RESOLVER, strikeUsd: "65000", oracleSource: "Chainlink" });
   assert.equal(evidence.state, "READY");
   assert.equal(evidence.selectedRoundId, r11);
   assert.equal(evidence.predecessorRoundId, r10);
   assert.equal(evidence.expectedWinner, "YES");
+  assert.equal(evidence.safeBlockNumber, 123n);
+  assert.equal(evidence.safeBlockHash, `0x${"ab".repeat(32)}`);
+  assert.deepEqual(blockRequests, [{ blockTag: "safe" }]);
+  assert.ok(contractBlockNumbers.length > 0);
+  assert.ok(contractBlockNumbers.every((number) => number === 123n));
 });
 
 test("selects the terminal prior-phase round when phase round one crosses resolution", async () => {
@@ -124,4 +138,54 @@ test("compares strike and answer with exact feed-decimal integer precision", asy
   assert.equal(evidence.state, "READY");
   assert.equal(evidence.settlementPriceUsd, "65000.12345677");
   assert.equal(evidence.expectedWinner, "NO");
+});
+
+test("does not use Chainlink's deprecated answeredInRound field as a validity gate", async () => {
+  const predecessor = composite(2, 10), selected = composite(2, 11);
+  const rounds = new Map([
+    [predecessor, { answer: 64_900_00000000n, updatedAt: 99n, answeredInRound: 0n }],
+    [selected, { answer: 65_100_00000000n, updatedAt: 101n, answeredInRound: 0n }],
+  ]);
+  const evidence = await findResolutionEvidence({ client: clientFixture({ latestRoundId: selected, rounds }), resolver: RESOLVER, strikeUsd: "65000", oracleSource: "Chainlink" });
+  assert.equal(evidence.state, "READY");
+  assert.equal(evidence.selectedRoundId, selected);
+});
+
+test("fails closed when the safe block has no canonical identity", async () => {
+  const evidence = await findResolutionEvidence({ client: clientFixture({ safeBlockNumber: null, safeBlockHash: null }), resolver: RESOLVER, strikeUsd: "65000", oracleSource: "Chainlink" });
+  assert.equal(evidence.state, "UNAVAILABLE");
+});
+
+test("propagates safe-block RPC failure without falling back to a torn latest-head scan", async () => {
+  const client = { async getBlock() { throw new Error("safe block unavailable"); } };
+  await assert.rejects(
+    () => findResolutionEvidence({ client, resolver: RESOLVER, strikeUsd: "65000", oracleSource: "Chainlink" }),
+    /safe block unavailable/,
+  );
+});
+
+test("resolved evidence reads every resolver field at the same safe block", async () => {
+  const selected = composite(2, 11), predecessor = composite(2, 10);
+  const contractBlockNumbers = [];
+  const evidence = await findResolutionEvidence({ client: clientFixture({ resolved: true, resolvedYes: true, settlementPriceWad: 65_100n * 10n ** 18n, settlementObservedAt: 105n, settlementRoundId: selected, predecessorRoundId: predecessor, contractBlockNumbers }), resolver: RESOLVER, strikeUsd: "65000", oracleSource: "Chainlink" });
+  assert.equal(evidence.state, "RESOLVED");
+  assert.ok(contractBlockNumbers.every((number) => number === 123n));
+});
+
+test("still rejects wrong returned IDs, nonpositive answers, and zero timestamps", async () => {
+  const predecessor = composite(2, 10), selected = composite(2, 11);
+  for (const invalidSelected of [
+    { returnedId: selected + 1n, answer: 65_100_00000000n, updatedAt: 101n },
+    { answer: 0n, updatedAt: 101n },
+    { answer: 65_100_00000000n, updatedAt: 0n },
+  ]) {
+    const rounds = new Map([
+      [predecessor, { answer: 64_900_00000000n, updatedAt: 99n }],
+      [selected, invalidSelected],
+    ]);
+    await assert.rejects(
+      () => findResolutionEvidence({ client: clientFixture({ latestRoundId: selected, rounds }), resolver: RESOLVER, strikeUsd: "65000", oracleSource: "Chainlink" }),
+      /not a valid positive observation/,
+    );
+  }
 });

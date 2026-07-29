@@ -106,11 +106,11 @@ describe("direct market reads", () => {
     const record = makeMarketRecord({ startsAt: "100", tradingClosesAt: "400", resolvesAt: "3700" });
     const phase = 1n << 64n;
     const rounds = new Map<bigint, readonly [bigint, bigint, bigint, bigint, bigint]>([
-      [phase + 5n, [phase + 5n, 65_005_00000000n, 0n, 199n, phase + 5n]],
-      [phase + 4n, [phase + 4n, 65_004_00000000n, 0n, 180n, phase + 4n]],
-      [phase + 3n, [phase + 3n, 65_003_00000000n, 0n, 160n, phase + 3n]],
-      [phase + 2n, [phase + 2n, 65_002_00000000n, 0n, 140n, phase + 2n]],
-      [phase + 1n, [phase + 1n, 65_001_00000000n, 0n, 120n, phase + 1n]],
+      [phase + 5n, [phase + 5n, 65_005_00000000n, 0n, 199n, 0n]],
+      [phase + 4n, [phase + 4n, 65_004_00000000n, 0n, 180n, 0n]],
+      [phase + 3n, [phase + 3n, 65_003_00000000n, 0n, 160n, 0n]],
+      [phase + 2n, [phase + 2n, 65_002_00000000n, 0n, 140n, 0n]],
+      [phase + 1n, [phase + 1n, 65_001_00000000n, 0n, 120n, 0n]],
     ]);
     const client = {
       getBlockNumber: vi.fn(async () => 106n),
@@ -172,7 +172,7 @@ describe("direct market reads", () => {
       getBlock: vi.fn(async () => ({ number: 100n, timestamp: 200n })),
       readContract: vi.fn(async (input: { address: string; functionName: string; args?: readonly unknown[] }) => {
         if (input.address === priorAggregator && input.functionName === "latestRoundData") {
-          return [3n, 64_903_00000000n, 0n, 120n, 3n] as const;
+          return [3n, 64_903_00000000n, 0n, 120n, 0n] as const;
         }
         if (input.functionName === "latestRoundData") return rounds.get(secondPhase + 2n);
         if (input.functionName === "phaseAggregators") return priorAggregator;

@@ -67,7 +67,6 @@ export function PositionDetail({ positionId }: { positionId: string }) {
       else setRedemptionReceiptHash(pending.hash);
       setProgress(null);
       setError(null);
-      pendingWrite.clear();
       void Promise.all([positions.refetch(), market.refetch(), resolution.refetch()]);
       return;
     }
@@ -75,6 +74,14 @@ export function PositionDetail({ positionId }: { positionId: string }) {
     setProgress(null);
     setError("The submitted position transaction reverted onchain. Its receipt is final, so this exact action may be reviewed again safely.");
   }, [pendingWrite.receipt.data, pendingWrite.pending]);
+  useEffect(() => {
+    const pending = pendingWrite.pending;
+    if (!pending || !position) return;
+    const canonicalProjectionAdvanced = pending.kind === "RESOLVE"
+      ? position.state !== "OPEN" && position.state !== "AWAITING_RESOLUTION"
+      : position.state === "REDEEMED";
+    if (canonicalProjectionAdvanced) pendingWrite.clear();
+  }, [pendingWrite.pending, position?.state]);
 
   if (!address) return <section className="data-state"><h1>Connect the owning wallet</h1><p>Positions are wallet-scoped confirmed projections.</p></section>;
   if (positions.isPending) return <section className="data-state" role="status">Loading position evidence…</section>;
@@ -102,7 +109,6 @@ export function PositionDetail({ positionId }: { positionId: string }) {
           }
         },
       });
-      pendingWrite.clear();
       setResolutionReceiptHash(confirmation.hash);
       await Promise.all([resolution.refetch(), market.refetch(), positions.refetch()]);
     } catch (reason) {
@@ -134,7 +140,6 @@ export function PositionDetail({ positionId }: { positionId: string }) {
           pendingWrite.record("REDEEM", nextProgress);
         }
       } });
-      pendingWrite.clear();
       setRedemptionReceiptHash(confirmation.hash);
       await positions.refetch();
     } catch (reason) {
@@ -157,16 +162,16 @@ export function PositionDetail({ positionId }: { positionId: string }) {
     {market.data?.state === "ready" ? <div className="notice"><strong><Link href={`/markets/${market.data.data.marketId}`}>{market.data.data.question}</Link></strong><p>Strike {market.data.data.strikeUsd} USD · objective resolution {new Date(market.data.data.resolvesAt).toLocaleString()}.</p></div> : null}
     <dl className="detail-grid"><div><dt>Collateral spent</dt><dd>{position.collateralSpent}</dd></div><div><dt>Realized average</dt><dd>{position.realizedAveragePrice}</dd></div><div><dt>Maximum redemption</dt><dd>{position.maximumRedemption}</dd></div><div><dt>Fill transaction</dt><dd><a href={`https://sepolia.etherscan.io/tx/${position.fillTransactionHash}`} target="_blank" rel="noreferrer">{position.fillTransactionHash.slice(0, 12)}…</a></dd></div></dl>
 
-    {pendingWrite.pending ? <div className="notice warning" role="status"><strong>{POSITION_ACTION_LABEL[pendingWrite.pending.kind]} transaction remains locked</strong><p>This exact transaction may still confirm. NoxLimit is checking <a href={`https://sepolia.etherscan.io/tx/${pendingWrite.pending.hash}`} target="_blank" rel="noreferrer">{pendingWrite.pending.hash.slice(0, 12)}…</a> and will not expose another {pendingWrite.pending.kind.toLowerCase()} action.</p><button className="button secondary" type="button" disabled={pendingWrite.receipt.isFetching} onClick={() => void pendingWrite.receipt.refetch()}>{pendingWrite.receipt.isFetching ? "Checking exact receipt…" : "Check exact receipt"}</button></div> : null}
+    {pendingWrite.pending ? <div className="notice warning" role="status"><strong>{POSITION_ACTION_LABEL[pendingWrite.pending.kind]} {pendingWrite.receipt.data?.status === "success" ? "confirmed; projection catching up" : "transaction remains locked"}</strong><p>{pendingWrite.receipt.data?.status === "success" ? "The receipt is final. NoxLimit keeps this action locked until the canonical safe-block position projection advances." : "This exact transaction may still confirm."} NoxLimit is checking <a href={`https://sepolia.etherscan.io/tx/${pendingWrite.pending.hash}`} target="_blank" rel="noreferrer">{pendingWrite.pending.hash.slice(0, 12)}…</a> and will not expose another {pendingWrite.pending.kind.toLowerCase()} action.</p><button className="button secondary" type="button" disabled={pendingWrite.receipt.isFetching} onClick={() => void pendingWrite.receipt.refetch()}>{pendingWrite.receipt.isFetching ? "Checking exact receipt…" : "Check exact receipt"}</button></div> : null}
     {resolution.isPending ? <div className="notice" role="status"><strong>Checking objective resolver evidence…</strong></div> : null}
     {resolution.error instanceof Error ? <div className="notice warning" role="alert"><strong>Resolver evidence unavailable</strong><p>{resolution.error.message}</p></div> : null}
-    {evidence?.state === "READY" ? <div className="resolution-evidence"><span className="eyebrow">Resolver ready</span><h2>First valid observation: {evidence.settlementPriceUsd} USD</h2><p>Expected winner: <strong>{evidence.expectedWinner}</strong>. Selected round {evidence.selectedRoundId.toString()} at {new Date(Number(evidence.selectedObservedAt) * 1_000).toLocaleString()}; adjacent predecessor {evidence.predecessorRoundId.toString()} at {new Date(Number(evidence.predecessorObservedAt) * 1_000).toLocaleString()}.</p><p>The resolver contract rechecks adjacency, chronology, and the immutable observation-delay bound before reporting payouts.</p><button className="button primary" type="button" disabled={!pendingWrite.hydrated || Boolean(pendingWrite.pending) || busy !== null || chainId !== sepolia.id} onClick={resolveMarket}>{busy === "RESOLVE" ? "Confirming objective resolution…" : "Resolve market with this evidence"}</button></div> : null}
+    {evidence?.state === "READY" ? <div className="resolution-evidence" data-safe-block-number={evidence.safeBlockNumber.toString()} data-safe-block-hash={evidence.safeBlockHash}><span className="eyebrow">Resolver ready</span><h2>First valid observation: {evidence.settlementPriceUsd} USD</h2><p>Expected winner: <strong>{evidence.expectedWinner}</strong>. Selected round {evidence.selectedRoundId.toString()} at {new Date(Number(evidence.selectedObservedAt) * 1_000).toLocaleString()}; adjacent predecessor {evidence.predecessorRoundId.toString()} at {new Date(Number(evidence.predecessorObservedAt) * 1_000).toLocaleString()}.</p><p>Evidence snapshot: Sepolia safe block {evidence.safeBlockNumber.toString()} ({evidence.safeBlockHash.slice(0, 12)}…) at {new Date(Number(evidence.safeBlockTimestamp) * 1_000).toLocaleString()}.</p><p>The resolver contract rechecks adjacency, chronology, and the immutable observation-delay bound before reporting payouts.</p><button className="button primary" type="button" disabled={!pendingWrite.hydrated || Boolean(pendingWrite.pending) || busy !== null || chainId !== sepolia.id} onClick={resolveMarket}>{busy === "RESOLVE" ? "Confirming objective resolution…" : "Resolve market with this evidence"}</button></div> : null}
     {resolutionReceiptHash ? <div className="notice" role="status"><strong>Objective resolution receipt confirmed</strong><p><a href={`https://sepolia.etherscan.io/tx/${resolutionReceiptHash}`} target="_blank" rel="noreferrer">View transaction {resolutionReceiptHash.slice(0, 12)}…</a></p></div> : null}
-    {evidence?.state === "RESOLVED" ? <div className="resolution-evidence"><span className="eyebrow">Objectively resolved</span><h2>{evidence.winner} won at {evidence.settlementPriceUsd} USD</h2><p>Accepted Chainlink round {evidence.selectedRoundId.toString()} at {new Date(Number(evidence.selectedObservedAt) * 1_000).toLocaleString()}, with predecessor {evidence.predecessorRoundId.toString()}.</p></div> : null}
+    {evidence?.state === "RESOLVED" ? <div className="resolution-evidence" data-safe-block-number={evidence.safeBlockNumber.toString()} data-safe-block-hash={evidence.safeBlockHash}><span className="eyebrow">Objectively resolved</span><h2>{evidence.winner} won at {evidence.settlementPriceUsd} USD</h2><p>Accepted Chainlink round {evidence.selectedRoundId.toString()} at {new Date(Number(evidence.selectedObservedAt) * 1_000).toLocaleString()}, with predecessor {evidence.predecessorRoundId.toString()}.</p><p>Confirmed from Sepolia safe block {evidence.safeBlockNumber.toString()} ({evidence.safeBlockHash.slice(0, 12)}…).</p></div> : null}
     {evidence && (evidence.state === "NOT_READY" || evidence.state === "NO_ACCEPTED_OBSERVATION" || evidence.state === "UNAVAILABLE") ? <div className={`notice ${evidence.state === "NOT_READY" ? "" : "warning"}`}><strong>{evidence.state.replaceAll("_", " ")}</strong><p>{evidence.detail}</p></div> : null}
     {position.state === "AWAITING_RESOLUTION" && !evidence ? <div className="notice"><strong>Awaiting objective resolution</strong><p>NoxLimit will not invent oracle round IDs. The browser is checking the bound resolver and public feed directly.</p></div> : null}
     {position.state === "SETTLED_ZERO" ? <div className="notice"><strong>This side did not win</strong><p>The objective resolver reported the opposite outcome, so these shares redeem for zero.</p></div> : null}
-    {position.state === "REDEEMABLE" ? <button className="button primary" disabled={!pendingWrite.hydrated || Boolean(pendingWrite.pending) || busy !== null || market.data?.state !== "ready" || chainId !== sepolia.id} onClick={redeem}>{busy === "REDEEM" ? "Confirming redemption…" : "Redeem winning shares"}</button> : null}
+    {position.state === "REDEEMABLE" ? <button className="button primary" disabled={!pendingWrite.hydrated || Boolean(pendingWrite.pending) || redemptionReceiptHash !== null || busy !== null || market.data?.state !== "ready" || chainId !== sepolia.id} onClick={redeem}>{busy === "REDEEM" ? "Confirming redemption…" : "Redeem winning shares"}</button> : null}
     {redemptionReceiptHash ? <div className="notice" role="status"><strong>Redemption receipt confirmed</strong><p><a href={`https://sepolia.etherscan.io/tx/${redemptionReceiptHash}`} target="_blank" rel="noreferrer">View transaction {redemptionReceiptHash.slice(0, 12)}…</a>. Final collateral movement remains tied to the indexed onchain receipt.</p></div> : null}
     {progress?.state === "REPLACED" ? <div className="notice">Tracking replacement transaction ({progress.reason}).</div> : null}
     {progress?.state === "UNCONFIRMED" && !pendingWrite.pending ? <div className="notice warning">Receipt is unconfirmed. The exact submitted hash remains the only action NoxLimit will check.</div> : null}

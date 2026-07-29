@@ -229,12 +229,11 @@ export class LiveMarketReader {
       functionName: "latestRoundData",
       blockNumber: safeBlock,
     });
-    const [latestRoundId, latestAnswer, , latestUpdatedAt, latestAnsweredInRound] = latest;
+    const [latestRoundId, latestAnswer, , latestUpdatedAt] = latest;
     if (
       latestRoundId === 0n ||
       latestAnswer <= 0n ||
-      latestUpdatedAt === 0n ||
-      latestAnsweredInRound < latestRoundId
+      latestUpdatedAt === 0n
     ) throw new Error(`${record.marketId}: invalid latest Chainlink round`);
 
     const startRoundId = input.cursor
@@ -295,12 +294,11 @@ export class LiveMarketReader {
       for (let index = 0; index < rounds.length && points.length < limit; index += 1) {
         const round = rounds[index];
         if (!round) continue;
-        const [roundId, answer, , updatedAt, answeredInRound] = round;
+        const [roundId, answer, , updatedAt] = round;
         if (
           roundId !== roundIds[index] ||
           answer <= 0n ||
-          updatedAt === 0n ||
-          answeredInRound < roundId
+          updatedAt === 0n
         ) continue;
         if (updatedAt < cutoff) {
           rangeBoundaryReached = true;
@@ -391,7 +389,7 @@ export class LiveMarketReader {
         args: [Number(priorPhase)],
         blockNumber: safeBlock,
       });
-      const [roundId, answer, , updatedAt, answeredInRound] = await this.#client.readContract({
+      const [roundId, answer, , updatedAt] = await this.#client.readContract({
         address: aggregator,
         abi: chainlinkAggregatorLatestAbi,
         functionName: "latestRoundData",
@@ -401,8 +399,7 @@ export class LiveMarketReader {
         roundId === 0n ||
         roundId > CHAINLINK_ROUND_MASK ||
         answer <= 0n ||
-        updatedAt === 0n ||
-        answeredInRound < roundId
+        updatedAt === 0n
       ) return { exhausted: false, incomplete: true };
       return {
         roundId: (priorPhase << CHAINLINK_PHASE_OFFSET) | roundId,

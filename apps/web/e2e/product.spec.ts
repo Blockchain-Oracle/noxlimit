@@ -390,6 +390,7 @@ test("objective resolution and winning-share redemption each require the exact w
   await page.goto(`/positions/0x${"5".repeat(64)}`);
   await page.getByRole("button", { name: "Redeem winning shares" }).click();
   await expect(page.getByText("Redemption receipt confirmed", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Redeem winning shares" })).toBeDisabled();
   const writes = await walletTransactions(page);
   expect(writes).toHaveLength(2);
   expect(writes[0]).toEqual(expect.objectContaining({ from: FIXTURE_ACCOUNT, to: FIXTURE_RESOLVER }));
@@ -424,8 +425,9 @@ test("unconfirmed resolution and redemption each survive reload without a duplic
   rpc.releaseReceipt(TX_REDEEM);
   await page.getByRole("button", { name: "Check exact receipt" }).click();
   await expect(page.getByText("Redemption receipt confirmed", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Redeem winning shares" })).toBeDisabled();
   expect(await walletTransactions(page)).toHaveLength(2);
-  expect(await page.evaluate((hashes) => Object.values(localStorage).some((value) => hashes.some((hash) => value.includes(hash))), [TX_RESOLVE, TX_REDEEM])).toBe(false);
+  expect(await page.evaluate((hashes) => Object.values(localStorage).some((value) => hashes.some((hash) => value.includes(hash))), [TX_RESOLVE, TX_REDEEM])).toBe(true);
 });
 
 test("pagination continues the exact stream snapshot without destroying a private draft", async ({ page }, testInfo) => {
