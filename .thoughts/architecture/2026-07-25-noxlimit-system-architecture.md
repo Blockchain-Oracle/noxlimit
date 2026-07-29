@@ -115,6 +115,12 @@ The product deployment has advanced beyond local readiness on branch
   [ETH YES](../evidence/2026-07-29-r8-corrected-eth-yes-order.json), and
   [ETH NO](../evidence/2026-07-29-r8-corrected-eth-no-order.json). Objective settlement and
   user/builder redemption remain pending;
+- corrected BTC and ETH LP shares are now zero after the
+  [BTC](../evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-close.json) and
+  [ETH](../evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-close.json)
+  close transactions. With both conditions unresolved, the builder retains respectively
+  49,981,169 YES / 50,018,839 NO and 50,018,839 YES / 49,981,169 NO atoms for post-resolution
+  redemption;
 - the [horizon strike plan](../evidence/2026-07-29-sepolia-btc-eth-1h-24h-strike-plan.json) and four
   deployment records add BTC 1h
   `0x0c552e5f150ec05e4ef39c4a7913ec4ac0a94b9fe71170538d452d3661e7b7ed`, ETH 1h
@@ -135,9 +141,12 @@ The product deployment has advanced beyond local readiness on branch
 - the first BTC 1h treasury-collateral top-up reverted out of gas under an exact estimate. The
   [recovery record](../evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json) preserves the
   failed attempt; explicit attempt-bound `RETRY` succeeded after the
-  Hardhat gas multiplier was raised to `1.2`. A runtime-acceptance bug that rejected future
-  catalog-`ACTIVE` routes was fixed and covered; r9→r12 then adopted sequentially, with one
-  controlled restart to load the fix and adjacent verified adoption thereafter;
+  Hardhat gas multiplier was raised to `1.2`. Runtime acceptance now treats catalog activation and
+  dynamic lifecycle separately: future `ACTIVE` routes remain truthful `UPCOMING`, open routes keep
+  strict evaluator/liquidity gates, and closed/resolving/resolved `ACTIVE` routes remain valid
+  non-tradeable history even after LP removal. The `69`-test suite covers both boundaries, and the
+  [r12 post-close restart](../evidence/2026-07-29-r12-post-close-restart.json) live-proved zero-depth
+  4h history beside four still-tradeable 1h/24h routes with service health `READY`;
 - fresh root `pnpm check` passes contracts `84`, protocol `14`, catalog `6`, service `69`, and web
   `62` tests (`235` total), including compile, type-check, test, and build; service/web container
   builds and local smoke checks pass, but no public deployment is verified.

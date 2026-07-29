@@ -18,9 +18,10 @@ export type EvaluatorCatalogRuntime = CatalogRuntime & Readonly<{
 
 /**
  * Reject a fully staged catalog before it can become the public runtime when an ACTIVE market is
- * neither a seeded future market nor an actually usable open market. Future ACTIVE markets remain
- * truthfully non-tradeable until their immutable start time; only ORDERING_OPEN markets require a
- * ready evaluator and completely clear dynamic tradeability gates. Closed/retired history and
+ * not represented truthfully for its current lifecycle. Future ACTIVE markets must retain seeded
+ * liquidity without pretending to be tradeable. Open ACTIVE markets require a ready evaluator and
+ * completely clear dynamic tradeability gates. Closed, resolving, and resolved ACTIVE markets may
+ * have had their liquidity removed, but must remain visibly non-tradeable. Retired history and
  * not-yet-active successor records remain adoptable independently of trading.
  */
 export async function assertStagedCatalogRuntimeAcceptable(
@@ -46,13 +47,7 @@ export async function assertStagedCatalogRuntimeAcceptable(
     if (card.catalogActivation !== "ACTIVE") {
       issues.push(`${route.marketId}: staged activation does not match the ACTIVE catalog route`);
     }
-    if (card.lifecycle === "ORDERING_OPEN") {
-      openActiveCards.push(card);
-    } else if (card.lifecycle !== "UPCOMING") {
-      issues.push(
-        `${route.marketId}: ACTIVE market lifecycle ${card.lifecycle} is already closed or resolved`,
-      );
-    }
+    if (card.lifecycle === "ORDERING_OPEN") openActiveCards.push(card);
   }
 
   if (openActiveCards.length > 0 && !runtime.evaluatorReady) {
@@ -63,14 +58,9 @@ export async function assertStagedCatalogRuntimeAcceptable(
     if (card.verification !== "VERIFIED") {
       issues.push(`${card.marketId}: ACTIVE market is not VERIFIED`);
     }
-    if (BigInt(card.completeSetDepthAtoms) <= 0n) {
-      issues.push(`${card.marketId}: complete-set depth must be positive`);
-    }
-    if (!isPositiveDecimal(card.yesAveragePrice) || !isPositiveDecimal(card.noAveragePrice)) {
-      issues.push(`${card.marketId}: YES and NO pool quotes must both be nonzero`);
-    }
 
     if (card.lifecycle === "UPCOMING") {
+      requirePositivePoolState(card, issues);
       if (
         card.tradeability !== "ORDERING_CLOSED" ||
         card.tradeabilityReasons[0] !== "ORDERING_CLOSED"
@@ -84,8 +74,20 @@ export async function assertStagedCatalogRuntimeAcceptable(
       }
       continue;
     }
-    if (card.lifecycle !== "ORDERING_OPEN") continue;
 
+    if (card.lifecycle !== "ORDERING_OPEN") {
+      if (
+        card.tradeability !== "ORDERING_CLOSED" ||
+        card.tradeabilityReasons[0] !== "ORDERING_CLOSED"
+      ) {
+        issues.push(
+          `${card.marketId}: ${card.lifecycle} ACTIVE market must remain non-tradeable as ORDERING_CLOSED`,
+        );
+      }
+      continue;
+    }
+
+    requirePositivePoolState(card, issues);
     const blockingReasons = card.tradeabilityReasons.filter((reason) =>
       LIVE_BLOCKING_REASONS.has(reason)
     );
@@ -150,4 +152,13 @@ function isInitialEmptyBootstrap(manifest: CatalogManifest): boolean {
 function isPositiveDecimal(value: string): boolean {
   if (!/^\d+(?:\.\d+)?$/u.test(value)) return false;
   return BigInt(value.replace(".", "")) > 0n;
+}
+
+function requirePositivePoolState(card: MarketStreamCardView, issues: string[]): void {
+  if (BigInt(card.completeSetDepthAtoms) <= 0n) {
+    issues.push(`${card.marketId}: complete-set depth must be positive`);
+  }
+  if (!isPositiveDecimal(card.yesAveragePrice) || !isPositiveDecimal(card.noAveragePrice)) {
+    issues.push(`${card.marketId}: YES and NO pool quotes must both be nonzero`);
+  }
 }

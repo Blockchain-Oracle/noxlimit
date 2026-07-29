@@ -68,8 +68,12 @@ worker, and confirmed from a fresh browser. The four redacted records are
 [ETH NO](.thoughts/evidence/2026-07-29-r8-corrected-eth-no-order.json). Receipt and ERC-1155
 checks prove respective user positions of 1,941,161, 1,978,831, 1,941,161, and 1,978,831 outcome
 atoms, with zero matching position balance left in either OrderBook. Corrected-route objective
-resolution, winning-user redemption, and builder-LP redemption remain pending; do not call either
-route a complete vertical yet. The approved BTC/ETH 1h and 24h bundles are now deployed,
+resolution, winning-user redemption, and builder-position redemption remain pending; do not call
+either route a complete vertical yet. Corrected BTC/ETH LP shares are now zero after confirmed
+[BTC](.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-close.json)
+and [ETH](.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-close.json)
+close transactions; the unresolved builder balances are 49,981,169 YES / 50,018,839 NO for BTC and
+50,018,839 YES / 49,981,169 NO for ETH. The approved BTC/ETH 1h and 24h bundles are now deployed,
 independently validated, and active beside the corrected 4h pair in runtime revision `12` at
 `packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json`, catalog hash
 `0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e`. Its ten records contain
@@ -88,9 +92,13 @@ same unique first-observation adjacency proof; runtime oracle quote freshness re
 3,600 seconds. The BTC 1h deployment exercised safe submitted-transaction recovery: its first
 treasury-collateral top-up reverted out of gas under an exact estimate, the
 [recovery record](.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json)
-preserves that receipt, and attempt-bound `RETRY` succeeded after Hardhat `gasMultiplier = 1.2`. A covered runtime-
-acceptance fix now treats future catalog-`ACTIVE` markets as `UPCOMING`; the service suite passes
-`69` tests. Preserve the completed BTC evidence and terminal ETH rejection. Do not poll or write the
+preserves that receipt, and attempt-bound `RETRY` succeeded after Hardhat `gasMultiplier = 1.2`.
+Covered runtime acceptance now treats future catalog-`ACTIVE` markets as `UPCOMING`, keeps strict
+open-market gates, and permits closed/resolving/resolved `ACTIVE` routes to restart only as truthful
+`ORDERING_CLOSED` history after liquidity removal; the service suite passes `69` tests. The
+[live r12 post-close restart](.thoughts/evidence/2026-07-29-r12-post-close-restart.json) proved both
+zero-depth 4h routes beside four still-tradeable 1h/24h routes with health `READY`. Preserve the
+completed BTC evidence and terminal ETH rejection. Do not poll or write the
 retired ETH resolver again, and do not substitute a later round. Revision `12` is current: do not
 roll back to revision `5`/`8`, serve revisions `6`/`7`, or reopen the completed paired cutover.
 

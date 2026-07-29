@@ -160,19 +160,30 @@ describe("staged catalog runtime acceptance", () => {
     "RESOLVED_YES",
     "RESOLVED_NO",
   ] as const)(
-    "rejects an ACTIVE route whose staged lifecycle is %s",
+    "accepts a truthful post-close ACTIVE route in %s without requiring remaining liquidity",
     async (lifecycle) => {
       const initial = createSepoliaBootstrapManifest();
       const candidate = nextRevision(initial);
       const card = marketCard(candidate.markets[0]!, {
         lifecycle,
         tradeability: "ORDERING_CLOSED",
-        tradeabilityReasons: ["ORDERING_CLOSED"],
+        tradeabilityReasons: ["ORDERING_CLOSED", "NO_LIQUIDITY", "EVALUATOR_UNAVAILABLE"],
+        yesAveragePrice: "0",
+        noAveragePrice: "0",
+        completeSetDepth: "0",
+        completeSetDepthAtoms: "0",
       });
 
       await expect(
-        assertStagedCatalogRuntimeAcceptable(runtime(candidate, true, [card])),
-      ).rejects.toThrow(`ACTIVE market lifecycle ${lifecycle} is already closed or resolved`);
+        assertStagedCatalogRuntimeAcceptable(runtime(candidate, false, [card])),
+      ).resolves.toBeUndefined();
+
+      const falselyTradeable = marketCard(candidate.markets[0]!, { lifecycle });
+      await expect(
+        assertStagedCatalogRuntimeAcceptable(runtime(candidate, true, [falselyTradeable])),
+      ).rejects.toThrow(
+        `${lifecycle} ACTIVE market must remain non-tradeable as ORDERING_CLOSED`,
+      );
     },
   );
 });

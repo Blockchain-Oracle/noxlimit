@@ -34,8 +34,16 @@
   the browser-off worker, and confirmed from a fresh browser. Their exact forwarded outcome-token
   amounts are 1,941,161, 1,978,831, 1,941,161, and 1,978,831 atoms respectively; the corresponding
   OrderBook balances are zero. The threshold-derived `minOut = 1,666,667` is public after
-  publication as designed; no evidence file stores the raw private maximum. Corrected-route
-  objective resolution, winning-user redemption, and builder-LP redemption remain pending.
+  publication as designed; no evidence file stores the raw private maximum. After trading close,
+  the corrected BTC and ETH LP positions were removed in transactions
+  `0xdedae353a3aa36ff1d9ccc95f81f28eb79ee695977f50dc773e163cad6a9e004` and
+  `0x7cee695b9848ea0f7249cf4f80f8287db3e54bbe8f3d0a46d85c4c31cc80188c`.
+  [BTC close evidence](../evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-close.json)
+  records zero LP shares and builder balances of 49,981,169 YES / 50,018,839 NO;
+  [ETH close evidence](../evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-close.json)
+  records zero LP shares and 50,018,839 YES / 49,981,169 NO. Both conditions were unresolved, so no
+  position redemption occurred. Corrected-route objective resolution, winning-user redemption,
+  and builder-position redemption remain pending.
   The approved BTC/ETH 1h and 24h breadth is now deployed, independently validated, seeded, and
   active alongside the corrected 4h pair in runtime catalog revision `12`. The final manifest has
   ten immutable records: four retired and six active, covering BTC/ETH 1h/4h/24h. The service is
@@ -254,9 +262,14 @@
   [recovery record](../evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json) preserves
   attempt 1 and its receipt, and the
   explicit attempt-bound `RETRY` succeeded after the Hardhat gas multiplier was raised to `1.2`.
-  No journal was deleted or rewritten. A runtime-acceptance defect that rejected future `ACTIVE`
-  markets was fixed and covered at `69` service tests; runtime then adopted r9→r12 sequentially,
-  using one controlled restart to load the fix and adjacent verified adoption thereafter.
+  No journal was deleted or rewritten. Runtime acceptance now distinguishes immutable catalog
+  activation from every dynamic lifecycle: verified/seeded `UPCOMING` routes stay non-tradeable,
+  `ORDERING_OPEN` routes retain the evaluator/liquidity safety gates, and closed/resolving/resolved
+  `ACTIVE` routes may restart as truthful `ORDERING_CLOSED` history without requiring removed
+  liquidity or an evaluator. The `69`-test service suite covers both time boundaries, and the
+  [r12 post-close restart](../evidence/2026-07-29-r12-post-close-restart.json) proved the exact mixed
+  state live: both zero-depth 4h routes were `AWAITING_RESOLUTION / ORDERING_CLOSED`, while all four
+  1h/24h routes remained `ORDERING_OPEN / TRADEABLE` and health stayed `READY`.
 - **Next workflow:** Preserve the completed BTC proof and the terminal ETH rejection. Do not keep
   polling the retired ETH resolver, submit an ETH resolution transaction, infer a winner from the
   rejected observation, or substitute a later round. Revision `12` is the current runtime routing;

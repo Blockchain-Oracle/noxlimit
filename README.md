@@ -60,7 +60,11 @@ and [YES order `2`](./.thoughts/evidence/2026-07-29-r8-corrected-btc-yes-order.j
 confirmed every fill. Receipt and ERC-1155 reads verify 1,941,161, 1,978,831, 1,941,161, and
 1,978,831 outcome atoms respectively, with zero matching OrderBook dust. These four records bring
 the product total to seven browser-off fills. Corrected-route objective settlement, winning-user
-redemption, and builder-LP redemption remain pending.
+redemption, and builder-position redemption remain pending. Confirmed
+[BTC](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-close.json)
+and [ETH](./.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-close.json)
+close transactions reduced both corrected LP balances to zero without premature redemption; the
+unresolved builder outcome balances are preserved for the settlement proof.
 
 The latest root `pnpm check` passes contracts `84`, protocol `14`, catalog `6`, service `69`, and web
 `62` tests (`235` total), including compile, type-check, test, and build. The dedicated Playwright
@@ -131,8 +135,11 @@ question. Reused operator-owned NLTUSDC is minted only by the calculated pool/tr
 During BTC 1h deployment, the first treasury-collateral top-up reverted out of gas under an exact
 estimate; the [recovery record](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json)
 preserves the failed receipt and an attempt-bound `RETRY` succeeded after
-Hardhat's gas multiplier was set to `1.2`. The runtime acceptance path now has regression coverage
-for future catalog-`ACTIVE` routes remaining `UPCOMING` before `startsAt`. See
+Hardhat's gas multiplier was set to `1.2`. Runtime acceptance now has regression coverage for both
+future catalog-`ACTIVE` routes remaining `UPCOMING` before `startsAt` and post-close `ACTIVE`
+routes restarting only as non-tradeable history after liquidity removal. The
+[live r12 restart](./.thoughts/evidence/2026-07-29-r12-post-close-restart.json) proves both zero-depth
+4h routes beside four still-tradeable 1h/24h routes with service health `READY`. See
 [`packages/contracts/OPERATOR.md`](./packages/contracts/OPERATOR.md).
 
 ## WTF in one minute

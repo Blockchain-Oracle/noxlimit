@@ -208,3 +208,8 @@ packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json:generi
 packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json:generic-api-key:1023
 packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json:generic-api-key:1069
 packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json:generic-api-key:1083
+
+# Reviewed false positives in corrected-route LP-close evidence: the public pinned Conditional
+# Tokens deployment address.
+.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-close.json:generic-api-key:6
+.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-close.json:generic-api-key:6

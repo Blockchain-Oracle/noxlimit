@@ -103,6 +103,12 @@ catalog until its separate Pyth gate passes.
 - Both corrected OrderBooks now return `nextOrderId = 3`. BTC NO/YES orders `1`/`2` and ETH
   YES/NO orders `1`/`2` were created through the browser, filled by the browser-off worker, and
   confirmed in fresh browsers. Objective settlement and user/builder redemption remain pending.
+- Both corrected LP positions were removed after trading close. BTC transaction
+  `0xdedae353a3aa36ff1d9ccc95f81f28eb79ee695977f50dc773e163cad6a9e004` leaves 49,981,169 YES /
+  50,018,839 NO builder atoms; ETH transaction
+  `0x7cee695b9848ea0f7249cf4f80f8287db3e54bbe8f3d0a46d85c4c31cc80188c` leaves 50,018,839 YES /
+  49,981,169 NO. Both evidence records show zero LP shares, unresolved conditions, and no premature
+  redemption.
 - Revisions `9`–`12` add verified BTC/ETH 1h and 24h bundles while keeping corrected 4h active.
   Current revision `12` is
   `packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json`, hash
@@ -112,7 +118,8 @@ catalog until its separate Pyth gate passes.
   reverted out of gas; the
   [recovery record](../evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json) preserves
   attempt 1 and attempt-bound `RETRY` succeeded after
-  setting Hardhat `gasMultiplier = 1.2`. The future-`ACTIVE` acceptance bug is fixed and covered.
+  setting Hardhat `gasMultiplier = 1.2`. Runtime acceptance now covers both future-`ACTIVE`
+  `UPCOMING` routes and post-close `ACTIVE` history without weakening open-market safety gates.
 - Reproducible service/web container builds and local smoke checks pass. No durable public URL is
   verified.
 - The six files in `.thoughts/design/html/` are the durable `Complement` design source. The
@@ -184,7 +191,7 @@ rebuildable projection, never contract truth.
 | Pyth SOL | Architecture/source candidate only | Separate historical-update adapter after BTC/ETH product works | SOL remains absent/verification-pending until fee, exponent, timestamp selection, and live redemption pass |
 | Wallet | Injected wagmi/viem Sepolia connector, account/network guards, and wallet-signed writes are implemented | Keep one responsive wallet path; add another connector only if a real configured provider is required | Wrong-chain/account-change/rejection/duplicate-click browser tests pass locally; fresh live writes remain Phase 6 evidence |
 | Charts | Oracle/FPMM history schemas and accessible real-point rendering are implemented | Lightweight accessible SVG/line rendering with explicit source, time, and sparse/unavailable states | Never fabricate OHLC/depth/volume; local browser history/quote inspection passes |
-| Worker | Gate C plus seven committed Phase 6 browser-off fills prove orchestration; the exercised service reported `READY` | One always-on TypeScript service, one replica, serialized service-account queue, restart reconstruction | The 69-test service suite covers restart/recovery and future-active adoption; durable public hosting remains unverified |
+| Worker | Gate C plus seven committed Phase 6 browser-off fills prove orchestration; the exercised service reported `READY` | One always-on TypeScript service, one replica, serialized service-account queue, restart reconstruction | The 69-test service suite and live r12 post-close restart cover future/post-close ACTIVE lifecycles; durable public hosting remains unverified |
 | Index/read model | In-memory projections, replay/deduplication, and authoritative rereads are implemented; revision `12` is the current runtime catalog | Replay every cataloged OrderBook from `deploymentBlock`; overlap/dedupe/re-read nonterminal state | Service suite passes and the exercised Phase 6 service was revision-12 `READY`; no public health URL is claimed yet |
 | Catalog | Revision `12` is current; revisions `6`/`7` are unserved staging history and four older routes are retired | Activate entries only after onchain invariant/provenance verification and synchronize affected axes at the shared close | Six catalog tests pass; runtime hash is `0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e`; six BTC/ETH 1h/4h/24h IDs are catalog-active |
 | Test collateral | Gate C used explicit test assets/funding | Clearly named six-decimal Test USDC and bounded onchain claim path | Unit/integration tests; no production-value implication |
@@ -485,8 +492,9 @@ advanced four corrected-route orders browser-off. It reported `READY` with both 
 ordering-open and `TRADEABLE` at the `2026-07-29T15:34:12Z` snapshot. This proves runtime adoption
 and corrected-route order execution, not corrected-route settlement/redemption or durable public
 hosting. It subsequently adopted revisions `9` through `12` sequentially and reports `READY` on
-revision `12`; future catalog-`ACTIVE` markets remain truthfully `UPCOMING` before `startsAt`. Public
-service credentials/URL and hosted monitoring remain release work.
+revision `12`; future catalog-`ACTIVE` markets remain truthfully `UPCOMING` before `startsAt`, while
+closed/resolving/resolved `ACTIVE` history can restart without pretending removed liquidity is
+still available. Public service credentials/URL and hosted monitoring remain release work.
 
 Startup algorithm:
 
@@ -751,8 +759,9 @@ Completed before adding breadth:
 - the BTC 1h treasury-collateral top-up's first transaction reverted out of gas under an exact gas
   estimate. The [recovery record](../evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json)
   preserves the reverted attempt and explicit attempt-bound `RETRY` succeeded
-  after Hardhat `gasMultiplier = 1.2`. The future-`ACTIVE` runtime-acceptance defect is fixed and
-  covered in the `69`-test service suite;
+  after Hardhat `gasMultiplier = 1.2`. Future and post-close catalog-`ACTIVE` lifecycle acceptance
+  is covered in the `69`-test service suite and the
+  [live r12 post-close restart](../evidence/2026-07-29-r12-post-close-restart.json);
 - service/web container builds and local smoke checks pass.
 
 Remaining, in order:

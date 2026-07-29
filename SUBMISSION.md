@@ -209,8 +209,10 @@ research material and is not part of the submission source release. See `LICENSE
   accepted exact release-branch/commit URL in the organizer form.
 - [ ] **PENDING — corrected-route settlement/redemption:** the revision-8 private order →
   browser-off fill segment is verified on both sides of both markets. Complete objective
-  resolution, winning-user redemption, and builder-LP redemption before claiming either corrected
-  successor as a full vertical. The completed predecessor BTC vertical remains valid evidence.
+  resolution, winning-user redemption, and builder-position redemption before claiming either
+  corrected successor as a full vertical. Both corrected LP positions are already closed with zero
+  shares and unresolved outcome balances preserved; no premature redemption occurred. The
+  completed predecessor BTC vertical remains valid evidence.
 - [ ] **PENDING — demo video URL (maximum 4 minutes):** `[DEMO_VIDEO_URL]`.
 - [ ] **PENDING — published X post URL:** `[X_POST_URL]`.
 - [ ] **PENDING — final submission-commit verification:** rerun root `pnpm check` and the dedicated

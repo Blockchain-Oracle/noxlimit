@@ -40,7 +40,11 @@ the browser, filled by the browser-off worker, and confirmed in fresh browsers. 
 [BTC YES](./.thoughts/evidence/2026-07-29-r8-corrected-btc-yes-order.json),
 [ETH YES](./.thoughts/evidence/2026-07-29-r8-corrected-eth-yes-order.json), and
 [ETH NO](./.thoughts/evidence/2026-07-29-r8-corrected-eth-no-order.json). Objective resolution,
-winning-user redemption, and builder-LP redemption remain pending for the corrected routes.
+winning-user redemption, and builder-position redemption remain pending for the corrected routes.
+Their [BTC](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-close.json)
+and [ETH](./.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-close.json)
+LP-close transactions are confirmed with zero LP shares and no premature redemption; the builder
+holds 49,981,169 YES / 50,018,839 NO BTC atoms and 50,018,839 YES / 49,981,169 NO ETH atoms.
 The approved BTC/ETH 1h and 24h bundles are now deployed, independently validated, seeded, and
 active alongside the corrected 4h pair in current runtime revision `12` at
 `packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json`, hash
@@ -226,8 +230,12 @@ Current revision `12` has four retired and six active records and the service is
 deployment's first treasury-collateral transfer reverted out of gas under an exact estimate; the
 [recovery record](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json)
 preserves the failed attempt and attempt-bound `RETRY` succeeded after setting Hardhat
-`gasMultiplier = 1.2`. A tested runtime-acceptance fix classifies future catalog-`ACTIVE` routes as
-`UPCOMING`; the service suite passes `69` tests. Public Cloud Run/service hosting is billable and
+`gasMultiplier = 1.2`. Tested runtime acceptance classifies future catalog-`ACTIVE` routes as
+`UPCOMING`, keeps open-market evaluator/liquidity gates strict, and permits post-close `ACTIVE`
+routes to restart only as truthful non-tradeable history; the service suite passes `69` tests. The
+[live r12 restart](./.thoughts/evidence/2026-07-29-r12-post-close-restart.json) proved zero-depth 4h
+history beside four still-tradeable 1h/24h routes with service health `READY`. Public Cloud
+Run/service hosting is billable and
 requires explicit user cost/provider authorization before creation.
 
 The detailed post-spike route is recorded in [`CURRENT.md`](./.thoughts/decisions/CURRENT.md).

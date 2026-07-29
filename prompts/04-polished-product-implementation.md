@@ -292,6 +292,10 @@ submitted recovery: its exact-estimate treasury-collateral transaction reverted 
 journal preserved attempt 1, and attempt-bound `RETRY` succeeded after Hardhat
 `gasMultiplier = 1.2`; preserve the
 [redacted recovery evidence](../.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json).
+Runtime acceptance now covers both truthful future `UPCOMING` routes and post-close `ACTIVE`
+history without weakening open-market liquidity/evaluator gates. The
+[live r12 post-close restart](../.thoughts/evidence/2026-07-29-r12-post-close-restart.json) proves
+that local runtime condition; public hosting is still not durable until its separate release gate.
 The
 clean unit, property, adversarial, integration, recovery, browser, and root checks now pass at `235`
 package tests plus `45` Playwright journeys (`21` intentional skips). Public hosting remains
@@ -300,6 +304,9 @@ without explicit user authorization. Before submission, complete corrected-route
 settlement and user/builder redemptions, preserve the completed revision-12 breadth evidence,
 expose the final commit on the default-branch
 handoff, and rerun root `pnpm check` plus the dedicated Playwright suite at that exact commit.
+Both corrected LP positions are already closed with zero shares and no premature redemption; use
+the committed BTC/ETH corrected-liquidity-close evidence and redeem the retained builder outcome
+balances only after objective resolution.
 
 Browser assertions must prove card Trade actions cause no Gateway/wallet request before explicit
 review, design fixtures never ship as live responses, scroll changes focus without changing the

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-07-29T17:53:47.811Z",
+  "claim": "Revision 12 restarts after the corrected 4h liquidity close while preserving truthful closed history and tradeable 1h/24h routes.",
+  "catalogRevision": "0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e",
+  "health": {
+    "status": "READY",
+    "chainId": 11155111,
+    "headBlock": "11377074",
+    "safeBlock": "11377068",
+    "indexerLagBlocks": "6",
+    "evaluatorStatus": "READY",
+    "fundingStatus": "READY"
+  },
+  "marketSnapshot": "v867rG96Dpgu03X4mD2x0b03uuCETD5v0cTXmgBXXo0",
+  "markets": [
+    {
+      "marketId": "0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2",
+      "asset": "BTC/USD",
+      "horizon": "4h",
+      "lifecycle": "AWAITING_RESOLUTION",
+      "tradeability": "ORDERING_CLOSED",
+      "tradeabilityReasons": ["ORDERING_CLOSED", "NO_LIQUIDITY"],
+      "completeSetDepthAtoms": "0"
+    },
+    {
+      "marketId": "0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a",
+      "asset": "ETH/USD",
+      "horizon": "4h",
+      "lifecycle": "AWAITING_RESOLUTION",
+      "tradeability": "ORDERING_CLOSED",
+      "tradeabilityReasons": ["ORDERING_CLOSED", "NO_LIQUIDITY"],
+      "completeSetDepthAtoms": "0"
+    },
+    {
+      "marketId": "0x0c552e5f150ec05e4ef39c4a7913ec4ac0a94b9fe71170538d452d3661e7b7ed",
+      "asset": "BTC/USD",
+      "horizon": "1h",
+      "lifecycle": "ORDERING_OPEN",
+      "tradeability": "TRADEABLE",
+      "tradeabilityReasons": [],
+      "completeSetDepthAtoms": "50000000"
+    },
+    {
+      "marketId": "0x47d1776ad85039be6705753f9aa6879ae7349a617540a3b0a0ef71e2915bee07",
+      "asset": "ETH/USD",
+      "horizon": "1h",
+      "lifecycle": "ORDERING_OPEN",
+      "tradeability": "TRADEABLE",
+      "tradeabilityReasons": [],
+      "completeSetDepthAtoms": "50000000"
+    },
+    {
+      "marketId": "0x5fdb953c06530f97653d665624c576d2303e62a64c5fd40f4ccfa84276a4a4e5",
+      "asset": "BTC/USD",
+      "horizon": "24h",
+      "lifecycle": "ORDERING_OPEN",
+      "tradeability": "TRADEABLE",
+      "tradeabilityReasons": [],
+      "completeSetDepthAtoms": "50000000"
+    },
+    {
+      "marketId": "0xd171e879c281a1321dd37b9f2085554f155d717307477181fd3c42ac1231edbd",
+      "asset": "ETH/USD",
+      "horizon": "24h",
+      "lifecycle": "ORDERING_OPEN",
+      "tradeability": "TRADEABLE",
+      "tradeabilityReasons": [],
+      "completeSetDepthAtoms": "50000000"
+    }
+  ]
+}

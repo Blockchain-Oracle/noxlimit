@@ -23,7 +23,9 @@ corrected OrderBooks now return `nextOrderId = 3`, and two browser-created, brow
 market are verified. Revision `12` carries ten records—four retired and six active—and adds verified
 BTC/ETH 1h and 24h routes beside the corrected 4h pair. The service is `READY` on r12; the new
 routes were `UPCOMING` before their shared `2026-07-29T17:30:00Z` start. Corrected-route objective
-settlement and user/builder redemption remain pending. Public hosting remains pending.
+settlement and user/builder redemption remain pending. Both corrected LP positions are closed with
+zero shares and unresolved outcome balances preserved in the linked Phase 6 evidence. Public
+hosting remains pending.
 
 ## Prerequisites
 
@@ -161,13 +163,13 @@ local startup only; no public service or frontend URL is currently verified.
 Build the service without placing runtime credentials in an image layer:
 
 ```bash
-docker build -f Dockerfile.service -t noxlimit-service .
+docker build --platform=linux/amd64 -f Dockerfile.service -t noxlimit-service .
 ```
 
 Build the web only after the canonical HTTPS service origin and browser-safe RPC are known:
 
 ```bash
-docker build -f Dockerfile.web -t noxlimit-web \
+docker build --platform=linux/amd64 -f Dockerfile.web -t noxlimit-web \
   --build-arg NEXT_PUBLIC_NOXLIMIT_API_ORIGIN=https://api.example.invalid \
   --build-arg NEXT_PUBLIC_SEPOLIA_RPC_URL=https://sepolia.example.invalid \
   --build-arg NEXT_PUBLIC_TEST_USDC_ADDRESS=0x0000000000000000000000000000000000000000 \
@@ -208,8 +210,9 @@ single-writer service. Do not provision or deploy it until the user explicitly a
 hosting spend and confirms the target project, region, budget, and alerts. Local image/smoke evidence
 is not that authorization.
 
-- Deploy the service in one explicit region with fixed manual scaling of one instance, CPU available
-  outside requests (`--no-cpu-throttling`), and no scale-to-zero. Set the container port to `8787`;
+- Deploy the service in one explicit region with fixed manual scaling of one instance
+  (`--scaling=1`), CPU available outside requests (`--no-cpu-throttling`), and no scale-to-zero.
+  Set the container port to `8787`;
   Cloud Run supplies `PORT`, while the application still requires `HOST=0.0.0.0`.
 - Deploy the web container separately with ordinary autoscaling and scale-to-zero. Its overlap is
   harmless because it owns no signer or worker queue.
@@ -373,6 +376,12 @@ One controlled restart loaded the corrected future-`ACTIVE` acceptance behavior;
 adoptions proceeded sequentially. Never skip directly from r8 to r12 through SIGHUP. Current r12
 has ten records—four retired and six active—and the service reports `READY` on its exact hash.
 The new routes correctly remained `UPCOMING` before `startsAt`.
+Runtime acceptance also permits verified closed/resolving/resolved `ACTIVE` routes to restart only
+as truthful `ORDERING_CLOSED` history after LP removal; it does not require obsolete positive depth
+or evaluator readiness for those non-tradeable routes. Keep the strict gates for `UPCOMING` and
+`ORDERING_OPEN`. The
+[local r12 post-close restart](./.thoughts/evidence/2026-07-29-r12-post-close-restart.json) proves
+that runtime boundary; durable hosted recovery still requires the public deployment gate.
 
 BTC 1h deployment also exercised submitted-transaction recovery. Treasury-collateral top-up attempt
 1 reverted out of gas under an exact gas estimate. The journal preserved the reverted receipt;

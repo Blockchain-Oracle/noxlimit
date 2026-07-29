@@ -12,6 +12,14 @@ Objective settlement and user/builder redemption remain pending. Both revision-5
 balances are zero. Current revision `12` has ten records—four retired and six active—and covers
 BTC/ETH 1h/4h/24h. The service is revision-12 `READY`; public hosting remains pending.**
 
+After the corrected routes reached trading close, their real LP positions were removed
+sequentially. [BTC evidence](../evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-close.json)
+records transaction `0xdedae353a3aa36ff1d9ccc95f81f28eb79ee695977f50dc773e163cad6a9e004`,
+zero LP shares, and 49,981,169 YES / 50,018,839 NO builder atoms. [ETH evidence](../evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-close.json)
+records transaction `0x7cee695b9848ea0f7249cf4f80f8287db3e54bbe8f3d0a46d85c4c31cc80188c`,
+zero LP shares, and 50,018,839 YES / 49,981,169 NO. Both conditions were unresolved and neither
+close attempted position redemption.
+
 This file is an operational verification log, not a new architecture or decision authority.
 Current product authority remains `.thoughts/decisions/CURRENT.md` and the canonical architecture.
 
@@ -239,10 +247,15 @@ The journal reached `COMPLETE`; it was never deleted or rewritten. Durable redac
 [the BTC 1h deployment recovery record](../evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json).
 
 The first runtime acceptance of future-start catalog-`ACTIVE` markets exposed a separate service
-bug: acceptance required immediate tradeability and rejected a valid `UPCOMING` route. The fix
-accepts immutable verified active routing while preserving dynamic `UPCOMING` lifecycle state. A
-controlled restart loaded that code once; adjacent revision adoption then continued sequentially
-through r12. The service suite now passes `69` tests.
+bug: acceptance required immediate tradeability and rejected a valid `UPCOMING` route. A hosting
+preflight then exposed the symmetric restart bug: once one active horizon closes and its LP is
+removed, a restart must still accept that verified route as truthful `ORDERING_CLOSED` history while
+other horizons remain open. The covered rule now keeps strict liquidity/evaluator gates for
+`UPCOMING`/`ORDERING_OPEN`, permits closed/resolving/resolved `ACTIVE` history without remaining
+liquidity, and never labels that history tradeable. The service suite remains `69` tests. The
+[r12 post-close restart](../evidence/2026-07-29-r12-post-close-restart.json) then proved the exact
+condition live: both zero-depth 4h routes restarted as `AWAITING_RESOLUTION / ORDERING_CLOSED`, all
+four 1h/24h routes remained `ORDERING_OPEN / TRADEABLE`, and health remained `READY`.
 
 BTC OrderBook deployment transaction
 `0x0c939de35c0f28db67c6ded2896c2ec3ce255c1c139bd05f89b913a78fd53d3e`

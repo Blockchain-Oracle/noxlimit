@@ -46,9 +46,14 @@ current r12 has four retired and six active records and the service is `READY`. 
 truthfully `UPCOMING` before their shared start. BTC 1h deployment's failed exact-estimate treasury
 top-up and successful attempt-bound retry are preserved in the
 [recovery evidence](../.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json).
+The service's `69` tests also cover post-close `ACTIVE` routes restarting as truthful
+non-tradeable history after LP removal while still-open horizons keep their strict gates; the
+[live r12 restart](../.thoughts/evidence/2026-07-29-r12-post-close-restart.json) proves that exact
+mixed state with health `READY`.
 Local container build/smoke passes, but public hosting requires explicit authorization for billable
 resources. Corrected-route objective settlement, user/builder redemptions, and final default-branch
-handoff remain pending. The public release work is on the
+handoff remain pending. Corrected BTC/ETH LP shares are already zero after confirmed close
+transactions, with unresolved builder outcome balances preserved for redemption. The public release work is on the
 [`codex/noxlimit-polished-product` branch](https://github.com/Blockchain-Oracle/noxlimit/tree/codex/noxlimit-polished-product),
 including [cutover commit `d28f307`](https://github.com/Blockchain-Oracle/noxlimit/commit/d28f307)
 and [PR #2](https://github.com/Blockchain-Oracle/noxlimit/pull/2). Prompt 4 is the active route; do
