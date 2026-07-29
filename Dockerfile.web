@@ -1,0 +1,59 @@
+# syntax=docker/dockerfile:1.7
+ARG NODE_VERSION=22.22.3
+
+FROM node:${NODE_VERSION}-bookworm-slim AS base
+ENV PNPM_HOME=/pnpm
+ENV PATH=${PNPM_HOME}:${PATH}
+RUN corepack enable && corepack prepare pnpm@10.33.4 --activate
+WORKDIR /app
+
+FROM base AS workspace
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/service/package.json apps/service/package.json
+COPY apps/web/package.json apps/web/package.json
+COPY packages/catalog/package.json packages/catalog/package.json
+COPY packages/contracts/package.json packages/contracts/package.json
+COPY packages/protocol/package.json packages/protocol/package.json
+
+FROM workspace AS dependencies
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+  pnpm install --frozen-lockfile --filter @noxlimit/web...
+
+FROM workspace AS production-dependencies
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+  pnpm install --prod --frozen-lockfile --filter @noxlimit/web...
+
+FROM dependencies AS builder
+ARG NEXT_PUBLIC_NOXLIMIT_API_ORIGIN
+ARG NEXT_PUBLIC_SEPOLIA_RPC_URL
+ARG NEXT_PUBLIC_TEST_USDC_ADDRESS
+ARG NEXT_PUBLIC_TRADING_MIN_ETH
+ARG NEXT_PUBLIC_TRADING_MIN_USDC
+ENV NEXT_PUBLIC_NOXLIMIT_API_ORIGIN=${NEXT_PUBLIC_NOXLIMIT_API_ORIGIN}
+ENV NEXT_PUBLIC_SEPOLIA_RPC_URL=${NEXT_PUBLIC_SEPOLIA_RPC_URL}
+ENV NEXT_PUBLIC_TEST_USDC_ADDRESS=${NEXT_PUBLIC_TEST_USDC_ADDRESS}
+ENV NEXT_PUBLIC_TRADING_MIN_ETH=${NEXT_PUBLIC_TRADING_MIN_ETH}
+ENV NEXT_PUBLIC_TRADING_MIN_USDC=${NEXT_PUBLIC_TRADING_MIN_USDC}
+COPY tsconfig.base.json ./
+COPY packages/protocol packages/protocol
+COPY apps/web apps/web
+RUN pnpm --filter @noxlimit/protocol build \
+  && pnpm --filter @noxlimit/web build
+
+FROM base AS runner
+ENV NODE_ENV=production
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
+COPY package.json pnpm-workspace.yaml ./
+COPY --from=production-dependencies /app/node_modules ./node_modules
+COPY --from=production-dependencies /app/apps/web/node_modules ./apps/web/node_modules
+COPY --from=production-dependencies /app/packages/protocol/node_modules ./packages/protocol/node_modules
+COPY --from=builder /app/packages/protocol/package.json ./packages/protocol/package.json
+COPY --from=builder /app/packages/protocol/dist ./packages/protocol/dist
+COPY --from=builder /app/apps/web/package.json ./apps/web/package.json
+COPY --from=builder /app/apps/web/public ./apps/web/public
+COPY --from=builder /app/apps/web/.next ./apps/web/.next
+RUN chown -R node:node /app
+USER node
+EXPOSE 3000
+CMD ["node", "apps/web/node_modules/next/dist/bin/next", "start", "apps/web"]

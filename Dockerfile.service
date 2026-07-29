@@ -1,0 +1,56 @@
+# syntax=docker/dockerfile:1.7
+ARG NODE_VERSION=22.22.3
+
+FROM node:${NODE_VERSION}-bookworm-slim AS base
+ENV PNPM_HOME=/pnpm
+ENV PATH=${PNPM_HOME}:${PATH}
+RUN corepack enable && corepack prepare pnpm@10.33.4 --activate
+WORKDIR /app
+
+FROM base AS workspace
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/service/package.json apps/service/package.json
+COPY apps/web/package.json apps/web/package.json
+COPY packages/catalog/package.json packages/catalog/package.json
+COPY packages/contracts/package.json packages/contracts/package.json
+COPY packages/protocol/package.json packages/protocol/package.json
+
+FROM workspace AS dependencies
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+  pnpm install --frozen-lockfile --filter @noxlimit/service...
+
+FROM workspace AS production-dependencies
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+  pnpm install --prod --frozen-lockfile --filter @noxlimit/service...
+
+FROM dependencies AS builder
+COPY tsconfig.base.json ./
+COPY packages/protocol packages/protocol
+COPY packages/catalog packages/catalog
+COPY apps/service apps/service
+RUN pnpm --filter @noxlimit/protocol build \
+  && pnpm --filter @noxlimit/catalog build \
+  && pnpm --filter @noxlimit/service build
+
+FROM base AS runner
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=8787
+COPY package.json pnpm-workspace.yaml ./
+COPY --from=production-dependencies /app/node_modules ./node_modules
+COPY --from=production-dependencies /app/apps/service/node_modules ./apps/service/node_modules
+COPY --from=production-dependencies /app/packages/protocol/node_modules ./packages/protocol/node_modules
+COPY --from=production-dependencies /app/packages/catalog/node_modules ./packages/catalog/node_modules
+COPY --from=builder /app/packages/protocol/package.json ./packages/protocol/package.json
+COPY --from=builder /app/packages/protocol/dist ./packages/protocol/dist
+COPY --from=builder /app/packages/catalog/package.json ./packages/catalog/package.json
+COPY --from=builder /app/packages/catalog/dist ./packages/catalog/dist
+COPY --from=builder /app/packages/catalog/sepolia ./packages/catalog/sepolia
+COPY --from=builder /app/apps/service/package.json ./apps/service/package.json
+COPY --from=builder /app/apps/service/dist ./apps/service/dist
+RUN chown -R node:node /app
+USER node
+EXPOSE 8787
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD node -e 'fetch(`http://127.0.0.1:${process.env.PORT??"8787"}/v1/health`).then((response)=>response.json()).then((health)=>process.exit(health.status==="READY"&&health.evaluator?.status==="READY"&&health.funding?.status==="READY"?0:1)).catch(()=>process.exit(1))'
+CMD ["node", "apps/service/dist/server.js"]
