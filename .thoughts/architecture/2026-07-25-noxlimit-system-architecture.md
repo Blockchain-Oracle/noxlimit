@@ -1,10 +1,12 @@
 # NoxLimit System Architecture
 
-**Date:** 2026-07-25; revised 2026-07-28 after the live gate and DeepBook/Opus product review
+**Date:** 2026-07-25; revised 2026-07-29 after local polished-product implementation
 **Authority:** Canonical architecture for the selected hackathon direction and bounded critical-path
 verification  
-**Maturity:** User-approved; local and live Ethereum Sepolia critical path verified (`GO`);
-awaiting the user's polished-build checkpoint
+**Maturity:** User-approved; bounded Gate C critical path verified (`GO`); polished contracts,
+protocol, catalog, service, web, and bounded operator hardening implemented and verified locally;
+fresh BTC/ETH product deployment and complete live create-to-redeem proof pending external Sepolia
+gas funding plus live credentials/processes
 **Spike substrate:** Unmodified Gnosis Conditional Tokens + Fixed Product Market Maker on Ethereum
 Sepolia
 
@@ -15,9 +17,9 @@ NoxLimit is the current product direction:
 > A trader escrows a public amount, immutable for that order, for a public `YES` or `NO` outcome
 > and leaves a confidential maximum price represented as a minimum-output threshold. Nox compares
 > that threshold with a real outcome-share
-> pool quote while the order rests. In the honest-worker path, only an eligible order publishes its
-> threshold-derived `minOut`, and one replay-safe authorization causes one real, atomically
-> protected pool buy.
+> pool quote while the order rests. In the honest-worker path, the worker requests public
+> decryption only for an eligible nonzero candidate. That request ends the resting privacy phase;
+> one replay-safe proof authorization then attempts one real, atomically protected pool buy.
 
 This document consolidates architecture that was already spread across the product hypothesis,
 market-reality brief, reassessment, and reaffirmation. The user approved it on 2026-07-28 and
@@ -49,7 +51,9 @@ authority order is defined in
 
 ### First complete product loop
 
-- one curated terminal that lists only real deployed and seeded market bundles;
+- one hybrid discovery/terminal experience that lists only real deployed and seeded market
+  bundles: a vertical Market Stream for fast discovery and a full trading terminal for analysis,
+  order review, and durable ownership;
 - BTC/USD and ETH/USD markets, plus SOL/USD once its Pyth settlement adapter passes the dedicated
   live test;
 - 1-hour, 4-hour, and 24-hour market horizons, with separate user-selected order expiries;
@@ -57,6 +61,10 @@ authority order is defined in
 - one confidential maximum buy price, represented exactly as `minOutcomeTokensToBuy`;
 - browser-off evaluation by a hosted worker under an explicit privacy/check budget;
 - real escrow, real FPMM liquidity, real ERC-1155 outcome shares;
+- one-wallet onboarding that sponsors measured native Sepolia ETH for gas and supplies clearly
+  labeled six-decimal NoxLimit Test USDC as collateral after a short-lived wallet-signed request;
+  no automatic replenishment, only an explicit low-balance refill subject to target, cooldown,
+  per-refill, and lifetime caps;
 - cancel, expiry, refund, objective resolution, positions, and redemption.
 
 ### Explicit non-goals
@@ -66,17 +74,24 @@ authority order is defined in
 - no sells, partial fills, hidden side, hidden size, leverage, or LP console;
 - no anonymity, FHE, production-mainnet, organic-liquidity, or audit-complete claim.
 
+`tradingClosesAt` is enforced by the market-bound NoxLimit OrderBook, not by the unchanged legacy
+FPMM, whose `buy` entry point has no time guard. The curated deployment operation must therefore
+stop new NoxLimit actions and remove builder-seeded LP liquidity before objective resolution (or
+explicitly expose any residual direct-pool interval as a testnet limitation). Product copy must not
+claim that the FPMM bytecode itself closes at that timestamp.
+
 ## Component View
 
 ```mermaid
 flowchart LR
-    CAT["Curated Market Catalog<br/>BTC / ETH / verified SOL<br/>1h / 4h / 24h"] --> UI["Trading terminal<br/>indexed reads + wallet"]
-    UI -->|"encryptInput(minOut)<br/>approve + create order"| O["Market-bound NoxLimitOrderBook<br/>one deployment per bundle"]
+    CAT["Curated Market Catalog<br/>BTC / ETH / verified SOL<br/>1h / 4h / 24h"] --> UI["Market Stream + trading terminal<br/>indexed reads + wallet"]
+    UI -->|"direct confidential input<br/>encryptInput(minOut)"| G
+    UI -->|"ciphertext/proof<br/>approve + create order"| O["Market-bound NoxLimitOrderBook<br/>one deployment per bundle"]
     W["Hosted evaluator/finalizer<br/>fixed viewer address"] -->|"evaluate, publish success,<br/>finalize, recover"| O
 
     O -->|"fromExternal, ge, select,<br/>allowThis, addViewer"| N["NoxCompute + Runner TEE"]
     N --> G["Nox Handle Gateway"]
-    W <-->|"private decrypt(candidate)<br/>publicDecrypt only on success"| G
+    W <-->|"private decrypt(candidate)<br/>publicDecrypt after publication grant"| G
 
     O -->|"calcBuyAmount / buy"| F["Unmodified Gnosis FPMM<br/>one seeded pool per market"]
     F <--> C["Conditional Tokens<br/>ERC-1155 YES / NO"]
@@ -91,6 +106,14 @@ flowchart LR
 The pool and Conditional Tokens contracts remain unmodified. NoxLimit owns only the confidential
 order, escrow, authorization, and adapter layer.
 
+The released browser Handle client sends the encoded plaintext input directly to the official Nox
+Handle Gateway confidential-input endpoint and receives the encrypted handle/proof. The NoxLimit
+application API, database, and analytics must never proxy, log, or persist that initial plaintext;
+the worker is not on the order-creation input path. During evaluation, the worker privately learns
+zero for an ineligible candidate or the exact derived `minOut` for an eligible candidate and must
+not log/persist the latter. The Gateway TEE is part of the disclosed confidentiality boundary;
+this is not a claim that the secret never leaves the user's device.
+
 ## Public and Confidential Data
 
 | Data | Visibility | Why |
@@ -101,8 +124,8 @@ order, escrow, authorization, and adapter layer.
 | encrypted input and derived handles | Public handles, private values | Nox computation inputs/state |
 | exact `minOut` value while genuinely resting | Not public; encrypted/TEE-confidential under the Nox trust model | Public metadata may narrow a range; the fixed worker learns the exact value once an eligible candidate is privately decrypted |
 | evaluation quote | Public | It comes from the public FPMM |
-| worker's private candidate | Worker learns `0` when ineligible; exact `minOut` when eligible | Required for success-only publication; stronger than a single readiness bit on success |
-| `minOut` at successful publication/fill | Public | Unmodified FPMM must enforce plaintext `minOut` |
+| worker's private candidate | Worker learns `0` when ineligible; exact `minOut` when eligible | Supports an honest nonzero-only publication policy; the contract still handles a published zero safely |
+| candidate after `allowPublicDecryption` | Publicly retrievable before finalization; a nonzero value is the exact `minOut` | Publication ends the resting privacy phase even if the later pool execution fails |
 | positions, resolution, redemption | Public | NoxLimit is not an anonymity product |
 
 Each evaluation emits observable activity, including viewer-grant metadata, and its public FPMM
@@ -112,9 +135,11 @@ result-neutral public event shape, so silence is not deterministic proof of that
 Repeated checks can therefore create only an assumption-dependent bracket while the order rests.
 The worker has a stronger view: it learns `quote < minOut` from a zero candidate, and it learns the
 exact `minOut` from any eligible candidate even before publication or when it withholds
-publication. The first published success makes that exact value public. Product copy must not
-claim an invisible or perfectly sealed resting order, and raw receipts must not be called
-identical—only the result-dependent public transcript after normalizing order/nonce/handle fields.
+publication. Once `allowPublicDecryption` is granted, the candidate is publicly retrievable before
+proof finalization; a nonzero value exposes the exact `minOut` even if the later pool execution
+fails and the order becomes refundable. Product copy must not claim an invisible or perfectly
+sealed resting order, and raw receipts must not be called identical—only the result-dependent
+public transcript after normalizing order/nonce/handle fields.
 
 ## Contract Topology
 
@@ -135,7 +160,7 @@ For each curated market bundle, one contract deliberately combines:
 This is the smallest topology that keeps asset and authorization invariants inspectable. One
 OrderBook still serves only one market; the product obtains breadth by composing several identical,
 independently bound deployments through a catalog. A generalized multi-market custody contract
-would increase cross-contract ACL, approval, and custody risk without improving the judge path.
+would increase cross-contract ACL, approval, and custody risk without improving the user path.
 
 Each deployment is deliberately single-market. Its constructor hard-binds and validates the curated
 FPMM, Conditional Tokens contract, collateral token, condition, outcome count, position IDs, and
@@ -146,12 +171,46 @@ deployed bundles. It lists a bundle only after resolver, condition, seeded FPMM,
 addresses are all verified. The catalog is not a permissionless market factory and never overrides
 the contracts as source of truth.
 
+The first catalog keeps liquidity concentrated with one active near-the-money bundle per tracked
+asset/horizon. `1h`, `4h`, and `24h` describe the original market windows; each bundle also exposes
+its live remaining close/resolution countdown. A deterministic, resolver-first successor is
+verified before the active bundle closes, then activated through the versioned catalog. Resolved
+bundles remain readable history rather than being overwritten.
+
 Logical `marketId`/Conditional Tokens `questionId` values are deterministic hashes of stable market
 content—chain, tracked asset/feed, strike, trading close, resolution time, collateral, and resolver
 policy—not deployment wall-clock time. Each deployed instance is versioned by its `conditionId`.
-The committed catalog exposes all addresses, resolver/feed provenance, configuration version,
-check/recovery policy, and active/retired status. Cross-market order identity is the composite
+Each immutable market record exposes all addresses, resolver/feed provenance, configuration,
+check/recovery policy, deployment evidence, and verification result. A separate hash-linked catalog
+revision routes exactly one `ACTIVE` market per asset/horizon and may label verified replacements
+`SUCCESSOR` or historical bundles `RETIRED`; activation never rewrites the immutable record. The
+read model keeps immutable verification, catalog activation, objective lifecycle, dynamic
+tradeability, and derived badges as separate facts. Cross-market order identity is the composite
 `(chainId, orderBook, orderId)`, because numeric `orderId` is local to one OrderBook.
+
+Catalog adoption is atomic at runtime. An operator publishes the next immutable manifest revision
+and invokes a non-public reload command. The service validates the hash chain, one-active invariant,
+all new immutable records, activation times/blocks, bindings, seeding, and successor cutover; it
+then completes the new OrderBook recovery replay before swapping one in-memory catalog pointer.
+Failure preserves the previous revision. The web consumes the service's `catalogRevision` rather
+than bundling an independently mutable copy.
+
+The Sepolia deployment operator implements that resolver-first topology through a durable,
+plan-bound journal created before the first transaction. A fresh journal freezes the exact plan
+hash, operator, chain, catalog/evidence output paths, ordered expected steps, and funding plan. A
+cross-process lock prevents two operators from advancing the same journal. Each transaction moves
+through `INTENT → SUBMITTED → CONFIRMED`; submitted/confirmed work resumes without replacement, and
+a crash leaving only `INTENT` fails closed until the operator supplies an explicit attempt-bound
+`ADOPT` with the exact transaction hash or `RETRY`. The journal rejects secret-bearing JSON and
+undeclared/out-of-order steps. It stages and hash-verifies final evidence/catalog payloads before
+publishing create-only outputs, then safely detects and resumes a crash between either output.
+
+Operator market inputs are canonical rather than prose-equivalent: the interval from `startsAt` to
+`resolvesAt` must equal the declared `1h`, `4h`, or `24h` duration exactly, and the question must
+equal the canonical asset/strike/resolution-UTC string. A later bundle may reuse the shared
+six-decimal Test USDC only after verifying its code, metadata, and operator issuer. The operator
+mints exactly the computed shortfall needed to reach the frozen pool-seed and funding-treasury
+targets; it never blindly remints a full allowance.
 
 The FPMM buy and share forwarding execute inside a restricted external self-call such as
 `executeAndForward`. The outer finalizer calls it with `try/catch`:
@@ -406,6 +465,12 @@ revive the order. `MonitoringExhausted` is a truthful derived product state unti
 extended; it is computed only when status is `Open`, no evaluation is active, and the remaining
 budget is zero.
 
+`ExpiryReady` is another derived product/API state, not a Solidity ordinal. It applies when an
+otherwise expirable `Open`/`Evaluating` order has reached `expiresAt` or `tradingClosesAt` but the
+permissionless expiry-advance transaction has not yet confirmed. The UI exposes `Expire order` in
+that state; only confirmed `Expired` exposes `Claim refund`. A `PublicationPending` order that
+reaches either boundary follows the disclosed-refundable recovery path instead.
+
 ## Finalization Invariants
 
 Before any external trade, finalization validates the proof. A valid zero proof—possible if a
@@ -498,23 +563,41 @@ live Ethereum Sepolia:
 - real outcome shares reach the immutable recipient;
 - no mock quote, share, proof, or execution is used in the bounded Gate C trace.
 
-### Still required in the polished build and submission gate
+### Locally implemented and verified in the polished workspace — 2026-07-29
 
-- a self-serve judge path without local setup, faucet hunting, owner-operated gas top-ups, or a
-  second human;
-- a direct DeepBook-inspired terminal with a truthful FPMM quote ladder, private order ticket,
-  durable order states, positions, and activity;
-- a curated BTC/USD and ETH/USD catalog across useful horizons, plus SOL/USD only after the Pyth
-  settlement adapter passes its dedicated live test;
-- objective settlement and redemption through the product UI;
-- explicit check-budget reads, `MonitoringExhausted`, and status-aware candidate access;
-- durable worker/finalizer gas provisioning and restart recovery;
-- mutation-strength tests for reentrancy, finalizer gas reserve, and global result consumption;
-- exact check-exhaustion, timeout-boundary, late-finalize, order-expiry-precedence,
-  zero/degenerate-configuration, and publication-disclosure tests;
-- custom-error-pinned rejection tests and truthful reconstructed-state provenance;
-- a fresh final deployment with production-intended cadence/check-budget guards enabled;
-- privacy copy that accurately discloses worker knowledge, TEE trust, and public metadata.
+- the hardened market-bound OrderBook, objective Chainlink resolver, six-decimal collateral, and
+  bounded funding treasury are implemented; the post-hardening contract suite passes `62` tests;
+- the shared protocol and catalog packages pass `14` and `6` tests respectively, including
+  JSON-safe types, independent disclosure provenance, deterministic catalog validation, and
+  unsigned transaction builders;
+- the Fastify service passes `63` tests covering chain projections, restart/recovery, worker,
+  funding, read APIs, phase-aware history, and atomic verified catalog adoption from the startup/
+  SIGHUP pointer; a read-only Sepolia smoke is truthfully degraded with an empty catalog;
+- the responsive Next application passes `30` web tests. Playwright records `42` passing journeys,
+  `18` intentional project/viewport skips, and zero failures, including direct Gateway privacy,
+  funding, and reload-safe exact-hash transaction locks. Root compile/type-check/test/build and the
+  current 1440px/390px responsive baselines are green;
+- the bounded operator path passes its journal, exact-horizon/question, external binding,
+  shared-collateral shortfall, and create-only output regression coverage;
+- the six local `Complement` HTML files are the durable design source; their sample data is not
+  loaded as live product state.
+
+These results establish local product implementation, not a fresh deployment. The historical
+Prompt 3 Gate C trace remains valid evidence and is not reclassified as the final product bundle.
+
+### Still required for the live product and submission gate
+
+- fund the operator safely, then deploy or resume through the journal one current BTC/USD 4h and
+  one ETH/USD 4h resolver-first bundle, verify every immutable binding, and publish a non-empty
+  activated catalog revision;
+- provision the hosted worker/finalizer, RPC, funding treasury, and deployment credentials without
+  weakening the one-wallet self-serve path;
+- run a fresh browser confidential-input → order → browser-off evaluation → publication → atomic
+  fill → position → objective resolution → redemption trace with production-intended cadence and
+  check-budget guards;
+- add BTC/ETH breadth only through the verified successor workflow; keep SOL absent until its
+  separate Pyth live gate passes;
+- publish deployment evidence, limitations, privacy boundary, and submission assets.
 
 ### Important after the hackathon, not a pre-build veto
 
@@ -523,39 +606,94 @@ live Ethereum Sepolia:
 - decentralized/multiple workers;
 - organic liquidity and production manipulation economics;
 - latency SLA/P95 guarantees;
-- full phase-boundary handling for long-lived oracle rounds;
 - sells, partial fills, permissionless market creation, and richer order types.
 
-## DeepBook-Informed Product Surface
+## Market Stream and DeepBook-Informed Product Surface
 
 DeepBook V3 Spot supplies the terminal grammar; DeepBook Predict supplies useful catalog,
-quote/position, and unsigned-transaction API patterns. Neither supplies NoxLimit's execution
-mechanic. The product therefore uses this layout:
+quote/position, and unsigned-transaction API patterns. A TikTok-like vertical stream supplies the
+mobile discovery grammar: one real market at a time, snap-scroll focus, and immediate YES/NO entry.
+Neither reference supplies NoxLimit's execution mechanic. The product therefore uses a hybrid,
+not a feed-only or terminal-only layout.
+
+Mobile:
+
+```text
+DISCOVER / MARKET STREAM
+one real market card per snap
+question + asset/horizon + close countdown
+oracle vs strike + YES/NO prices + liquidity + truthful chart preview
+→ Open market / Trade YES / Trade NO
+→ full-context Trade workspace with chart, terms, quote, ticket, and review
+```
+
+Desktop:
 
 ```text
 ┌──────────────┬────────────────────────────────────┬───────────────────────┐
-│ Market list  │ Selected market                    │ Private order ticket  │
-│ BTC/ETH/SOL  │ Oracle + YES/NO price history      │ Side: YES / NO        │
-│ 1h/4h/24h    │ Liquidity + AMM quote ladder       │ Public amount         │
-│ live/status  │ Public fills/activity              │ Private maximum price │
-│              │                                    │ Order expiry + submit │
+│ Market Stream│ Selected market                    │ Private order ticket  │
+│ scroll cards │ Oracle + YES/NO price history      │ Side: YES / NO        │
+│ BTC/ETH/SOL  │ Liquidity + AMM quote ladder       │ Public amount         │
+│ 1h/4h/24h    │ Public fills/activity              │ Private maximum price │
+│ close/status │                                    │ Order expiry + submit │
 ├──────────────┴────────────────────────────────────┴───────────────────────┤
 │ My Orders                 │ Positions                 │ Activity            │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
+
+The TikTok analogy is limited to discovery interaction. The first release has no personalized
+ranking, likes/comments, autoplay media, fake popularity, or one-tap execution. Live cards come
+only from verified deployed/seeded catalog entries and sort through visible deterministic controls
+for `Closing soon`, `Recently opened`, or `Liquidity`; asset, horizon, and lifecycle remain filters.
+The three comparators use close time ascending, open time descending, or numeric
+`completeSetDepthAtoms` descending respectively, then `marketId` ascending. The initial expected depth is BTC/USD and ETH/USD
+across three horizons—up to six live cards—plus SOL only after its resolver gate. Resolved or
+resolving bundles remain in explicit history/lifecycle views.
+
+The catalog exposes `opensAt` and `opensAtBlock` as the effective time/block of the first valid
+revision that routes the market `ACTIVE`, never deployment wall-clock time; those values remain
+stable in later revisions. All sorts use stable `marketId` tie-breaking. Prices, liquidity,
+freshness, and countdowns update inside a card without moving the focused card. A deliberate
+filter, sort, or refresh action applies any changed ranking.
+
+On mobile, `Trade YES` or `Trade NO` preselects market and side in a full-height Trade workspace,
+not a bare ticket. That view retains the full question, oracle-versus-outcome distinction,
+size-aware quote, liquidity and terms, and an expandable full chart before review and the
+Gateway/wallet sequence. On desktop, deliberate stream-card selection updates the center workspace.
+Public fields may remain in volatile per-market state, but switching a dirty market requires
+confirmation and then clears the private maximum; mobile dismiss/back/swipe has the same
+keep-editing/discard behavior. The private value is never persisted. The full-size chart remains
+the central analytical surface even though each stream card may include a compact truthful preview.
 
 The central liquidity view is computed from real `calcBuyAmount` calls for several public input
 sizes and may display average execution price and price impact. It is not an order book. Private
 resting orders never appear as bids, asks, or public depth; only completed fills appear on the
 public activity tape.
 
-The typed client surface is deliberately small:
+The typed client surface is deliberately small. These examples show JSON-safe wire types; domain
+adapters validate decimal strings and convert them to `bigint` without floating point:
 
 ```ts
-type OrderRef = { chainId: number; orderBook: Address; orderId: bigint }
+type OrderRef = { chainId: number; orderBook: Address; orderId: string }
+type MarketListQuery = {
+  asset?: "BTC/USD" | "ETH/USD" | "SOL/USD"
+  horizon?: "1h" | "4h" | "24h"
+  lifecycle?: "LIVE" | "RESOLVING" | "RESOLVED"
+  sort: "CLOSING_SOON" | "RECENTLY_OPENED" | "LIQUIDITY"
+  limit?: number
+  cursor?: string
+  snapshot?: string
+}
+type MarketListPage = {
+  catalogRevision: string
+  snapshot: string
+  items: MarketStreamCardView[]
+  nextCursor?: string
+}
 
-markets.list({ asset, horizon })
+markets.list(query: MarketListQuery): Promise<MarketListPage>
 markets.get(marketId)
+markets.history({ marketId, mode, range, sampling, cursor })
 markets.quote({ marketId, side, amount })
 orders.preparePrivateLimit({ marketId, side, amount, maxPrice, expiresAt, clientRequestId })
 orders.get(orderRef)
@@ -567,11 +705,20 @@ positions.list(address)
 positions.redeem(positionId)
 ```
 
+`CLOSING_SOON` sorts by `tradingClosesAt ASC`; `RECENTLY_OPENED` by `opensAt DESC`; and
+`LIQUIDITY` by numeric `completeSetDepthAtoms DESC`. Every comparator ends with `marketId ASC`.
+Asset, horizon, and lifecycle are filters. Card YES/NO reference prices are the fee-inclusive
+average prices returned by `calcBuyAmount` for exactly `1.000000 Test USDC` input.
+`completeSetDepthAtoms` is the numeric minimum of the pool's YES and NO reserves in six-decimal
+complete-set units. Market-list snapshots freeze the ordering while live values update in place.
+
 Public catalog/history reads may use a cached indexer or backend-for-frontend. Wallet-scoped reads
-remain address-bound. The final quote, threshold conversion, encryption, and transaction build are
-refreshed at the trust boundary; encryption occurs in the browser and the wallet signs the write.
-The backend never receives the plaintext maximum price. Evaluator decrypt/publication operations
-are internal worker capabilities and are not exposed as public trading tools.
+remain address-bound. The final quote, threshold conversion, direct browser-to-Gateway
+confidential-input request, and transaction build are refreshed at the trust boundary; the wallet
+signs the write. The NoxLimit backend never receives the plaintext maximum price, while the
+official Gateway TEE necessarily does under the released Handle protocol. Evaluator
+decrypt/publication operations are internal worker capabilities and are not exposed as public
+trading tools.
 
 `clientRequestId` is a caller correlation/idempotency key for building and tracking a proposal; it
 does not replace the onchain composite identity `(chainId, orderBook, orderId)`. Public API statuses
@@ -582,15 +729,18 @@ oracle/pool/trade history.
 
 ### User flow
 
-1. Filter real markets by tracked asset and horizon, then choose one deployed/seeded bundle.
+1. Browse the deterministic Market Stream, optionally filter by asset/horizon/lifecycle, and choose
+   one deployed/seeded bundle. Mobile uses vertical one-market-at-a-time discovery; desktop uses the
+   stream as the terminal rail.
 2. Inspect its question, strike, trading close, resolution time, oracle price, YES/NO pool prices,
    liquidity, and real-size quote ladder.
 3. Choose YES or NO, public amount, private maximum average price, and order expiry.
-4. Refresh the exact pool quote, derive integer `minOut`, encrypt it in the browser, approve
-   collateral, and sign order creation.
+4. Refresh the exact pool quote, derive integer `minOut`, send it directly from the browser through
+   the released Handle client to the official Nox Gateway, then approve collateral and sign order
+   creation with the returned encrypted input/proof.
 5. Close the browser if desired. The worker evaluates under the visible check budget; the indexer
    and chain reconstruct `Resting`, `Evaluating`, `Publication pending`, `Filled`,
-   `Monitoring exhausted`, `Expired`, or `Refundable` state.
+   `Monitoring exhausted`, `Expiry ready`, `Expired`, or `Refundable` state.
 6. An eligible order publishes and executes one atomically protected FPMM buy. Outcome shares go
    directly to the immutable recipient. An ineligible order remains resting until another allowed
    check, cancellation, expiry, or budget exhaustion.
@@ -613,7 +763,18 @@ The UI must therefore be durable and explicit:
 - closing and reopening the browser reconstructs state from chain/worker receipts;
 - retries are idempotent;
 - “try in 30 seconds” means understanding and entering the loop without local setup, faucet hunting,
-  or a second wallet—not a guaranteed Nox fill latency.
+  or a second wallet—not a guaranteed Nox fill latency. This is the normal first-use experience for
+  every user, not a separate reduced evaluation route.
+
+The central terminal chart is a first-class product surface: one real underlying-oracle view with
+strike/close/resolution markers, one real YES/NO outcome-price history reconstructed from pool
+state/completed fills, and a size-aware `calcBuyAmount` quote ladder. The chart library is only a
+renderer; the product never fabricates candles, volume, public depth, or fills.
+
+The compact Market Stream preview is a discovery derivative of that same real data, not a separate
+synthetic chart. Mobile snap motion degrades to ordinary scrolling under reduced-motion or assistive
+input, and every card exposes a visible position/count and keyboard/switch-accessible next/previous
+path.
 
 ## Evidence Basis
 
@@ -633,7 +794,8 @@ minimum-output check. The released Nox source and local stack establish the nece
 viewer role, and combined adapter behavior. The live Prompt 3 evidence adds the bounded recovered
 orchestration, success-only publication, independent proof rescue, real FPMM action, asset deltas,
 and terminal cleanup on Ethereum Sepolia. The owner/deployer funded finalizer gas after order
-creation, so durable product-operated gas provisioning remains build work.
+creation. The polished workspace now implements bounded funding and serialized worker writes with
+restart coverage, but durable hosted provisioning and treasury balance remain live-release work.
 
 The DeepBook research establishes the product/terminal/API patterns and the boundary between its
 real CLOB mechanics and NoxLimit's FPMM mechanics. The post-gate reconciliation records the
@@ -643,9 +805,14 @@ not retroactively change the successful bounded Gate C evidence.
 
 ## Next Authorized Action
 
-The user approved this architecture on 2026-07-28, and local Gates A/B plus live Gate C now pass.
-The next authorized action is the user's polished-build checkpoint. If the user authorizes that
-phase, implementation must derive from this architecture and the recorded Prompt 3 evidence rather
-than restarting discovery or creating a competing design. Executable evidence may refine this
-architecture; it may not silently replace the product, privacy boundary, or hackathon risk
-standard.
+The user approved this architecture, accepted the passed bounded Gate C critical path, and
+explicitly authorized Codex to build the polished product. The local product layers now exist and
+their post-hardening verification snapshot is recorded above. The next action is Phase 6: safely
+fund the operator, deploy one BTC/USD 4h and one ETH/USD 4h bundle (or resume through their bound
+journals), activate the verified catalog, provision the hosted worker/funding path, and record the
+complete live browser → Nox → FPMM → objective resolution → redemption journey. That action is
+pending external Sepolia gas funding plus live credentials/processes; it has not yet occurred. Work
+continues from the current implementation and accepted product-surface contract rather than
+restarting discovery, repeating Gate C, or creating a competing design. Executable evidence may
+refine this architecture; it may not silently replace the product, privacy boundary, or hackathon
+risk standard.

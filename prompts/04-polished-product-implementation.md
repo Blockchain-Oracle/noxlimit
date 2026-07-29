@@ -1,6 +1,17 @@
 # Prompt 4 — Build the NoxLimit Product
 
-> **Staged only. Do not run until the user explicitly authorizes the polished build.**
+> **ACTIVE — the user explicitly authorized the polished build on 2026-07-28.**
+
+> **IMPLEMENTATION CHECKPOINT — Phases 0–5 and bounded operator hardening are complete locally.
+> The final 2026-07-29 local snapshot records contracts `62`, protocol `14`, catalog `6`, service
+> `63`, and web `30` passing (`175` package tests total); Playwright records `42` passing, `18`
+> intentional project/viewport skips, and zero failures. Root compile/type-check/test/build and the
+> current 1440px/390px responsive baselines are
+> green. The service's read-only Sepolia smoke correctly reports a degraded empty catalog. Do not
+> recreate these layers or modify `spike/**`. Execute Phase 6 only after safely funding the
+> operator: deploy or resume one BTC/USD 4h and one ETH/USD 4h bundle through their journals,
+> activate the catalog, provision the hosted worker/funding path, and record the complete live
+> create-to-redeem trace. External Sepolia gas and live credentials/processes remain pending.**
 
 You are implementing the selected iExec WTF Hackathon product in this repository. This is not a
 new discovery, selection, or architecture exercise. Start by following `AGENTS.md` and the mandatory
@@ -12,12 +23,17 @@ Read, in order:
 
 1. `.thoughts/decisions/CURRENT.md`
 2. `.thoughts/decisions/AUDIT-GATES.md`
-3. `.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md`
-4. `.thoughts/verification/2026-07-28-noxlimit-product-surface-and-opus-reconciliation.md`
-5. `.thoughts/research/2026-07-28-deepbook-patterns-for-noxlimit.md`
-6. `.thoughts/verification/2026-07-28-noxlimit-critical-path.md`
-7. `AGENT_HANDOFF.md`
-8. the existing `spike/market` and `spike/nox` code and tests
+3. `.thoughts/decisions/2026-07-28-noxlimit-market-stream-experience.md`
+4. `.thoughts/architecture/2026-07-25-noxlimit-system-architecture.md`
+5. `.thoughts/stories/2026-07-28-noxlimit-product-stories.md`
+6. `.thoughts/design/2026-07-28-noxlimit-product-surface-map.md`
+7. `.thoughts/plans/2026-07-28-noxlimit-polished-product-plan.md`
+8. `DESIGNER_HANDOFF.md`
+9. `.thoughts/verification/2026-07-28-noxlimit-product-surface-and-opus-reconciliation.md`
+10. `.thoughts/research/2026-07-28-deepbook-patterns-for-noxlimit.md`
+11. `.thoughts/verification/2026-07-28-noxlimit-critical-path.md`
+12. `AGENT_HANDOFF.md`
+13. the existing `spike/market` and `spike/nox` code and tests
 
 Before editing, report the objective, canonical authority, established executable evidence,
 historical/superseded instructions, genuine unknowns, and the next safe mutation. Inspect `git
@@ -30,18 +46,26 @@ and publication recovery.
 
 ## Product to build
 
-Build NoxLimit as a direct multi-asset trading terminal over real Ethereum Sepolia outcome-share
-markets:
+Build NoxLimit as a hybrid Market Stream and multi-asset trading terminal over real Ethereum
+Sepolia outcome-share markets:
 
 - curated BTC/USD and ETH/USD markets, plus SOL/USD after its Pyth settlement adapter passes the
   dedicated live verification;
 - 1h, 4h, and 24h market horizons;
 - YES/NO outcome shares against real seeded Conditional Tokens + FPMM bundles;
 - public variable collateral amount, immutable per order;
-- private maximum average buy price converted to integer `minOut` and encrypted in the browser;
+- private maximum average buy price converted to integer `minOut`, then sent directly by the
+  browser to the official Nox Handle Gateway confidential-input path;
 - hosted browser-off evaluation with an explicit privacy/check budget;
 - cancel, expiry, refund, fill, position, objective resolution, and redemption;
 - durable status and self-serve onboarding.
+
+The first-use experience is universal product behavior, not an evaluation-only mode. A wallet that
+needs funds signs one short-lived request; the sponsor service tops it toward measured native
+Sepolia ETH and clearly labeled six-decimal NoxLimit Test USDC starting targets without an external
+faucet or separate account. Balances then decrease normally and are never auto-refilled. A
+low-balance returning user may explicitly request a cooldown- and lifetime-capped refill that tops
+toward the targets. This sponsored onboarding does not make normal writes gasless.
 
 Use DeepBook only as product inspiration: market catalog, trading-terminal layout, typed reads and
 unsigned transaction builders, quote preview, transaction receipt, Orders, Positions, and Activity.
@@ -49,7 +73,27 @@ Do not implement or display a CLOB, public bid/ask depth, maker queue, or price-
 NoxLimit liquidity view is a real FPMM quote ladder for several public input sizes. Confidential
 resting orders never appear as public depth.
 
+Use the user's TikTok reference only for discovery interaction: on mobile, a vertically
+snap-aligned `Discover` Market Stream focuses on one real market at a time; on desktop, the same
+catalog becomes a richer vertical stream rail beside the full terminal. Each card uses real catalog,
+oracle, FPMM, liquidity, and compact chart data. The stream has visible deterministic sorting, no
+personalized `For You`, social mechanics, autoplay media, fake popularity, or placeholder markets.
+Sort modes are exactly `Closing soon` (`tradingClosesAt ASC`), `Recently opened` (`opensAt DESC`),
+and `Liquidity` (numeric `completeSetDepthAtoms DESC`), each then `marketId ASC`; asset, horizon,
+and lifecycle remain filters.
+`Trade YES` / `Trade NO` preselects the market and side and opens a full-context Trade workspace,
+not a bare form. It must include the full question, oracle-versus-outcome distinction, liquidity,
+size-aware quote, close/resolution terms, and expandable full chart before the amount, private-limit,
+expiry, disclosure, Gateway, and wallet flow. A dirty order draft must not be silently destroyed by
+scrolling, switching cards, mobile dismissal, back navigation, or swipe-away. Public fields may be
+kept only in volatile per-market state; a confirmed market/account/chain switch or explicit discard
+clears the private maximum price, which is never persisted.
+
 ## Required implementation order
+
+Steps 1–4 below are the retained implementation contract and regression boundary; they and bounded
+operator hardening are locally implemented rather than a request to restart. Step 5's fresh product
+deployment is the next live milestone.
 
 ### 1. Harden the verified contract slice
 
@@ -94,14 +138,30 @@ an undeployed, unseeded, or unverified placeholder as live.
 Keep each OrderBook single-market. Compose the product with a versioned manifest/read model rather
 than weakening the constructor bindings or building a permissionless market factory.
 
+The unchanged FPMM has no trading-close guard. Enforce `tradingClosesAt` for every NoxLimit action,
+stop presenting executable product quotes at close, and include an idempotent operator action that
+removes builder-seeded LP liquidity before resolution. Do not describe the legacy pool itself as
+time-gated.
+
 Derive `marketId` and Conditional Tokens `questionId` from stable market content, never wall-clock
 deployment time. Version deployed instances by `conditionId`, identify orders externally by
-`(chainId, orderBook, orderId)`, and expose resolver/feed provenance, configuration, and
-active/retired state in the committed catalog. Chainlink resolution must handle aggregator phase
+`(chainId, orderBook, orderId)`, and expose resolver/feed provenance, configuration, and immutable
+verification in each market record. Publish hash-linked catalog revisions with exactly one
+`ACTIVE` market per asset/horizon plus explicit `SUCCESSOR`/`RETIRED` routing; never mutate the
+market record to change activation. Chainlink resolution must handle aggregator phase
 boundaries and current round guidance; do not rely on deprecated `answeredInRound` checks. Prove
 the selected observation is the first chronological one at or after resolution by validating its
 timestamp and an adjacent predecessor before resolution, including phase transitions. Never let a
 caller cherry-pick any later favorable round.
+
+Use the implemented deployment journal for every live bundle. It is created before the first
+write, cross-process locked, and bound to the exact plan/operator/chain/output paths, ordered
+expected steps, and frozen funding plan. Preserve `INTENT → SUBMITTED → CONFIRMED`; never blindly
+replace a submitted transaction. A bare intent requires explicit per-step `ADOPT` with the exact
+transaction hash or `RETRY`, both bound to `expectedAttempt`. Keep secrets out of the journal, and
+publish only hash-verified create-only evidence/catalog outputs. Market duration and canonical
+question must match the declared 1h/4h/24h horizon exactly. When reusing operator-owned shared Test
+USDC, mint only the calculated pool/treasury shortfall.
 
 ### 3. Build the worker, indexer/read model, and typed client
 
@@ -117,30 +177,60 @@ caller cherry-pick any later favorable round.
 - Make writes unsigned until the connected wallet signs them.
 - Use a caller correlation/idempotency key for transaction proposals and named status strings in
   APIs, not enum ordinals from either the disposable harness or OrderBook.
+- Separate immutable verification, catalog activation, objective lifecycle, dynamic tradeability,
+  the complete ordered `tradeabilityReasons`, and derived badges; `CLOSING_SOON` is only a badge.
+- Implement the plan's snapshot/cursor market-list and source-provenanced history contracts. JSON
+  uses decimal strings for unbounded integers. Card prices use the canonical 1-Test-USDC reference
+  quote and liquidity sorting uses integer complete-set depth.
+- Prefetch only adjacent public detail/compact history with abort/deduplication. Never prefetch the
+  Gateway, wallet/funding data, writes, or uncached final quote.
 
-### 4. Build the direct terminal
+### 4. Build the Market Stream and direct terminal
 
 Implement:
 
+- a mobile vertical Market Stream and desktop stream rail over only verified/deployed/seeded
+  catalog entries;
+- full/expandable question, asset/horizon, separate close countdown, oracle versus strike,
+  YES/NO prices, liquidity, freshness/lifecycle, and truthful compact preview on each card;
+- visible deterministic `Closing soon`, `Recently opened`, and `Liquidity` sorts plus asset,
+  horizon, and lifecycle filters, with reduced-motion ordinary-scroll and explicit previous/next
+  accessibility paths;
+- `opensAt`/catalog-activation data, stable `marketId` tie-breaking, and focused-card ordering that
+  does not jump until a deliberate filter/sort/refresh action;
 - asset and horizon filters;
 - real market/strike/trading-close/resolution details;
 - oracle and YES/NO price history;
+- bounded source/as-of/block/staleness provenance for card previews and an accessible real-point
+  chart implementation in the selected terminal; do not add a chart dependency merely to replace
+  the current verified SVG/line renderer;
 - FPMM liquidity and quote ladder, clearly labeled as AMM pricing;
 - a private order ticket with side, public amount, private maximum price, and order expiry;
-- exact pre-sign quote, threshold conversion, browser encryption, approval, and signing;
+- exact pre-sign quote, threshold conversion, direct browser-to-Gateway confidential input,
+  approval, and signing;
 - transaction receipts and explorer links;
 - `My Orders`, `Positions`, and `Activity`;
 - durable `Resting privately`, `Evaluating`, `Publication pending`, `Filled`,
-  `Monitoring exhausted`, `Cancelled`, `Expired`, `Refundable`, and `Redeemable` states.
+  `Monitoring exhausted`, derived `Expiry ready`, `Cancelled`, `Expired`, `Refundable`, and
+  `Redeemable` states. `Expiry ready` exposes the permissionless expiry transaction before the
+  separate refund action is available.
 
-The primary flow is a terminal, not chat. An API/agent interface is secondary.
+The primary flow is `Market Stream → selected-market terminal/ticket → explicit review → wallet
+authorization`, not chat and not one-tap wagering. An API/agent interface is secondary.
 
-### 5. Verify the judged product path
+### 5. Verify the complete user path
 
 Run clean unit, property, adversarial, integration, recovery, and browser tests. Then verify a fresh
-live path that includes real funding/onboarding, order creation, browser closure, worker evaluation,
-one atomic FPMM fill, position display, objective resolution, and redemption. Use the final
+live path over one BTC/USD 4h and one ETH/USD 4h bundle that includes real funding/onboarding,
+order creation, browser closure, worker evaluation, one atomic FPMM fill, position display,
+objective resolution, and redemption. Safely fund the operator first; deploy or resume through the
+journal, activate the catalog, and provision the hosted worker/funding processes. Use the final
 cadence/check-budget guards, not the permissive Gate C deployment configuration.
+
+Browser assertions must prove card Trade actions cause no Gateway/wallet request before explicit
+review, design fixtures never ship as live responses, scroll changes focus without changing the
+selected Trade market or destroying a draft, reduced-motion Prev/Next parity, one accessible
+responsive interaction tree, and no page-level overflow at 390px.
 
 The product may be builder-seeded on testnet, but label that honestly. Do not claim anonymity, FHE,
 organic liquidity, production mainnet, professional auditing, or deterministic fill latency.

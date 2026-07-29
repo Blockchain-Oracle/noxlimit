@@ -10,8 +10,18 @@ Prompt 2 is waived by explicit user selection. The user approved the
 2026-07-28. Prompt 3 is complete at `GO`: its local Nox, market, and combined-adapter paths pass,
 and the bounded recovered Ethereum Sepolia trace/fill also passes. Do not restart discovery, comparison, or
 architecture from scratch. The canonical architecture now includes the DeepBook-informed
-multi-asset terminal and post-gate Opus corrections. The active route is the user's polished-build
-checkpoint; Prompt 4 is staged but not authorized to run.
+multi-asset terminal, the adopted mobile Market Stream + desktop stream-rail discovery contract,
+and post-gate Opus corrections. The user explicitly advanced the
+polished-build checkpoint on 2026-07-28; Prompt 4 is authorized and active. Its contracts,
+protocol, catalog, service, and web layers now exist locally, and bounded operator hardening is
+complete. The final 2026-07-29 local snapshot is contracts `62`, protocol `14`, catalog `6`,
+service `63`, and web `30` passing (`175` package tests total); Playwright records `42` passing,
+`18` intentional project/viewport skips, and zero failures. Root compile/type-check/test/build and
+the current 1440px/390px responsive baselines pass. The read-only
+Sepolia smoke correctly reports a degraded empty catalog. The active route is Prompt 4 Phase 6:
+safely fund the operator, deploy or resume one BTC/USD 4h and one ETH/USD 4h bundle through their
+journals, activate the catalog, provision the hosted worker/funding path, and record the full live
+create-to-redeem proof. External Sepolia gas funding and live credentials/processes remain pending.
 
 1. [Run docs-first product discovery](./00-docs-first-product-discovery.md)
 2. [Independently audit NoxLimit and the full corpus](./01-independent-noxlimit-audit.md)
@@ -19,6 +29,7 @@ checkpoint; Prompt 4 is staged but not authorized to run.
 4. [Adversarially choose one concept](./02-adversarial-selection.md)
 5. [Verify the chosen concept's critical path](./03-critical-path-verification.md)
 6. [Build the polished NoxLimit product](./04-polished-product-implementation.md)
+7. [Design NoxLimit from product truth to developer handoff](./05-designer-agent-handoff.md)
 
 Prompt 0 is the canonical discovery prompt **only if the user and `CURRENT.md` explicitly reopen
 discovery**. It recovers the official Nox product catalog that `llms-full.txt` omits, distinguishes
@@ -50,7 +61,18 @@ historical context and must not be run. The older Prompt 0 excluded several offi
 incorrectly required an unchanged third-party integration even for a standalone Nox product.
 
 Run Prompt 2 only if the user explicitly reopens product comparison. Do not rerun Prompt 3, broad
-research, or architecture redesign. A polished product build begins only after the user's current
-checkpoint. When the user explicitly advances it, Prompt 4 is the active implementation handoff.
-Historical project clocks and submission dates are not implementation authority; user direction
-controls pacing.
+research, or architecture redesign. Execute Prompt 4 from the canonical architecture, accepted
+evidence, product stories, and surface map. Historical project clocks and submission dates are not
+implementation authority; user direction controls pacing.
+
+Prompt 5 is complete as a design handoff. The user selected visual direction **`Complement`** with a palette
+inherited from Reclaim (`getreclaim.xyz`); see
+[`../.thoughts/design/2026-07-28-noxlimit-visual-direction-selection.md`](../.thoughts/design/2026-07-28-noxlimit-visual-direction-selection.md).
+`Vigil` and `Caliper` are rejected history. Do not re-run the three-direction exploration. The six
+files in `../.thoughts/design/html/` now preserve directions, foundations, audited Batches A–C,
+responsive compositions, and the prototype; their sample data is not live product evidence.
+
+Prompt 5 was a parallel external-designer handoff, not a later product-selection gate. Its accepted
+result preserves the Market Stream → terminal → explicit review interaction in the production
+implementation; future refinements may not revive rejected directions or turn sample fixtures into
+live inventory.
