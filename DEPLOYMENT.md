@@ -79,8 +79,9 @@ curl --fail http://127.0.0.1:8787/v1/markets
 ```
 
 Without worker credentials, health intentionally reports evaluator/funding as unavailable or
-degraded. Public market inspection still works. That status is not permission to display sample
-markets or claim that write flows are live.
+degraded. An empty bootstrap or closed historical catalog may still be inspected, but startup
+rejects a non-empty catalog with an open active market unless its evaluator is ready. That status
+is not permission to display sample markets or claim that write flows are live.
 
 ## Enable the Sepolia worker and in-product funding
 
@@ -102,7 +103,8 @@ private key, credential-bearing RPC URL, proof, raw private maximum, or decrypte
 Before declaring the service ready:
 
 1. derive the worker address from the secret without printing the secret;
-2. verify that address is the immutable `worker` on every active OrderBook;
+2. verify that address is the immutable `worker` on every catalogued OrderBook, including staged
+   successors and retained history;
 3. fund it with enough Sepolia ETH for the measured lifecycle and recovery reserve;
 4. verify the funding treasury holds its advertised Test ETH/Test USDC targets;
 5. start the service and require overall, evaluator, and funding health to report `READY`;
@@ -131,9 +133,11 @@ pnpm --filter @noxlimit/web start
 Recommended hosting boundaries:
 
 - expose the web application and service through HTTPS;
+- set service `HOST=0.0.0.0` inside a container or hosted process;
 - set `WEB_ORIGIN` to the exact public web origin for CORS;
 - mount immutable catalog revisions and an absolute reload-pointer file into the service;
-- monitor `/v1/health`, worker ETH, treasury balances, RPC lag, and Gateway health;
+- monitor `/v1/health` as structured data and require top-level, evaluator, and funding status to
+  remain `READY`; also monitor worker ETH, treasury balances, RPC lag, and Gateway health;
 - redact credentials, signatures, handles/proofs, candidates, and private-input material;
 - deploy a new service process rather than overlapping two write-enabled replicas.
 
