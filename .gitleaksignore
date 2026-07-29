@@ -2,6 +2,55 @@
 # Conditional Tokens contract address recorded in two create-only evidence files.
 .thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-close.json:generic-api-key:6
 .thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-liquidity-close.json:generic-api-key:6
+.thoughts/evidence/2026-07-29-phase6-btc-resolution-redemption.json:generic-api-key:15
+.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-redemption.json:generic-api-key:6
+.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-resolution-policy-rejection.json:generic-api-key:15
+
+# Reviewed false positives in corrected-successor deployment evidence: public Conditional Tokens
+# deployment address and runtime hash.
+.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json:generic-api-key:16
+.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json:generic-api-key:61
+.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json:generic-api-key:16
+.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json:generic-api-key:61
+
+# Reviewed false positives in staged catalog r6: public Conditional Tokens deployment
+# addresses/runtime hashes and the public pinned source commit.
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:50
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:97
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:111
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:159
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:205
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:219
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:267
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:313
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:327
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:375
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:421
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:435
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:483
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:529
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json:generic-api-key:543
+
+# Reviewed false positives in staged catalog r7: public Conditional Tokens deployment
+# addresses/runtime hashes and the public pinned source commit.
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:50
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:97
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:111
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:159
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:205
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:219
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:267
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:313
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:327
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:375
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:421
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:435
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:483
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:529
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:543
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:591
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:637
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json:generic-api-key:651
 
 # Reviewed false positives in immutable catalog r5: public Conditional Tokens
 # deployment addresses/runtime hashes and the public pinned source commit.
