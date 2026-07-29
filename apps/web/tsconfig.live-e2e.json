@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "incremental": false,
+    "types": ["node", "@playwright/test"]
+  },
+  "include": ["playwright.live.config.ts", "playwright.redemption.config.ts", "e2e/live/**/*.ts"],
+  "exclude": ["node_modules"]
+}

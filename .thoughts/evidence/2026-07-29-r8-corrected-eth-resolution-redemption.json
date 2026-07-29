@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "chainId": 11155111,
+  "recordedAt": "2026-07-29T18:20:53.782Z",
+  "catalogRevision": "0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e",
+  "publicIdentity": {
+    "wallet": "0xEE88b83C63DBe3F585B458D2Bf18A5eed1bEAD34",
+    "marketId": "0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a",
+    "positionId": "0xff57a3fdee7bc9f367e9e00a1dd83166181f4c41466eb1097621d5eb7843f588",
+    "side": "YES",
+    "question": "Will ETH/USD be at or above $1,910 at 2026-07-29T17:50:00Z?"
+  },
+  "contracts": {
+    "resolver": "0x7B81e9c43351d3a5F5B4DddDdf3E3Ac69517FE47",
+    "conditionalTokens": "0x5f3198E99F74A9AaA82386e275395D57401C953D",
+    "collateral": "0x2B0F8B156a2870E53621802A618C3d0427A163A6",
+    "conditionId": "0xfccd763871781a26414c5db2269fdce1808c4ae2a3a8acecad87a6ab2e558bcc",
+    "questionId": "0x15e32ed9a6b77d4b3d1722b54d3978df399bbebeb77a4509c0393dae3ee1d535",
+    "fpmm": "0x4Dd94Ec9Ea9A3A88529b3397244eC4c1b22b6435",
+    "orderBook": "0x360D8C69c7f0fe3178145Ba6Cb237846Aa44C9f4",
+    "yesPositionId": "97019495723367340443359515032063998274375348112116967116316650918043750207119",
+    "noPositionId": "65235259052029887276015326645082137112309098532755523044583601247894422134175"
+  },
+  "safeEvidence": {
+    "preflight": {
+      "blockNumber": "11377152",
+      "blockHash": "0x9b6802193db5e028f6accc443f75488a44d679c43b6fe0907a87706639b1ce49",
+      "timestamp": "1785348576"
+    },
+    "browser": {
+      "safeBlockNumber": "11377152",
+      "safeBlockHash": "0x9b6802193db5e028f6accc443f75488a44d679c43b6fe0907a87706639b1ce49",
+      "safeBlockTimestamp": "1785348576"
+    },
+    "selectedAnswer": "191351850000",
+    "selectedObservedAt": "1785348012",
+    "predecessorObservedAt": "1785344772"
+  },
+  "objectiveResolution": {
+    "transactionHash": "0x44d1f1903e31506a27b5b9ee4b7508b2ff71ce7322343fac2d3f57f7247577f0",
+    "blockNumber": "11377186",
+    "blockHash": "0xc27510c738f02caeb35ca981ed1873f881b92472eec9a5b1309bff14648cb37b",
+    "questionId": "0x15e32ed9a6b77d4b3d1722b54d3978df399bbebeb77a4509c0393dae3ee1d535",
+    "winner": "YES",
+    "settlementPriceWad": "1913518500000000000000",
+    "observedAt": "1785348012",
+    "selectedRoundId": "18446744073709586451",
+    "predecessorRoundId": "18446744073709586450"
+  },
+  "redemption": {
+    "transactionHash": "0xbc46ffba534acebfc00fb1681b97c83953007b28bad8f84a26c00ce18096c64e",
+    "blockNumber": "11377198",
+    "blockHash": "0xa78a37e8da7ea55cc446ae5413d57930b24dd2b87dcd4effe6be2c2d5faabfab",
+    "beforeBlock": "11377197",
+    "afterBlock": "11377198",
+    "yesSharesBefore": "1941161",
+    "noSharesBefore": "1978831",
+    "yesSharesAfter": "0",
+    "noSharesAfter": "0",
+    "payoutDenominator": "1",
+    "yesPayoutNumerator": "1",
+    "noPayoutNumerator": "0",
+    "computedPayoutAtoms": "1941161",
+    "eventPayoutAtoms": "1941161",
+    "collateralBalanceBeforeAtoms": "22978831",
+    "collateralBalanceAfterAtoms": "24919992",
+    "collateralDeltaAtoms": "1941161",
+    "apiMaximumRedemption": "1.941161",
+    "finalPositionState": "REDEEMED",
+    "finalShares": "0.000000"
+  },
+  "journal": {
+    "storage": "private-local",
+    "bindingHash": "0xa6e634d159f47ab2bd4fae8d27e8c99a2d1bdfc769e2fe245ac2038d610ba24e",
+    "resolution": {
+      "state": "CONFIRMED",
+      "attempt": 1,
+      "plannedTransactionHash": "0x44d1f1903e31506a27b5b9ee4b7508b2ff71ce7322343fac2d3f57f7247577f0",
+      "plannedNonce": "10",
+      "destination": "0x7B81e9c43351d3a5F5B4DddDdf3E3Ac69517FE47",
+      "transactionHash": "0x44d1f1903e31506a27b5b9ee4b7508b2ff71ce7322343fac2d3f57f7247577f0",
+      "receiptBlockNumber": "11377186",
+      "receiptBlockHash": "0xc27510c738f02caeb35ca981ed1873f881b92472eec9a5b1309bff14648cb37b",
+      "recoveries": []
+    },
+    "redemption": {
+      "state": "CONFIRMED",
+      "attempt": 1,
+      "plannedTransactionHash": "0xbc46ffba534acebfc00fb1681b97c83953007b28bad8f84a26c00ce18096c64e",
+      "plannedNonce": "11",
+      "destination": "0x5f3198E99F74A9AaA82386e275395D57401C953D",
+      "transactionHash": "0xbc46ffba534acebfc00fb1681b97c83953007b28bad8f84a26c00ce18096c64e",
+      "receiptBlockNumber": "11377198",
+      "receiptBlockHash": "0xa78a37e8da7ea55cc446ae5413d57930b24dd2b87dcd4effe6be2c2d5faabfab",
+      "recoveries": []
+    }
+  },
+  "destinations": {
+    "web": "http://127.0.0.1:<port>",
+    "api": "http://127.0.0.1:<port>",
+    "rpc": "https://sepolia.drpc.org"
+  },
+  "checks": [
+    "CATALOG_AND_BUNDLE_BOUND",
+    "EXACT_SAFE_ROUND_PAIR",
+    "BROWSER_WALLET_RESOLUTION",
+    "DURABLE_ONE_SHOT_JOURNAL",
+    "ONE_SHOT_RESOLVER_EVENT",
+    "WINNING_POSITION_REDEEMABLE",
+    "BROWSER_WALLET_REDEMPTION",
+    "CTF_PAYOUT_REDEMPTION_EVENT",
+    "EXACT_COLLATERAL_TRANSFER",
+    "BLOCK_PINNED_COLLATERAL_DELTA",
+    "BOTH_OUTCOME_BALANCES_CONSUMED",
+    "SAFE_BLOCK_REDEEMED_PROJECTION"
+  ]
+}

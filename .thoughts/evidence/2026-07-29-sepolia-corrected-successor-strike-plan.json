@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "kind": "NOXLIMIT_SUCCESSOR_STRIKE_PLAN",
+  "chainId": 11155111,
+  "recordedAt": "2026-07-29T11:46:07Z",
+  "snapshot": {
+    "blockNumber": "11375278",
+    "blockHash": "0x77f0c273c23c2f65cd0b292afab9beb873ec2e02b2f5c91d8824cd3fc5a4ec8a",
+    "blockTimestamp": "1785325152",
+    "blockTime": "2026-07-29T11:39:12Z",
+    "tagAtSelection": "safe",
+    "canonicalHashRechecked": true
+  },
+  "selectionPolicy": {
+    "version": "near-the-money-half-up-v1",
+    "rule": "Round the positive eight-decimal Chainlink answer to the nearest configured whole-dollar tick; an exact half-tick rounds upward.",
+    "ticksUsd": {
+      "BTC/USD": "100",
+      "ETH/USD": "10"
+    }
+  },
+  "resolverPolicy": {
+    "policyVersion": "chainlink-first-observation-v1",
+    "maximumObservationDelaySeconds": "14400",
+    "minimumEnforcedByOperator": true,
+    "reason": "The last 11 observed Sepolia gaps on both feeds reached 3696 seconds; four hours preserves the unique first-observation rule while tolerating ordinary cadence jitter and missed reports."
+  },
+  "markets": [
+    {
+      "asset": "BTC/USD",
+      "proxy": "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
+      "roundId": "18446744073709584255",
+      "answer": "6450486079524",
+      "decimals": 8,
+      "observedAt": "1785321636",
+      "observedPriceUsd": "64504.86079524",
+      "selectedStrikeUsd": "64500",
+      "strikePriceWad": "64500000000000000000000"
+    },
+    {
+      "asset": "ETH/USD",
+      "proxy": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+      "roundId": "18446744073709586444",
+      "answer": "190981780000",
+      "decimals": 8,
+      "observedAt": "1785322824",
+      "observedPriceUsd": "1909.81780000",
+      "selectedStrikeUsd": "1910",
+      "strikePriceWad": "1910000000000000000000"
+    }
+  ],
+  "sharedTimes": {
+    "startsAt": "1785333000",
+    "startsAtIso": "2026-07-29T13:50:00Z",
+    "tradingClosesAt": "1785347100",
+    "tradingClosesAtIso": "2026-07-29T17:45:00Z",
+    "resolvesAt": "1785347400",
+    "resolvesAtIso": "2026-07-29T17:50:00Z",
+    "horizonSeconds": "14400"
+  },
+  "privacy": {
+    "containsCredentials": false,
+    "containsPrivateOrderMaterial": false
+  }
+}

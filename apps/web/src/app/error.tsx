@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) { return <main className="error-page"><span className="status-mark barred" aria-hidden="true" /><h1>NoxLimit could not load this surface.</h1><p>No transaction has been inferred from this error. Retry the read or return to the Market Stream.</p><button className="button primary" type="button" onClick={reset}>Retry</button></main>; }

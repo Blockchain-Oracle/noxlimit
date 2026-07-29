@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "chainId": 11155111,
+  "recordedAt": "2026-07-29T06:16:08.699Z",
+  "publicOrder": {
+    "ref": {
+      "chainId": 11155111,
+      "orderBook": "0x44d663aA3b613E98eBAD962e8C9BCffE8Acf4DfC",
+      "orderId": "2"
+    },
+    "marketId": "0xb0380849b49402e9bfb22d89f9c4e7bd3fb9e096af12812aec047deebdc4d682",
+    "side": "YES",
+    "amount": "1"
+  },
+  "fundingMode": "ALREADY_FUNDED",
+  "destinations": {
+    "web": "http://127.0.0.1:<port>",
+    "api": "http://127.0.0.1:<port>",
+    "rpc": "https://sepolia.drpc.org",
+    "gateway": "https://gateway-testnets.noxprotocol.dev",
+    "wallet": "0xc160cE…cBbF6a",
+    "fundingTreasury": "0x6b4Ce6…721b78",
+    "collateral": "0x2B0F8B…A163A6",
+    "orderBook": "0x44d663…cf4DfC"
+  },
+  "transactionHashes": [
+    {
+      "kind": "COLLATERAL_APPROVAL",
+      "transactionHash": "0xcf0726a91757dac5d6907c3806b6aeece9f8b43c73248aed7e2f22cfd49e2565"
+    },
+    {
+      "kind": "ORDER_CREATE",
+      "transactionHash": "0xe0410d6eae30dc9ee233d8f5873d2794bea3e2071720173691d73896244fa14e"
+    },
+    {
+      "kind": "ORDER_FILL",
+      "transactionHash": "0x5b0cf0db51394b2cbe1f843beb99a14a1695d9145ccc8a434b07cdcca6dc626e"
+    }
+  ],
+  "networkEvidence": {
+    "directGatewayPostCount": 1
+  },
+  "checks": [
+    "BALANCES_ALREADY_READY",
+    "DIRECT_GATEWAY",
+    "ORDER_CREATED",
+    "BROWSER_CLOSED",
+    "API_FILLED",
+    "FRESH_BROWSER_FILLED"
+  ]
+}

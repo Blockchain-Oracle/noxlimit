@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "kind": "NOXLIMIT_SEPOLIA_BUNDLE_DEPLOYMENT",
+  "chainId": 11155111,
+  "marketId": "0x0c552e5f150ec05e4ef39c4a7913ec4ac0a94b9fe71170538d452d3661e7b7ed",
+  "catalogRevisionCandidate": "0x3fdb8c17958a56f89b19b8ab491ba458629d2762c69eacf4ad2b436c92d561f3",
+  "operator": "0xA03D26E19ee4061A06a9a097010Bc06028Bba60A",
+  "deploymentPlanHash": "0x9dfd7c09e95aafe61b8f10897d299274992c0c15bc88ed5de0ebb918c888d258",
+  "addresses": {
+    "collateral": "0x2B0F8B156a2870E53621802A618C3d0427A163A6",
+    "settlementAdapter": "0xE288c9ee65625c530Ea94902dbDAa90cD2628c33",
+    "resolver": "0x3788390710385c6321E47788224A2aDF48676661",
+    "fpmm": "0x6c385a491FaD61F832D4f3E7C3F7aA64087f575D",
+    "orderBook": "0x2bFceD9242ae322AC3976fa565EFb6ddF162Cee6",
+    "fundingTreasury": "0x6b4Ce61906E7402e198Bd6D2bc73CEd24A721b78",
+    "conditionalTokens": "0x5f3198E99F74A9AaA82386e275395D57401C953D",
+    "fpmmFactory": "0xC3ab21B6339b4AAbA14915FC34794DbB12a8901C"
+  },
+  "identity": {
+    "questionId": "0x7bdb429d9eb03c04eb04ce1dbcb342fbcfbc15a10f61ef476ad5ad134dc9f569",
+    "conditionId": "0x7858dc420322bf5e6f88c8d10af0f1afc03b4bbad9973191763d2cbc30904a8a",
+    "assetId": "0xee62665949c883f9e0f6f002eac32e00bd59dfe6c34e92a91c37d6a8322d6489"
+  },
+  "builderSeededLiquidity": {
+    "requestedCompleteSetsAtoms": "50000000",
+    "poolYesBalance": "50000000",
+    "poolNoBalance": "50000000",
+    "lpShares": "50000000"
+  },
+  "funding": {
+    "sharedTreasuryReused": true,
+    "minimumNativeWei": "100000000000000000",
+    "minimumCollateralAtoms": "250000000",
+    "nativeTopUpWei": "20000000000000000",
+    "collateralTopUpAtoms": "25000000",
+    "operatorCollateralMintAtoms": "75000000"
+  },
+  "receipts": {
+    "collateral": null,
+    "operatorCollateralMint": "0xb7b581026adeef4d6067eef225ba4c74fbe7b1c24d1e69bc1cfbf7b26bddbd7c",
+    "settlementAdapter": "0x33abe74d9ff4a6dd50a8a72e5acadc99f822943ba253e084d1b27d52e3a88033",
+    "resolver": "0xbf0b6699009492752684242d3b38b4149e790a8850e7b16a9954f7f87cefdda4",
+    "prepareCondition": "0x8bdeafc6b0e65dd3aa90b93bf674793dd644c44e462bdef5383835746a4cd236",
+    "fpmm": "0xd85211db585f7db01b61ecc24a342114e6deffbdc8138cb2086a8166948397d7",
+    "fpmmSeedApproval": "0xd681f122890cfcaf5b54243ae364bfe4df9fe80a6a9e1a4163c6f9ea07d1338d",
+    "seedLiquidity": "0xe9a2783fd17381140d7f29dd69b16956e27ad057810c75c52031c281aebe6b92",
+    "orderBook": "0xcd1e89fed7d595e29a7ebf77ae2f97603584a35c1615263a0ffd975f4eecb5b2",
+    "fundingTreasury": null,
+    "fundTreasuryCollateral": "0x833e083daee5321be9499112697c138e411c03a9ab2b69dd571a1c7f386e1de0",
+    "fundTreasuryNative": "0x96c8084413a133d90beae8215c433d4092918fca3726931b02c57f527d8d3201"
+  },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-29T16:03:24.000Z",
+    "verifiedAtBlock": "11376533",
+    "verifiedBy": "0xA03D26E19ee4061A06a9a097010Bc06028Bba60A",
+    "evidenceRef": ".thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment.json",
+    "runtimeCodeHashes": {
+      "collateral": "0x63d2cbe6d5b8f50c9732dea3dbc69d68382f6057d15e698c5ce75da1b303ec8c",
+      "settlementAdapter": "0x610e161c52e88a4e54cf962b5ee71301150e1d93f655088fafd26d72c18c6db1",
+      "conditionalTokens": "0x3fabb10bb08ca7d52b1806ff2802b039fcfa203300c72752b78774d91ca5239d",
+      "resolver": "0xaae0e5af8038e093c7586f0f6ff8e57875196373c4b3ee8f3606a8e81413fd7e",
+      "fpmm": "0xc80e727e8099b094e7ed192de60832c5903f06f111d71349be4861f72d2423ef",
+      "orderBook": "0x6a2900df647b272da7b7154c8d3d20c21cc51ed4b2c6b6f48ae44e776b12f2ff"
+    }
+  },
+  "infrastructureRuntimeCodeHashes": {
+    "fpmmFactory": "0x3a936a16b5fc3c8cdc1b0e155a325696016f8feadfc63002ed22bf0382618213",
+    "chainlinkProxy": "0x9190afba2a699a9627d64ed68c7cc60e4005a8830b33183c4413b4e1a93b9ccd",
+    "fundingTreasury": "0x26ed2b3bfcad33d08fdba3e5fc521cc87564ef29c1401475ed9d389c9b959de1"
+  }
+}

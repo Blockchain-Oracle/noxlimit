@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "chainId": 11155111,
+  "marketId": "0x0c552e5f150ec05e4ef39c4a7913ec4ac0a94b9fe71170538d452d3661e7b7ed",
+  "deploymentEvidenceRef": ".thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment.json",
+  "step": "fundingTreasuryCollateralTopUp",
+  "operator": "0xA03D26E19ee4061A06a9a097010Bc06028Bba60A",
+  "collateral": "0x2B0F8B156a2870E53621802A618C3d0427A163A6",
+  "fundingTreasury": "0x6b4Ce61906E7402e198Bd6D2bc73CEd24A721b78",
+  "amountAtoms": "25000000",
+  "failedAttempt": {
+    "attempt": 1,
+    "transactionHash": "0x5eed0a5e4b8d9b94ba9eb1bc7ca5fe45b7f98897a33fbbc85d706c89bfcea884",
+    "nonce": "83",
+    "blockNumber": "11376448",
+    "blockHash": "0x7c2141c5201c505003c70101a98359e12f006bf3fc5cb13bd55388d8a608c5cb",
+    "receiptStatus": "REVERTED",
+    "gasLimit": "34012",
+    "gasUsed": "34012",
+    "traceOutcome": "OUT_OF_GAS"
+  },
+  "recovery": {
+    "action": "RETRY",
+    "expectedAttempt": 1,
+    "failedReceiptAndSenderVerifiedBeforeRetry": true,
+    "failedSubmissionPersistedBeforeAttemptIncrement": true
+  },
+  "successfulAttempt": {
+    "attempt": 2,
+    "transactionHash": "0x833e083daee5321be9499112697c138e411c03a9ab2b69dd571a1c7f386e1de0",
+    "nonce": "84",
+    "blockNumber": "11376530",
+    "blockHash": "0xca3f466a153b785ad807c9acf9e18807be608b10fdb3cee43f1cb3e4823a374d",
+    "receiptStatus": "SUCCESS",
+    "gasLimit": "41390",
+    "gasUsed": "29691"
+  },
+  "prevention": {
+    "sepoliaOperatorGasMultiplier": "1.2",
+    "automaticGasHeadroomCoveredWritesDeploymentsAndNativeTransfers": true,
+    "regressionTestsAdded": true
+  },
+  "recordedAt": "2026-07-29T16:45:59Z"
+}

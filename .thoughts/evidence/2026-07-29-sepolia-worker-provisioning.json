@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "kind": "NOXLIMIT_SEPOLIA_WORKER_PROVISIONING",
+  "chainId": 11155111,
+  "recordedAt": "2026-07-29T05:05:36.000Z",
+  "operator": "0xA03D26E19ee4061A06a9a097010Bc06028Bba60A",
+  "worker": "0x393b05351089dE5BBF6c85A21d72FC370bb19a09",
+  "policy": {
+    "kind": "MEASURED_ONE_TIME_TARGET_TOP_UP",
+    "targetWei": "20000000000000000",
+    "automaticRefill": false
+  },
+  "balanceBeforeWei": "3923157828954289",
+  "amountWei": "16076842171045711",
+  "balanceAfterWei": "20000000000000000",
+  "transaction": {
+    "hash": "0xc7a1d9cc8e1212a63c4cb653aaa67d06f7fb004c18a95d68710970cf448f426b",
+    "blockNumber": "11373429",
+    "blockHash": "0x778bfa05a8201725d5c925946913e2d58f04c41cfc95fe24caf5b84eadd417f8",
+    "status": "success"
+  }
+}

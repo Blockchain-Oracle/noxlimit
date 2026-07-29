@@ -1,0 +1,1 @@
+export default function Loading() { return <main className="loading-shell" aria-busy="true" aria-label="Loading NoxLimit"><div className="skeleton wide" /><div className="skeleton" /><div className="skeleton tall" /></main>; }
