@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "kind": "NOXLIMIT_SEPOLIA_BUNDLE_DEPLOYMENT",
+  "chainId": 11155111,
+  "marketId": "0xb0380849b49402e9bfb22d89f9c4e7bd3fb9e096af12812aec047deebdc4d682",
+  "catalogRevisionCandidate": "0xed59599a3b777571a97733c24e793b3264f2f47cede79629640e3fc6d660c258",
+  "operator": "0xA03D26E19ee4061A06a9a097010Bc06028Bba60A",
+  "deploymentPlanHash": "0xd6465508fe905403599da850f4af66663afa5e143a01ec094a0a4fd80e1c6d59",
+  "addresses": {
+    "collateral": "0x2B0F8B156a2870E53621802A618C3d0427A163A6",
+    "settlementAdapter": "0xd905e5eD02CEDb94eb284B25b0fcd91BF4a0a8Ee",
+    "resolver": "0x0c208f1504cF22010e3Fa504BB680c4289dCc2B2",
+    "fpmm": "0xe4F17F73A0A29BfDf66138ae43F8E2A77EeC29c3",
+    "orderBook": "0x44d663aA3b613E98eBAD962e8C9BCffE8Acf4DfC",
+    "fundingTreasury": "0x6b4Ce61906E7402e198Bd6D2bc73CEd24A721b78",
+    "conditionalTokens": "0x5f3198E99F74A9AaA82386e275395D57401C953D",
+    "fpmmFactory": "0xC3ab21B6339b4AAbA14915FC34794DbB12a8901C"
+  },
+  "identity": {
+    "questionId": "0xee42680e2030980a7b64ffd6ae9899c7569201c9c6e5facc23e2803fff6cb7e3",
+    "conditionId": "0x94bae4f11ca905f276d9b23d6d00cd6469a9a17fc48c31adc19fb3ddf7d73d71",
+    "assetId": "0xee62665949c883f9e0f6f002eac32e00bd59dfe6c34e92a91c37d6a8322d6489"
+  },
+  "builderSeededLiquidity": {
+    "requestedCompleteSetsAtoms": "50000000",
+    "poolYesBalance": "50000000",
+    "poolNoBalance": "50000000",
+    "lpShares": "50000000"
+  },
+  "funding": {
+    "sharedTreasuryReused": false,
+    "minimumNativeWei": "100000000000000000",
+    "minimumCollateralAtoms": "250000000",
+    "nativeTopUpWei": "100000000000000000",
+    "collateralTopUpAtoms": "250000000",
+    "operatorCollateralMintAtoms": "300000000"
+  },
+  "receipts": {
+    "collateral": "0x900248880fd71f9b3803e50039e08eff5116f9711c3ffa36b47c4cd830a4b0b9",
+    "operatorCollateralMint": "0xe26771d8f18f440de68a68657da4448f604fb28b3da7b8cee29972a06d4e9926",
+    "settlementAdapter": "0xb0d4b7a2679818043e04c11deb0ebfa5c64b67af4a2e9c57306e24d28fb3469c",
+    "resolver": "0x1370e7d32ba53035efc0e767fff321e5869834715293c771866272d2c0d595a7",
+    "prepareCondition": "0xdf2a7ea1d447a636c790a5f718957fe7721270a8cda36f47d6ba6e7e5588af87",
+    "fpmm": "0xff966413116e10db9e34fa500bfc77980a21681fab30d99e2fabcaf5c12e6648",
+    "seedLiquidity": "0xb21e530615e3658daf3850625797c752bf16da2e92c29f1819db18d4033eebb6",
+    "orderBook": "0x0c939de35c0f28db67c6ded2896c2ec3ce255c1c139bd05f89b913a78fd53d3e",
+    "fundingTreasury": "0x35aefe16a6a788331056a067daa7091288460ba0beb4a19c11c63f71c9dba348",
+    "fundTreasuryCollateral": "0x48690d26ce5590e31d1679eb150bbf49b267d44483a6cca7ee94ea6400d37957",
+    "fundTreasuryNative": "0xc79c3ecdcccb80654d2b928fd99b77611c26228fdd487119d4eeb2d8bf9277e3"
+  },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-29T04:50:12.000Z",
+    "verifiedAtBlock": "11373354",
+    "verifiedBy": "0xA03D26E19ee4061A06a9a097010Bc06028Bba60A",
+    "evidenceRef": ".thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-deployment.json",
+    "runtimeCodeHashes": {
+      "collateral": "0x63d2cbe6d5b8f50c9732dea3dbc69d68382f6057d15e698c5ce75da1b303ec8c",
+      "settlementAdapter": "0x610e161c52e88a4e54cf962b5ee71301150e1d93f655088fafd26d72c18c6db1",
+      "conditionalTokens": "0x3fabb10bb08ca7d52b1806ff2802b039fcfa203300c72752b78774d91ca5239d",
+      "resolver": "0x93982dc5b4569e642b33a2c889dc5b1db7734dcaa2d0372c47f4f636b9d7308d",
+      "fpmm": "0xc80e727e8099b094e7ed192de60832c5903f06f111d71349be4861f72d2423ef",
+      "orderBook": "0x0f5e2dc3aceb6e869b49112aa75a34cd7ca7df17dec6c1bc4dfa1b435b3b6c60"
+    }
+  },
+  "infrastructureRuntimeCodeHashes": {
+    "fpmmFactory": "0x3a936a16b5fc3c8cdc1b0e155a325696016f8feadfc63002ed22bf0382618213",
+    "chainlinkProxy": "0x9190afba2a699a9627d64ed68c7cc60e4005a8830b33183c4413b4e1a93b9ccd",
+    "fundingTreasury": "0x26ed2b3bfcad33d08fdba3e5fc521cc87564ef29c1401475ed9d389c9b959de1"
+  }
+}
