@@ -31,9 +31,9 @@ correctly reported `UPCOMING` until their shared `2026-07-29T17:30:00Z` start.
 
 The corrected 14,400-second BTC market
 `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2` and ETH market
-`0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a` are `ACTIVE`; the verified
-`2026-07-29T15:34:12Z` service snapshot found both ordering-open and dynamically tradeable. That
-runtime result is time-bound rather than a permanent market-state claim. Their immutable deployment
+`0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a` are `ACTIVE`. Their earlier
+ordering-open snapshot was time-bound; after close and objective resolution, both now report
+`RESOLVED_YES / ORDERING_CLOSED`. Their immutable deployment
 and seed evidence remains in the
 [corrected strike plan](./.thoughts/evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json),
 [BTC deployment evidence](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json),
@@ -59,14 +59,22 @@ and [YES order `2`](./.thoughts/evidence/2026-07-29-r8-corrected-btc-yes-order.j
 [NO order `2`](./.thoughts/evidence/2026-07-29-r8-corrected-eth-no-order.json). Fresh browsers
 confirmed every fill. Receipt and ERC-1155 reads verify 1,941,161, 1,978,831, 1,941,161, and
 1,978,831 outcome atoms respectively, with zero matching OrderBook dust. These four records bring
-the product total to seven browser-off fills. Corrected-route objective settlement, winning-user
-redemption, and builder-position redemption remain pending. Confirmed
+the product total to seven browser-off fills. The exact first safe post-deadline Chainlink
+observations resolved both corrected markets YES. The browser resolved and redeemed the winning
+user in the [BTC](./.thoughts/evidence/2026-07-29-r8-corrected-btc-resolution-redemption.json) and
+[ETH](./.thoughts/evidence/2026-07-29-r8-corrected-eth-resolution-redemption.json) journeys, paying
+1,978,831 and 1,941,161 Test USDC atoms respectively. Confirmed
 [BTC](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-close.json)
 and [ETH](./.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-close.json)
-close transactions reduced both corrected LP balances to zero without premature redemption; the
-unresolved builder outcome balances are preserved for the settlement proof.
+close transactions reduced both corrected LP balances to zero without premature redemption. The
+subsequent [BTC](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-redemption.json)
+and [ETH](./.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-redemption.json)
+passes redeemed every retained resolved builder position without a second liquidity removal; both
+builder YES/NO balances are zero. Each corrected route now has a complete browser-created order →
+browser-off fill → objective resolution → winning-user redemption → builder-position redemption
+vertical.
 
-The latest root `pnpm check` passes contracts `84`, protocol `14`, catalog `6`, service `69`, and web
+The post-settlement root `pnpm check` passes contracts `84`, protocol `14`, catalog `6`, service `69`, and web
 `62` tests (`235` total), including compile, type-check, test, and build. The dedicated Playwright
 baseline records `45` passing journeys, `21` intentional skips, and zero failures; both gates must be
 rerun and recorded at the final submission commit. New official Sepolia BTC/ETH
@@ -75,8 +83,7 @@ first-observation rule; runtime quote freshness remains separately 3,600 seconds
 service/web container builds and local smoke checks pass. Public frontend/service URLs, video, X
 post, and form/contact fields are pending, and provisioning the proposed always-on service requires
 the user's explicit authorization for billable hosting. Both corrected revision-8 routes now have
-real browser-created, browser-off fills, but neither has a complete create-to-redeem vertical until
-objective resolution and user/builder redemption are preserved. The approved 1h/24h BTC/ETH
+complete create-to-redeem verticals. The approved 1h/24h BTC/ETH
 catalog breadth is now deployed and active beside the 4h pair in revision `12`. The public repository is
 verified, and the release work is visible on the
 [exact branch](https://github.com/Blockchain-Oracle/noxlimit/tree/codex/noxlimit-polished-product),
@@ -139,7 +146,10 @@ Hardhat's gas multiplier was set to `1.2`. Runtime acceptance now has regression
 future catalog-`ACTIVE` routes remaining `UPCOMING` before `startsAt` and post-close `ACTIVE`
 routes restarting only as non-tradeable history after liquidity removal. The
 [live r12 restart](./.thoughts/evidence/2026-07-29-r12-post-close-restart.json) proves both zero-depth
-4h routes beside four still-tradeable 1h/24h routes with service health `READY`. See
+4h routes beside four still-tradeable 1h/24h routes with service health `READY`; the
+[post-resolution restart](./.thoughts/evidence/2026-07-29-r12-post-resolution-restart.json) proves
+both corrected 4h routes rebuild as `RESOLVED_YES / ORDERING_CLOSED` with service, evaluator, and
+funding `READY`. See
 [`packages/contracts/OPERATOR.md`](./packages/contracts/OPERATOR.md).
 
 ## WTF in one minute
@@ -252,14 +262,14 @@ The authorized implementation handoff is
 [`prompts/04-polished-product-implementation.md`](./prompts/04-polished-product-implementation.md);
 the user advanced its checkpoint on 2026-07-28. Deployment, funding, real browser-off fills,
 predecessor LP close, the historical revision-5 cutover, the corrected atomic revision-8 cutover,
-and one complete BTC browser/user/LP redemption vertical are now committed. ETH is a terminal
-policy rejection, not `WAITING`: do not keep polling or write its retired resolver, infer a winner,
+one complete predecessor BTC browser/user/LP-redemption vertical, and two complete corrected 4h
+browser/user/builder-redemption verticals are now committed. The retired predecessor ETH is a terminal
+policy rejection, not `WAITING`: do not keep polling or write its resolver, infer a winner,
 or substitute a later round. Revision `12` is current routing; corrected BTC/ETH 1h/4h/24h are active with the
 14,400-second settlement-liveness bound, and the retired revision-5 pools have zero LP shares with
-their unresolved complete sets recorded honestly. Revisions `6`/`7` were never served. Public
-hosting requires explicit authorization for billable infrastructure; corrected-route objective
-settlement/redemptions, final default-branch handoff, and submission assets
-remain pending.
+the predecessor pools' unresolved complete sets recorded honestly. Revisions `6`/`7` were never
+served. Public hosting requires explicit authorization for billable infrastructure; final
+default-branch handoff and submission assets remain pending.
 The user
 controls pacing; historical project clocks and submission dates are not implementation authority.
 
@@ -306,8 +316,9 @@ DarkOdds's Polymarket connection was read-only discovery/display. It did not rou
 trades. A generic native Nox prediction market is therefore still a direct repeat. NoxLimit remains
 selected—with its critical path verified—as a narrower outcome-share advanced-execution product
 rather than a new native market. Its non-empty BTC/ETH catalog, fresh live browser-off fills, and
-one complete BTC create-to-redeem vertical are committed. ETH is an honestly recorded immutable-
-policy failure, not a second completed vertical; the publicly hosted release remains pending.
+one complete predecessor BTC vertical plus two complete corrected BTC/ETH create-to-redeem
+verticals are committed. The retired predecessor ETH is an honestly recorded immutable-policy
+failure; the publicly hosted release remains pending.
 
 ## Source policy
 

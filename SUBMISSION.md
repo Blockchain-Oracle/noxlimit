@@ -1,16 +1,16 @@
 # NoxLimit submission packet
 
 Status: **DRAFT — do not submit yet.** The product, live deployments, seven fresh browser-off fills,
-paired rotations, retired-pool liquidity closes, and one complete BTC browser-resolution/user-
-redemption/LP-redemption vertical have evidence. ETH is a terminal no-write policy rejection, not a
-second winner: its first post-deadline observation was 24 seconds outside the immutable one-hour
-bound. Catalog revision `12` is current at
+paired rotations, retired-pool liquidity closes, one complete predecessor BTC vertical, and two
+complete corrected BTC/ETH 4h browser-resolution/user-redemption/builder-redemption verticals have
+evidence. The retired predecessor ETH is a terminal no-write policy rejection: its first
+post-deadline observation was 24 seconds outside the immutable one-hour bound. Catalog revision `12` is current at
 `packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json`, hash
 `0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e`. Six corrected/breadth
 BTC/ETH 1h/4h/24h markets are active. The exercised single-writer service reported `READY` on
 revision `12`; revision `8` previously reported `READY` at
-`2026-07-29T15:33:41Z`; at the `2026-07-29T15:34:12Z` market snapshot, both were ordering-open and
-dynamically tradeable. Those are time-bound observations. Public hosting, video, X post, and
+`2026-07-29T15:33:41Z`; both corrected 4h routes now report `RESOLVED_YES / ORDERING_CLOSED`.
+Public hosting, video, X post, and
 organizer form/contact fields remain
 explicitly pending.
 
@@ -181,6 +181,14 @@ research material and is not part of the submission source release. See `LICENSE
   receipt-verified positions are 1,941,161, 1,978,831, 1,941,161, and 1,978,831 outcome atoms,
   respectively, and neither OrderBook retains matching outcome-token dust. Each record contains
   one direct Gateway post and no raw private maximum, key, signature, handle, or ciphertext.
+- [x] Both corrected 4h markets resolved YES from the exact safe adjacent first-observation pair,
+  and the browser redeemed the winning user: [BTC](./.thoughts/evidence/2026-07-29-r8-corrected-btc-resolution-redemption.json)
+  paid 1,978,831 Test USDC atoms and
+  [ETH](./.thoughts/evidence/2026-07-29-r8-corrected-eth-resolution-redemption.json) paid 1,941,161.
+- [x] The retained corrected-route builder positions were redeemed after resolution, without a
+  second liquidity removal, and both builder YES/NO balances are zero:
+  [BTC](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-redemption.json)
+  and [ETH](./.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-redemption.json).
 - [x] Both retired revision-5 pools then closed with zero LP shares while preserving 50,000,000 YES
   plus 50,000,000 NO unresolved atoms per pool. BTC transaction
   `0xe811190d41186d666b5b90b7938edcdd974a1a8c48fad9fa7f18b8ebf9946b4b` is in block `11375985`;
@@ -188,7 +196,7 @@ research material and is not part of the submission source release. See `LICENSE
   `.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-successor-liquidity-close.json` and
   `.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-successor-liquidity-close.json`.
 - [x] Service and web container builds plus local smoke checks pass. This is not public hosting.
-- [x] The latest `pnpm check` passes contracts `84`, protocol `14`, catalog `6`, service `69`, and
+- [x] The post-settlement `pnpm check` passes contracts `84`, protocol `14`, catalog `6`, service `69`, and
   web `62` (`235` package tests total), including compile/type-check/test/build.
   The dedicated Playwright suite passes `45` journeys with `21` intentional skips and zero failures.
 
@@ -207,12 +215,6 @@ research material and is not part of the submission source release. See `LICENSE
 - [ ] **PENDING — final default-branch release handoff:** `main` currently trails the public release
   branch. Merge/advance the default branch to the final submission commit, or use an explicitly
   accepted exact release-branch/commit URL in the organizer form.
-- [ ] **PENDING — corrected-route settlement/redemption:** the revision-8 private order →
-  browser-off fill segment is verified on both sides of both markets. Complete objective
-  resolution, winning-user redemption, and builder-position redemption before claiming either
-  corrected successor as a full vertical. Both corrected LP positions are already closed with zero
-  shares and unresolved outcome balances preserved; no premature redemption occurred. The
-  completed predecessor BTC vertical remains valid evidence.
 - [ ] **PENDING — demo video URL (maximum 4 minutes):** `[DEMO_VIDEO_URL]`.
 - [ ] **PENDING — published X post URL:** `[X_POST_URL]`.
 - [ ] **PENDING — final submission-commit verification:** rerun root `pnpm check` and the dedicated
@@ -262,12 +264,12 @@ displaying the raw resting maximum. Reopen the public URL in a fresh browser and
 
 ### 2:25–3:05 — Objective settlement and redemption
 
-Open the BTC position's resolution evidence. Show the strike, resolution timestamp, first valid
-post-deadline Chainlink observation and adjacent predecessor, resolved YES outcome, real user
-redemption, and builder-LP redemption. Show the winning shares decrease and Test USDC return. Then
-show the ETH rejection artifact briefly: the unique first observation was 24 seconds outside its
-immutable bound, so no transaction or winner exists. Do not substitute a later ETH round or imply a
-paired successful vertical.
+Open the corrected BTC and ETH position evidence. Show each strike, resolution timestamp, first
+valid post-deadline Chainlink observation and adjacent predecessor, resolved YES outcome, real user
+redemption, and builder-position redemption. Show winning shares decrease and Test USDC return.
+Then show the retired predecessor ETH rejection artifact briefly: its unique first observation was
+24 seconds outside its immutable bound, so no transaction or winner exists for that historical
+route. Do not substitute a later predecessor round.
 
 ### 3:05–3:35 — Why Nox is indispensable
 
@@ -276,10 +278,10 @@ Show the architecture line:
 `direct Gateway input → persisted encrypted handle → Nox compare/select → public proof → one-shot FPMM buy`
 
 Close with: “NoxLimit adds a private resting order primitive to an unchanged public protocol. The
-BTC market, assets, liquidity, trade, oracle settlement, and redemption are real on Ethereum
-Sepolia; the ETH liveness failure is disclosed, and six BTC/ETH 1h/4h/24h routes are active together
-in revision 12. Both corrected four-hour markets now have real private-order fills; objective
-settlement/redemptions remain release work.”
+BTC/ETH markets, assets, liquidity, trades, oracle settlements, and redemptions are real on Ethereum
+Sepolia; the retired predecessor ETH liveness failure is disclosed, and six BTC/ETH 1h/4h/24h routes
+are catalog-active together in revision 12. Both corrected four-hour markets complete the private
+order-to-redemption path.”
 Display repository, hosted app, and `@iEx_ec`.
 
 ## X post draft

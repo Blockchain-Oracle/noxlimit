@@ -14,7 +14,7 @@
 > `6`/`7` were never served. The runtime used controlled stop → pointer → single startup for the
 > non-adjacent revision-5-to-8 adoption. Health was `READY` at `2026-07-29T15:33:41Z`; both
 > corrected markets were ordering-open and dynamically tradeable at the time-bound
-> `2026-07-29T15:34:12Z` market snapshot. The latest `pnpm check` passes contracts
+> `2026-07-29T15:34:12Z` market snapshot and now report `RESOLVED_YES / ORDERING_CLOSED`. The latest `pnpm check` passes contracts
 > `84`, protocol `14`, catalog `6`, service `69`, and web `62` (`235` total), including
 > compile/type-check/test/build. The dedicated Playwright suite passes
 > `45` journeys with `21` intentional skips and zero failures. Do not recreate these layers or modify
@@ -31,9 +31,17 @@
 > [BTC YES](../.thoughts/evidence/2026-07-29-r8-corrected-btc-yes-order.json),
 > [ETH YES](../.thoughts/evidence/2026-07-29-r8-corrected-eth-yes-order.json), and
 > [ETH NO](../.thoughts/evidence/2026-07-29-r8-corrected-eth-no-order.json).
+> Both corrected routes then resolved YES from the exact safe adjacent first-observation pair. The
+> [BTC](../.thoughts/evidence/2026-07-29-r8-corrected-btc-resolution-redemption.json) and
+> [ETH](../.thoughts/evidence/2026-07-29-r8-corrected-eth-resolution-redemption.json) browser
+> records prove winning-user payouts of 1,978,831 and 1,941,161 Test USDC atoms. The corresponding
+> [BTC](../.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-redemption.json)
+> and [ETH](../.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-redemption.json)
+> builder records prove no second liquidity removal, successful redemption of all retained
+> positions, and zero remaining builder YES/NO balance.
 > Local service/web container build/smoke passes, but public hosting, video, X, and form/contact
-> fields remain pending. Billable hosting requires the user's explicit authorization. A complete
-> corrected-route vertical still requires objective resolution and user/builder redemptions.
+> fields remain pending. Billable hosting requires the user's explicit authorization. Both
+> corrected-route create-to-redeem verticals are complete.
 > Approved BTC/ETH 1h/24h breadth is complete in current revision `12`, whose ten records contain
 > four retired and six active routes. The service is `READY` on hash
 > `0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e`; the new routes were
@@ -120,11 +128,10 @@ clears the private maximum price, which is never persisted.
 ## Required implementation order
 
 Steps 1–4 below are the retained implementation contract and regression boundary; they and bounded
-operator hardening are implemented rather than a request to restart. Step 5 is partial/degraded:
-live deployment/funding/fills/LP close/successor cutover and one complete BTC resolution/redemption
-vertical on the predecessor route are committed; ETH is a terminal immutable-policy rejection.
-Both corrected revision-8 routes now have real browser-created, browser-off fills, but neither is a
-complete vertical until objective resolution and user/builder redemption are preserved. Approved
+operator hardening are implemented rather than a request to restart. Step 5 is complete except for
+public release: live deployment/funding/fills/LP close/successor cutover, one complete predecessor
+BTC resolution/redemption vertical, and two complete corrected 4h verticals are committed; the
+retired predecessor ETH is a terminal immutable-policy rejection. Approved
 BTC/ETH 1h/24h breadth is deployed and active in revision `12`.
 Public release evidence remains pending.
 
@@ -300,13 +307,12 @@ The
 clean unit, property, adversarial, integration, recovery, browser, and root checks now pass at `235`
 package tests plus `45` Playwright journeys (`21` intentional skips). Public hosting remains
 unverified despite passing local container build/check/smoke and must not create billable resources
-without explicit user authorization. Before submission, complete corrected-route objective
-settlement and user/builder redemptions, preserve the completed revision-12 breadth evidence,
-expose the final commit on the default-branch
+without explicit user authorization. Before submission, preserve the completed corrected-route
+settlement/user/builder-redemption and revision-12 breadth evidence, expose the final commit on the default-branch
 handoff, and rerun root `pnpm check` plus the dedicated Playwright suite at that exact commit.
-Both corrected LP positions are already closed with zero shares and no premature redemption; use
-the committed BTC/ETH corrected-liquidity-close evidence and redeem the retained builder outcome
-balances only after objective resolution.
+Both corrected LP positions were closed with zero shares and no premature redemption; the later
+builder-redemption records prove their retained outcome balances were redeemed only after objective
+resolution.
 
 Browser assertions must prove card Trade actions cause no Gateway/wallet request before explicit
 review, design fixtures never ship as live responses, scroll changes focus without changing the

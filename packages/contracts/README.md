@@ -128,7 +128,7 @@ and `7` were staging history only and were never served. Because the runtime ski
 revisions, adoption used a controlled single-writer stop, pointer update, and one startup rather
 than a non-adjacent `SIGHUP`; at the post-cutover 2026-07-29 snapshot, the service reached `READY`
 on revision `8` and both corrected markets were ordering-open and dynamically tradeable. That
-market-state observation is time-bound.
+market-state observation was time-bound; both now report `RESOLVED_YES / ORDERING_CLOSED`.
 
 Three committed browser-off traces prove direct-Gateway order creation and real FPMM fills on the
 original bundles. The earlier BTC/ETH liquidity-close artifacts prove builder LP removal after
@@ -168,8 +168,7 @@ It has ten records—four retired and six active—covering BTC/ETH 1h/4h/24h, a
 attempt-bound retry after setting Hardhat `gasMultiplier = 1.2`; the journal-preserved record is
 [`../../.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json`](../../.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json).
 Local service/web container build/smoke passes, but no public service/frontend URL is verified and
-billable hosting is not authorized by these local checks. Remaining product evidence includes one
-complete corrected revision-8 route vertical. Corrected-route order execution itself is now verified: both
+billable hosting is not authorized by these local checks. Corrected-route order execution is verified: both
 OrderBooks return `nextOrderId = 3`, with BTC NO/YES and ETH YES/NO browser-created, browser-off
 fills recorded in
 [`../../.thoughts/evidence/2026-07-29-r8-corrected-btc-no-order.json`](../../.thoughts/evidence/2026-07-29-r8-corrected-btc-no-order.json),
@@ -177,8 +176,14 @@ fills recorded in
 [`../../.thoughts/evidence/2026-07-29-r8-corrected-eth-yes-order.json`](../../.thoughts/evidence/2026-07-29-r8-corrected-eth-yes-order.json),
 and
 [`../../.thoughts/evidence/2026-07-29-r8-corrected-eth-no-order.json`](../../.thoughts/evidence/2026-07-29-r8-corrected-eth-no-order.json).
-Objective settlement plus user/builder redemptions remain before either corrected route can be
-called a complete vertical.
+Both corrected routes then resolved YES from the exact first safe post-deadline Chainlink pair. The
+[BTC](../../.thoughts/evidence/2026-07-29-r8-corrected-btc-resolution-redemption.json) and
+[ETH](../../.thoughts/evidence/2026-07-29-r8-corrected-eth-resolution-redemption.json) browser
+records prove winning-user redemptions; the corresponding
+[BTC](../../.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-redemption.json)
+and [ETH](../../.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-redemption.json)
+builder records prove no second liquidity removal and zero remaining builder outcome balances.
+Both corrected routes are complete create-to-redeem verticals.
 
 ## Commands
 

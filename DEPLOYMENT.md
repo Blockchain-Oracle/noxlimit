@@ -17,14 +17,14 @@ The paired activation became effective at Sepolia block `11375905`
 `0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a` are `ACTIVE`; revisions
 `6`/`7` are staging history and were never served. The revision-5 pools are retired and have zero LP
 shares; their LP owner now holds 50,000,000 YES plus 50,000,000 NO unresolved atoms per market for
-later resolution and redemption. At the `2026-07-29T15:34:12Z` service snapshot, the corrected
-markets were ordering-open and dynamically tradeable; that observation is time-bound. Both
+later resolution and redemption. The corrected markets' ordering-open snapshot was time-bound;
+after close and objective resolution, both now report `RESOLVED_YES / ORDERING_CLOSED`. Both
 corrected OrderBooks now return `nextOrderId = 3`, and two browser-created, browser-off fills per
 market are verified. Revision `12` carries ten records—four retired and six active—and adds verified
 BTC/ETH 1h and 24h routes beside the corrected 4h pair. The service is `READY` on r12; the new
-routes were `UPCOMING` before their shared `2026-07-29T17:30:00Z` start. Corrected-route objective
-settlement and user/builder redemption remain pending. Both corrected LP positions are closed with
-zero shares and unresolved outcome balances preserved in the linked Phase 6 evidence. Public
+routes were `UPCOMING` before their shared `2026-07-29T17:30:00Z` start. Both corrected 4h routes
+now have complete objective browser resolution, winning-user redemption, and builder-position
+redemption evidence. Their LP shares and retained builder YES/NO balances are all zero. Public
 hosting remains pending.
 
 ## Prerequisites
@@ -381,7 +381,10 @@ as truthful `ORDERING_CLOSED` history after LP removal; it does not require obso
 or evaluator readiness for those non-tradeable routes. Keep the strict gates for `UPCOMING` and
 `ORDERING_OPEN`. The
 [local r12 post-close restart](./.thoughts/evidence/2026-07-29-r12-post-close-restart.json) proves
-that runtime boundary; durable hosted recovery still requires the public deployment gate.
+that runtime boundary. The later
+[post-resolution restart](./.thoughts/evidence/2026-07-29-r12-post-resolution-restart.json) proves
+both corrected 4h routes rebuild as `RESOLVED_YES / ORDERING_CLOSED` with service, evaluator, and
+funding `READY`; durable hosted recovery still requires the public deployment gate.
 
 BTC 1h deployment also exercised submitted-transaction recovery. Treasury-collateral top-up attempt
 1 reverted out of gas under an exact gas estimate. The journal preserved the reverted receipt;
@@ -461,6 +464,13 @@ LIVE_REDEMPTION_CONFIRM=RUN_REAL_SEPOLIA_RESOLUTION_AND_REDEMPTION \
   pnpm --filter @noxlimit/web test:e2e:live:redemption
 ```
 
+The completed corrected-route records are
+[BTC browser resolution/redemption](./.thoughts/evidence/2026-07-29-r8-corrected-btc-resolution-redemption.json),
+[ETH browser resolution/redemption](./.thoughts/evidence/2026-07-29-r8-corrected-eth-resolution-redemption.json),
+[BTC builder redemption](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-redemption.json),
+and
+[ETH builder redemption](./.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-redemption.json).
+
 These commands perform real Sepolia writes. Do not run them against an arbitrary market, reuse an
 old evidence path, or retry blindly after a transport failure. The resolution/redemption harness
 has an attempt-bound recovery journal that must be inspected first. The order-creation harness has
@@ -482,9 +492,9 @@ A hosted release is ready only when all of the following are true:
 - every relied-on active bundle has a settlement-liveness parameter accepted for the release;
   revision `12` carries corrected/breadth BTC/ETH bundles with the 14,400-second bound, while the
   one-hour revision-5 bundles are retired history;
-- one fresh corrected revision-8 route completes the real funding → order → browser-off fill →
-  objective resolution → redemption vertical; the predecessor BTC proof does not satisfy this
-  successor-route gate;
+- both corrected revision-8 routes complete a real funding → order → browser-off fill → objective
+  resolution → winning-user redemption → builder-position redemption vertical; the predecessor BTC
+  proof does not substitute for either corrected route;
 - the approved BTC/ETH 1h and 24h breadth is deployed, verified, seeded, cataloged, and preserved in
   the current revision-12 hash chain;
 - the final submission commit passes root `pnpm check` and the dedicated Playwright suite, with the

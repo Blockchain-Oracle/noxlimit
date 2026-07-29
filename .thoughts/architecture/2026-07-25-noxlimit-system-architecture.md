@@ -10,8 +10,9 @@ browser-resolution/user-redemption/LP-redemption vertical verified; ETH terminal
 immutable one-hour observation bound; corrected 14,400-second BTC/ETH successors deployed,
 verified, seeded, activated together in catalog revision 8, and live-service verified. Four
 corrected-route orders and browser-off fills are verified. BTC/ETH 1h and 24h bundles are also
-deployed, verified, seeded, and active beside the 4h pair in catalog revision 12; corrected-route
-objective settlement, user/builder redemption, public hosting, and submission assets remain pending
+deployed, verified, seeded, and active beside the 4h pair in catalog revision 12. Both corrected 4h
+routes now complete objective browser resolution, winning-user redemption, and builder-position
+redemption; public hosting and submission assets remain pending
 **Spike substrate:** Unmodified Gnosis Conditional Tokens + Fixed Product Market Maker on Ethereum
 Sepolia
 
@@ -97,9 +98,8 @@ The product deployment has advanced beyond local readiness on branch
 - the service reported `READY` on revision `8`; corrected BTC
   `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2` and corrected ETH
   `0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a` remain catalog
-  `ACTIVE`. At the `2026-07-29T15:34:12Z` service snapshot, both were ordering-open and dynamically
-  `TRADEABLE`. This is timestamped runtime evidence, not a durable lifecycle or public-hosting
-  claim;
+  `ACTIVE`. Their ordering-open snapshot was timestamped runtime evidence; after the immutable
+  close/resolution boundary both now report `RESOLVED_YES / ORDERING_CLOSED`;
 - the retired revision-5 BTC successor LP was closed in transaction
   `0xe811190d41186d666b5b90b7938edcdd974a1a8c48fad9fa7f18b8ebf9946b4b` at block
   `11375985`; the retired revision-5 ETH successor LP was closed in transaction
@@ -113,14 +113,24 @@ The product deployment has advanced beyond local readiness on branch
   redacted records are [BTC NO](../evidence/2026-07-29-r8-corrected-btc-no-order.json),
   [BTC YES](../evidence/2026-07-29-r8-corrected-btc-yes-order.json),
   [ETH YES](../evidence/2026-07-29-r8-corrected-eth-yes-order.json), and
-  [ETH NO](../evidence/2026-07-29-r8-corrected-eth-no-order.json). Objective settlement and
-  user/builder redemption remain pending;
+  [ETH NO](../evidence/2026-07-29-r8-corrected-eth-no-order.json);
 - corrected BTC and ETH LP shares are now zero after the
   [BTC](../evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-close.json) and
   [ETH](../evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-close.json)
-  close transactions. With both conditions unresolved, the builder retains respectively
-  49,981,169 YES / 50,018,839 NO and 50,018,839 YES / 49,981,169 NO atoms for post-resolution
-  redemption;
+  close transactions. Those records truthfully preserve the then-unresolved builder positions;
+- the exact adjacent first post-deadline Chainlink pairs resolved both corrected markets YES. The
+  real browser resolved and redeemed the winning user in the
+  [BTC](../evidence/2026-07-29-r8-corrected-btc-resolution-redemption.json) and
+  [ETH](../evidence/2026-07-29-r8-corrected-eth-resolution-redemption.json) journeys, proving Test
+  USDC deltas of 1,978,831 and 1,941,161 atoms respectively;
+- the subsequent [BTC builder redemption](../evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-redemption.json)
+  and [ETH builder redemption](../evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-redemption.json)
+  each skipped liquidity removal because LP shares were already zero, redeemed every retained
+  resolved position, and left zero builder YES/NO balance;
+- the [revision-12 post-resolution restart](../evidence/2026-07-29-r12-post-resolution-restart.json)
+  proves a controlled fresh singleton startup reconstructs both corrected 4h markets as
+  `RESOLVED_YES / ORDERING_CLOSED`, preserves the contemporaneous 1h/24h lifecycle boundaries, and
+  returns service, evaluator, and funding health to `READY` on the exact current catalog hash;
 - the [horizon strike plan](../evidence/2026-07-29-sepolia-btc-eth-1h-24h-strike-plan.json) and four
   deployment records add BTC 1h
   `0x0c552e5f150ec05e4ef39c4a7913ec4ac0a94b9fe71170538d452d3661e7b7ed`, ETH 1h
@@ -753,9 +763,10 @@ live Ethereum Sepolia:
 - the six local `Complement` HTML files are the durable design source; their sample data is not
   loaded as live product state.
 
-These results establish one full BTC create-to-redeem journey and an honest ETH liveness failure,
-not a paired successful journey or a public hosted release. The historical Prompt 3 Gate C trace
-remains valid evidence and is not reclassified as the final product bundle.
+These results establish one full predecessor BTC create-to-redeem journey, two full corrected 4h
+BTC/ETH journeys, and one honest predecessor ETH liveness failure. They do not establish a public
+hosted release. The historical Prompt 3 Gate C trace remains valid evidence and is not reclassified
+as the final product bundle.
 
 ### Still required for the live product and submission gate
 
@@ -764,9 +775,8 @@ remains valid evidence and is not reclassified as the final product bundle.
 - preserve revision `12` as the only current routing manifest; do not serve the historical
   revisions `6`/`7`, roll back to revision `8`, reopen the retired revision-5 pools, or claim the
   retained unresolved outcome positions are redeemed;
-- preserve the four real corrected-route order → browser-off Nox fill records, then complete
-  objective resolution, winning-user redemption, and builder-LP redemption. Order/fill is proven;
-  neither corrected route is a complete vertical until the settlement/redemption evidence exists;
+- preserve the four real corrected-route order → browser-off Nox fill records and both complete
+  corrected objective-resolution/winning-user-redemption/builder-redemption verticals;
 - preserve the completed BTC/ETH 1h and 24h breadth deployment and sequential r9→r12 adoption;
 - keep SOL absent until its separate Pyth live gate passes;
 - after explicit user cost/provider authorization, provision and verify durable public web/service

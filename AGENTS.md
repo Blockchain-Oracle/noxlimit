@@ -15,7 +15,7 @@ includes the user-directed DeepBook-inspired BTC/ETH/verified-SOL terminal, 1h/4
 truthful FPMM quote ladder, typed client boundary, and accepted post-gate Opus corrections. The
 user also adopted the hybrid discovery contract: a TikTok-like vertical Market Stream on mobile,
 the same stream as the desktop terminal rail, and full analysis/review before any order action.
-The polished contracts, protocol, catalog, service, and web now exist. The fresh post-breadth root
+The polished contracts, protocol, catalog, service, and web now exist. The fresh post-settlement root
 `pnpm check` records contracts `84`, protocol `14`, catalog `6`, service `69`, and web `62` passing
 tests (`235` total), with compile, type-check, test, and build gates green. The fresh
 dedicated Playwright snapshot records `45` passing journeys, `21` intentional project/viewport
@@ -32,15 +32,16 @@ stop → catalog-pointer update → single startup adopted revision `8`; health 
 same hash, and revisions `6`/`7` were never served. Corrected BTC market
 `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2` and ETH market
 `0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a` remain catalog `ACTIVE`.
-At the `2026-07-29T15:34:12Z` service snapshot, both reported lifecycle `ORDERING_OPEN` and dynamic
-tradeability `TRADEABLE`.
+After their immutable close/resolution boundary, both corrected 4h markets now report
+`RESOLVED_YES / ORDERING_CLOSED`; revision `12` remains current and its four 1h/24h routes continue
+on their independent schedules.
 
-Phase 6 settlement is partial/degraded. The retired BTC predecessor completed real browser
+Phase 6 predecessor settlement is split/degraded. The retired BTC predecessor completed real browser
 resolution, winning-user redemption, and builder-LP redemption. The retired ETH predecessor cannot
 resolve under its immutable 3,600-second observation-delay policy: the exact first post-deadline
 Chainlink observation arrived at `+3,624s`, 24 seconds outside the bound. The accountless selector
 rejected before any write, the resolver and payout vector remain unset, and ETH user/LP positions
-remain unredeemable. Do not claim an ETH winner or a paired BTC/ETH complete vertical. Public
+remain unredeemable. Do not claim a winner for that retired ETH predecessor. Public
 frontend/service URLs, the video, X post, and submission form/contact fields are pending. Local
 container build/smoke evidence is not public hosting.
 
@@ -67,13 +68,21 @@ worker, and confirmed from a fresh browser. The four redacted records are
 [ETH YES](.thoughts/evidence/2026-07-29-r8-corrected-eth-yes-order.json), and
 [ETH NO](.thoughts/evidence/2026-07-29-r8-corrected-eth-no-order.json). Receipt and ERC-1155
 checks prove respective user positions of 1,941,161, 1,978,831, 1,941,161, and 1,978,831 outcome
-atoms, with zero matching position balance left in either OrderBook. Corrected-route objective
-resolution, winning-user redemption, and builder-position redemption remain pending; do not call
-either route a complete vertical yet. Corrected BTC/ETH LP shares are now zero after confirmed
+atoms, with zero matching position balance left in either OrderBook. Both corrected routes then
+resolved YES from their exact first safe post-deadline Chainlink observations. The browser resolved
+and redeemed the winning user on
+[BTC](.thoughts/evidence/2026-07-29-r8-corrected-btc-resolution-redemption.json) and
+[ETH](.thoughts/evidence/2026-07-29-r8-corrected-eth-resolution-redemption.json); the respective
+Test USDC payouts were 1,978,831 and 1,941,161 atoms. Corrected BTC/ETH LP shares were already zero
+after confirmed
 [BTC](.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-close.json)
 and [ETH](.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-close.json)
-close transactions; the unresolved builder balances are 49,981,169 YES / 50,018,839 NO for BTC and
-50,018,839 YES / 49,981,169 NO for ETH. The approved BTC/ETH 1h and 24h bundles are now deployed,
+close transactions. The builder subsequently redeemed those retained resolved positions in the
+[BTC](.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-liquidity-redemption.json)
+and [ETH](.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-liquidity-redemption.json)
+records; no second liquidity removal occurred and both builder YES/NO balances are zero. Each
+corrected route is now a complete browser-created order → browser-off fill → objective resolution →
+winning-user redemption → builder-position redemption vertical. The approved BTC/ETH 1h and 24h bundles are now deployed,
 independently validated, and active beside the corrected 4h pair in runtime revision `12` at
 `packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json`, catalog hash
 `0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e`. Its ten records contain
@@ -97,7 +106,10 @@ Covered runtime acceptance now treats future catalog-`ACTIVE` markets as `UPCOMI
 open-market gates, and permits closed/resolving/resolved `ACTIVE` routes to restart only as truthful
 `ORDERING_CLOSED` history after liquidity removal; the service suite passes `69` tests. The
 [live r12 post-close restart](.thoughts/evidence/2026-07-29-r12-post-close-restart.json) proved both
-zero-depth 4h routes beside four still-tradeable 1h/24h routes with health `READY`. Preserve the
+zero-depth 4h routes beside four still-tradeable 1h/24h routes with health `READY`; the later
+[post-resolution restart](.thoughts/evidence/2026-07-29-r12-post-resolution-restart.json) proved
+both corrected 4h routes rebuild as `RESOLVED_YES / ORDERING_CLOSED` while service, evaluator, and
+funding return `READY`. Preserve the
 completed BTC evidence and terminal ETH rejection. Do not poll or write the
 retired ETH resolver again, and do not substitute a later round. Revision `12` is current: do not
 roll back to revision `5`/`8`, serve revisions `6`/`7`, or reopen the completed paired cutover.
@@ -252,15 +264,14 @@ silently guessing from memory.
 - Do not reopen product selection or rerun Prompt 3. The bounded technical critical path is
   live-verified, the polished layers and operator hardening are complete, and the committed Phase 6
   evidence now includes a non-empty activated BTC/ETH catalog, seven browser-off fills—three on
-  predecessor routes and four on corrected routes—and one
-  complete BTC browser-to-user/LP-redemption vertical. ETH is a terminal immutable-policy rejection,
-  not pending settlement or a second winner. Corrected 14,400-second BTC/ETH routes are active
-  together in revision `8`; revision `5` is retired and revisions `6`/`7` were never served. Their
-  former LP shares are zero, while the unresolved YES/NO positions remain. Durable public hosting
-  and submission assets remain unverified; do not roll back or repeat the completed cutover. The
-  corrected routes now prove browser creation and browser-off fills on both sides, but neither is a
-  complete vertical until objective resolution and user/builder redemption evidence is preserved.
-  Keep those settlement/redemption proofs pending. BTC/ETH 1h/24h breadth is complete in revision
+  predecessor routes and four on corrected routes—one complete predecessor BTC vertical, and two
+  complete corrected 4h browser/user/builder-redemption verticals. The retired predecessor ETH is a
+  terminal immutable-policy rejection, not pending settlement or a winner. Corrected 14,400-second
+  BTC/ETH routes were activated together in revision `8` and remain current through revision `12`;
+  revision `5` is retired and revisions `6`/`7` were never served. Their
+  former LP shares are zero; their retained positions were redeemed after objective resolution and
+  now have zero YES/NO balances. Durable public hosting and submission assets remain unverified; do
+  not roll back or repeat the completed cutover or settlement. BTC/ETH 1h/24h breadth is complete in revision
   `12`; preserve its four deployment records and sequential r9→r12 adoption instead of redeploying
   it. Do not create billable hosting resources without explicit user cost/provider authorization.
 - Do not create a second NoxLimit architecture. Update the canonical architecture when executable
