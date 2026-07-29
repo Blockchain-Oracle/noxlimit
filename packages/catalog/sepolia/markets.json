@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "chainId": 11155111,
+  "revision": "0",
+  "previousRevisionHash": null,
+  "effectiveAt": "1970-01-01T00:00:00.000Z",
+  "effectiveBlock": "0",
+  "markets": [],
+  "routing": [],
+  "catalogRevision": "0x2f0ea2999cce53436d49379a658ee1f428357d8c7ca2560f580e59d18488caaf"
+}

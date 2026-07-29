@@ -1,0 +1,40 @@
+{
+  "name": "@noxlimit/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.22.3"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "compile": "hardhat compile",
+    "operator": "pnpm run operator:plan",
+    "operator:plan": "hardhat run scripts/operator/plan-bundle.ts",
+    "operator:validate": "hardhat run scripts/operator/validate-bundle.ts --network sepolia",
+    "operator:deploy": "hardhat run scripts/operator/deploy-bundle.ts --network sepoliaOperator",
+    "operator:resolve": "hardhat run scripts/operator/resolve-market.ts --network sepoliaOperator",
+    "operator:close-liquidity": "hardhat run scripts/operator/close-liquidity.ts --network sepoliaOperator",
+    "operator:activate-successor": "hardhat run scripts/operator/activate-successor.ts --network sepolia",
+    "test": "node scripts/strict-test.mjs",
+    "test:raw": "hardhat test",
+    "typecheck": "tsc --build --pretty false"
+  },
+  "dependencies": {
+    "@gnosis.pm/conditional-tokens-contracts": "1.0.3",
+    "@gnosis.pm/conditional-tokens-market-makers": "1.8.1",
+    "@gnosis.pm/util-contracts": "3.0.0-alpha.3",
+    "@iexec-nox/handle": "0.1.0-beta.13",
+    "@iexec-nox/nox-protocol-contracts": "0.2.4",
+    "openzeppelin-solidity": "2.3.0",
+    "viem": "2.48.4"
+  },
+  "devDependencies": {
+    "@iexec-nox/nox-hardhat-plugin": "0.1.0",
+    "@nomicfoundation/hardhat-node-test-runner": "3.0.17",
+    "@nomicfoundation/hardhat-toolbox-viem": "5.0.7",
+    "@types/node": "22.18.12",
+    "hardhat": "3.9.0",
+    "typescript": "5.8.3"
+  }
+}

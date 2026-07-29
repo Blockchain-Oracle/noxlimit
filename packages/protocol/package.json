@@ -1,0 +1,33 @@
+{
+  "name": "@noxlimit/protocol",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": "22.22.3"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "test": "pnpm run build && node --test dist/test/*.test.js",
+    "typecheck": "tsc --build --pretty false"
+  },
+  "dependencies": {
+    "viem": "2.48.4",
+    "zod": "4.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.12",
+    "typescript": "5.8.3"
+  }
+}

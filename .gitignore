@@ -2,6 +2,10 @@
 .env
 .env.*
 !.env.example
+operator.env.*
+!packages/contracts/operator.env.example
+*.journal.json
+*.journal.json.lock
 node_modules/
 dist/
 build/
@@ -9,9 +13,14 @@ coverage/
 artifacts/
 cache/
 .hardhat/
+.next/
+.playwright-mcp/
+playwright-report/
+test-results/
 .gate-c-deployer-key
 .gate-c-worker-key
 .gate-c-mover-key
+packages/contracts/offchain-services.log
 
 # Third-party research mirrors are intentionally local-only. The authored
 # manifests preserve their exact repositories and commit SHAs.

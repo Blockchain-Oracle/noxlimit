@@ -1,0 +1,18 @@
+{
+  "name": "@noxlimit/root",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.4",
+  "engines": {
+    "node": "22.22.3",
+    "pnpm": "10.33.4"
+  },
+  "scripts": {
+    "build": "pnpm -r --workspace-concurrency=1 --if-present run build",
+    "compile": "pnpm --filter @noxlimit/contracts --fail-if-no-match compile",
+    "test": "pnpm -r --workspace-concurrency=1 --if-present run test",
+    "typecheck": "pnpm -r --workspace-concurrency=1 --if-present run typecheck",
+    "check": "pnpm compile && pnpm typecheck && pnpm test && pnpm build"
+  }
+}
