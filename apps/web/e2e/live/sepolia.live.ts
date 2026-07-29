@@ -121,6 +121,8 @@ test("funds one wallet, creates one private order, closes, and reopens after a w
     fundingHash,
     fundingMode: settings.fundingMode,
     fillHash,
+    gatewayPostCount: gatewayPosts,
+    orderRef: ref,
     writes: wallet.writes(),
     wallet: wallet.address,
     fundingTreasury: settings.fundingTreasury,
@@ -238,6 +240,8 @@ async function writeRedactedEvidence(settings: LiveSepoliaSettings, input: {
   fundingHash?: Hex;
   fundingMode: LiveFundingMode;
   fillHash: Hex;
+  gatewayPostCount: number;
+  orderRef: OrderRef;
   writes: readonly RecordedWalletWrite[];
   wallet: Address;
   fundingTreasury: Address;
@@ -254,6 +258,14 @@ async function writeRedactedEvidence(settings: LiveSepoliaSettings, input: {
   const evidence = {
     schemaVersion: 1,
     chainId: sepolia.id,
+    recordedAt: new Date().toISOString(),
+    publicOrder: {
+      ref: input.orderRef,
+      marketId: settings.marketId,
+      side: settings.side,
+      amount: settings.amount,
+    },
+    fundingMode: input.fundingMode,
     destinations: {
       web: redactOrigin(settings.webOrigin),
       api: redactOrigin(settings.apiOrigin),
@@ -265,6 +277,7 @@ async function writeRedactedEvidence(settings: LiveSepoliaSettings, input: {
       orderBook: redactAddress(input.orderBook),
     },
     transactionHashes: transactions,
+    networkEvidence: { directGatewayPostCount: input.gatewayPostCount },
     checks: [
       input.fundingMode === "REQUIRED" ? "REAL_FUNDING" : "BALANCES_ALREADY_READY",
       "DIRECT_GATEWAY",
