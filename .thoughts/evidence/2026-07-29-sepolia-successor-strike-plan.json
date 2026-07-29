@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "kind": "NOXLIMIT_SUCCESSOR_STRIKE_PLAN",
+  "chainId": 11155111,
+  "recordedAt": "2026-07-29T06:42:00.000Z",
+  "snapshot": {
+    "blockNumber": "11373845",
+    "blockHash": "0x25b017c2ad296bb4fb48c5133f6be7c34a41f13afed7672a9923e9022d15f81a",
+    "blockTimestamp": "1785306720",
+    "blockTime": "2026-07-29T06:32:00.000Z",
+    "tagAtSelection": "safe",
+    "canonicalHashRechecked": true
+  },
+  "selectionPolicy": {
+    "version": "near-the-money-half-up-v1",
+    "rule": "Round the positive eight-decimal Chainlink answer to the nearest configured whole-dollar tick; an exact half-tick rounds upward.",
+    "ticksUsd": {
+      "BTC/USD": "100",
+      "ETH/USD": "10"
+    }
+  },
+  "markets": [
+    {
+      "asset": "BTC/USD",
+      "proxy": "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
+      "roundId": "18446744073709584250",
+      "answer": "6389723600000",
+      "decimals": 8,
+      "observedAt": "1785303312",
+      "observedPriceUsd": "63897.23600000",
+      "selectedStrikeUsd": "63900",
+      "strikePriceWad": "63900000000000000000000"
+    },
+    {
+      "asset": "ETH/USD",
+      "proxy": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+      "roundId": "18446744073709586439",
+      "answer": "191082000000",
+      "decimals": 8,
+      "observedAt": "1785304608",
+      "observedPriceUsd": "1910.82000000",
+      "selectedStrikeUsd": "1910",
+      "strikePriceWad": "1910000000000000000000"
+    }
+  ],
+  "sharedTimes": {
+    "startsAt": "1785318900",
+    "startsAtIso": "2026-07-29T09:55:00.000Z",
+    "tradingClosesAt": "1785333000",
+    "tradingClosesAtIso": "2026-07-29T13:50:00.000Z",
+    "resolvesAt": "1785333300",
+    "resolvesAtIso": "2026-07-29T13:55:00.000Z",
+    "horizonSeconds": "14400"
+  },
+  "privacy": {
+    "containsCredentials": false,
+    "containsPrivateOrderMaterial": false
+  }
+}
