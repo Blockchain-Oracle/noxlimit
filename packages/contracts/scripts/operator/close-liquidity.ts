@@ -16,8 +16,10 @@ import {
   assertLiquidityClosePreconditions,
   assertOutputReady,
   explicitPath,
+  planLiquidityClose,
   readJsonIfExists,
   requireExplicitWrite,
+  rethrowSanitizedOperatorFailure,
   writeJsonExclusive,
 } from "./lib.js";
 
@@ -233,33 +235,33 @@ async function main(): Promise<void> {
   assertLiquidityClosePreconditions({
     operator: operatorAddress,
     lpOwner,
-    lpShares: before.lpShares,
     latestTimestamp: latestBlock.timestamp,
     tradingClosesAt,
   });
+  const beforePlan = planLiquidityClose(before);
 
   const receipts: { removeFunding: Hash | null; redeemPositions: Hash | null } = {
     removeFunding: null,
     redeemPositions: null,
   };
-  receipts.removeFunding = await operator.writeContract({
-    address: fpmm,
-    abi: fpmmAbi,
-    functionName: "removeFunding",
-    args: [before.lpShares],
-  });
-  const removeReceipt = await publicClient.waitForTransactionReceipt({
-    hash: receipts.removeFunding,
-    confirmations: confirmationCount,
-  });
-  if (removeReceipt.status !== "success") {
-    throw new OperatorConfigurationError(`removeFunding reverted: ${receipts.removeFunding}`);
+  if (beforePlan.removeFunding) {
+    receipts.removeFunding = await operator.writeContract({
+      address: fpmm,
+      abi: fpmmAbi,
+      functionName: "removeFunding",
+      args: [before.lpShares],
+    });
+    const removeReceipt = await publicClient.waitForTransactionReceipt({
+      hash: receipts.removeFunding,
+      confirmations: confirmationCount,
+    });
+    if (removeReceipt.status !== "success") {
+      throw new OperatorConfigurationError(`removeFunding reverted: ${receipts.removeFunding}`);
+    }
   }
-  const afterRemoval = await state();
-  if (
-    afterRemoval.payoutDenominator > 0n &&
-    (afterRemoval.yesBalance > 0n || afterRemoval.noBalance > 0n)
-  ) {
+  const afterRemoval = beforePlan.removeFunding ? await state() : before;
+  const afterRemovalPlan = planLiquidityClose(afterRemoval);
+  if (afterRemovalPlan.redeemPositions) {
     receipts.redeemPositions = await operator.writeContract({
       address: conditionalTokens,
       abi: conditionalTokensAbi,
@@ -312,4 +314,11 @@ async function main(): Promise<void> {
   );
 }
 
-await main();
+try {
+  await main();
+} catch (error) {
+  rethrowSanitizedOperatorFailure(
+    error,
+    "Sepolia liquidity close failed unexpectedly; inspect onchain state before retrying",
+  );
+}

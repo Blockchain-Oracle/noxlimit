@@ -22,6 +22,7 @@ import {
   officialChainlinkFeed,
   readJsonIfExists,
   requireExplicitWrite,
+  rethrowSanitizedOperatorFailure,
   writeJsonExclusive,
   type ResolverIdentity,
   type SupportedAsset,
@@ -321,4 +322,11 @@ async function main(): Promise<void> {
   );
 }
 
-await main();
+try {
+  await main();
+} catch (error) {
+  rethrowSanitizedOperatorFailure(
+    error,
+    "Sepolia objective resolution failed unexpectedly; inspect onchain state before retrying",
+  );
+}

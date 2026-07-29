@@ -29,6 +29,8 @@ import {
   loadCatalogHistory,
   operatorPlan,
   parseBundleConfig,
+  planLiquidityClose,
+  rethrowSanitizedOperatorFailure,
   stableIdentityOf,
   withExclusiveOperatorLock,
 } from "../scripts/operator/lib.js";
@@ -848,13 +850,12 @@ describe("operator configuration and manifest helpers", () => {
     );
   });
 
-  it("fails liquidity close unless the signer owns positive LP after the onchain close", () => {
+  it("binds liquidity close to the declared signer and onchain close boundary", () => {
     const lpOwner = address("a");
     assert.doesNotThrow(() =>
       assertLiquidityClosePreconditions({
         operator: lpOwner,
         lpOwner,
-        lpShares: 1n,
         latestTimestamp: 100n,
         tradingClosesAt: 100n,
       }),
@@ -864,7 +865,6 @@ describe("operator configuration and manifest helpers", () => {
         assertLiquidityClosePreconditions({
           operator: address("b"),
           lpOwner,
-          lpShares: 1n,
           latestTimestamp: 100n,
           tradingClosesAt: 100n,
         }),
@@ -875,22 +875,99 @@ describe("operator configuration and manifest helpers", () => {
         assertLiquidityClosePreconditions({
           operator: lpOwner,
           lpOwner,
-          lpShares: 1n,
           latestTimestamp: 99n,
           tradingClosesAt: 100n,
         }),
       /before NoxLimit trading close/,
     );
+  });
+
+  it("plans LP removal and an independent post-resolution redemption pass", () => {
+    assert.deepEqual(
+      planLiquidityClose({
+        lpShares: 10n,
+        yesBalance: 0n,
+        noBalance: 0n,
+        payoutDenominator: 0n,
+      }),
+      {
+        removeFunding: true,
+        redeemPositions: false,
+        unresolvedPositionsRemain: false,
+        alreadyClosed: false,
+      },
+    );
+    assert.deepEqual(
+      planLiquidityClose({
+        lpShares: 0n,
+        yesBalance: 12n,
+        noBalance: 11n,
+        payoutDenominator: 0n,
+      }),
+      {
+        removeFunding: false,
+        redeemPositions: false,
+        unresolvedPositionsRemain: true,
+        alreadyClosed: false,
+      },
+    );
+    assert.deepEqual(
+      planLiquidityClose({
+        lpShares: 0n,
+        yesBalance: 12n,
+        noBalance: 11n,
+        payoutDenominator: 1n,
+      }),
+      {
+        removeFunding: false,
+        redeemPositions: true,
+        unresolvedPositionsRemain: false,
+        alreadyClosed: false,
+      },
+    );
+    assert.deepEqual(
+      planLiquidityClose({
+        lpShares: 0n,
+        yesBalance: 0n,
+        noBalance: 0n,
+        payoutDenominator: 1n,
+      }),
+      {
+        removeFunding: false,
+        redeemPositions: false,
+        unresolvedPositionsRemain: false,
+        alreadyClosed: true,
+      },
+    );
     assert.throws(
       () =>
-        assertLiquidityClosePreconditions({
-          operator: lpOwner,
-          lpOwner,
+        planLiquidityClose({
           lpShares: 0n,
-          latestTimestamp: 100n,
-          tradingClosesAt: 100n,
+          yesBalance: 0n,
+          noBalance: 0n,
+          payoutDenominator: 0n,
         }),
-      /no FPMM LP shares/,
+      /no FPMM LP shares or outcome positions/,
+    );
+  });
+
+  it("redacts unexpected operator failures while preserving controlled errors", () => {
+    const controlled = new OperatorConfigurationError("known safe validation failure");
+    assert.throws(
+      () => rethrowSanitizedOperatorFailure(controlled, "generic"),
+      /known safe validation failure/,
+    );
+    assert.throws(
+      () =>
+        rethrowSanitizedOperatorFailure(
+          new Error("request failed at https://user:rpc-secret@example.test"),
+          "Sepolia operation failed unexpectedly; inspect onchain state before retrying",
+        ),
+      (error: unknown) =>
+        error instanceof OperatorConfigurationError &&
+        error.message ===
+          "Sepolia operation failed unexpectedly; inspect onchain state before retrying" &&
+        !error.message.includes("rpc-secret"),
     );
   });
 

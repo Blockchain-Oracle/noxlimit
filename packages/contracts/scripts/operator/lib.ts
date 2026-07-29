@@ -498,7 +498,6 @@ export function collateralMintShortfall(input: {
 export interface LiquidityClosePreconditions {
   readonly operator: Address;
   readonly lpOwner: Address;
-  readonly lpShares: bigint;
   readonly latestTimestamp: bigint;
   readonly tradingClosesAt: bigint;
 }
@@ -516,9 +515,64 @@ export function assertLiquidityClosePreconditions(
       `builder liquidity cannot close before NoxLimit trading close ${input.tradingClosesAt}`,
     );
   }
-  if (input.lpShares === 0n) {
-    throw new OperatorConfigurationError("declared LP owner has no FPMM LP shares to close");
+}
+
+export interface LiquidityCloseState {
+  readonly lpShares: bigint;
+  readonly yesBalance: bigint;
+  readonly noBalance: bigint;
+  readonly payoutDenominator: bigint;
+}
+
+export interface LiquidityClosePlan {
+  readonly removeFunding: boolean;
+  readonly redeemPositions: boolean;
+  readonly unresolvedPositionsRemain: boolean;
+  readonly alreadyClosed: boolean;
+}
+
+/**
+ * Plans one restart-safe liquidity-close step from current onchain balances.
+ *
+ * Removing FPMM funding and redeeming resolved outcome positions are deliberately independent:
+ * the first pass commonly happens before resolution, while a later pass must still redeem after
+ * the LP token balance has reached zero. A fully empty resolved state is accepted so a process
+ * that stopped after its final receipt can publish honest state evidence without another write.
+ */
+export function planLiquidityClose(input: LiquidityCloseState): LiquidityClosePlan {
+  const hasOutcomePositions = input.yesBalance > 0n || input.noBalance > 0n;
+  if (input.lpShares > 0n) {
+    return {
+      removeFunding: true,
+      redeemPositions: false,
+      unresolvedPositionsRemain: false,
+      alreadyClosed: false,
+    };
   }
+  if (hasOutcomePositions) {
+    return {
+      removeFunding: false,
+      redeemPositions: input.payoutDenominator > 0n,
+      unresolvedPositionsRemain: input.payoutDenominator === 0n,
+      alreadyClosed: false,
+    };
+  }
+  if (input.payoutDenominator > 0n) {
+    return {
+      removeFunding: false,
+      redeemPositions: false,
+      unresolvedPositionsRemain: false,
+      alreadyClosed: true,
+    };
+  }
+  throw new OperatorConfigurationError(
+    "declared LP owner has no FPMM LP shares or outcome positions to close",
+  );
+}
+
+export function rethrowSanitizedOperatorFailure(error: unknown, message: string): never {
+  if (error instanceof OperatorConfigurationError) throw error;
+  throw new OperatorConfigurationError(message);
 }
 
 export interface ResolverIdentity {
