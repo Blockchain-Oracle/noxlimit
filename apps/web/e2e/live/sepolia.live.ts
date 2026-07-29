@@ -170,8 +170,10 @@ async function liveContext(
 
 async function connect(page: Page): Promise<void> {
   const button = page.getByRole("button", { name: "Connect browser wallet" });
-  if (await button.isVisible()) await button.click();
-  await expect(page.getByTitle("Disconnect wallet")).toBeVisible();
+  const connected = page.getByTitle("Disconnect wallet");
+  await expect(button.or(connected).first()).toBeVisible();
+  if (!(await connected.isVisible())) await button.click();
+  await expect(connected).toBeVisible();
 }
 
 async function completeFunding(page: Page, mode: LiveFundingMode): Promise<Hex | undefined> {

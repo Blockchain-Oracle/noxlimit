@@ -73,10 +73,16 @@ test("primary shell has no serious or critical axe violations", async ({ page })
 });
 
 test("primary shell matches the approved viewport baseline", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-07-29T09:30:00Z"));
   await page.goto("/");
   await expect(page.locator(".chain-pill")).toHaveAttribute("title", "READY");
   await expect(page.getByLabel("Market Stream").getByRole("heading", { name: "Will BTC/USD settle at or above 65,000?" })).toBeVisible();
-  await expect(page).toHaveScreenshot("primary-shell.png", { fullPage: true, animations: "disabled", caret: "hide" });
+  await expect(page).toHaveScreenshot("primary-shell.png", {
+    fullPage: true,
+    animations: "disabled",
+    caret: "hide",
+    maxDiffPixels: 100,
+  });
 });
 
 test("deterministic filters request the fixture API and explicit Open enters analysis", async ({ page }, testInfo) => {

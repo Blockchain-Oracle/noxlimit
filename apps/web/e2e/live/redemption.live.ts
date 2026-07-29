@@ -99,13 +99,16 @@ test.skip(!liveWriteRequested, live.enabled ? undefined : live.reason);
 test("resolves from the exact first observation and redeems the winning position through the product", async () => {
   if (!live.enabled) throw new Error(live.reason);
   const settings = live.settings;
+  let safeFailureStage = "initialize";
   try {
   delete process.env.LIVE_REDEMPTION_PRIVATE_KEY;
   delete process.env.LIVE_REDEMPTION_RPC_URL;
+  safeFailureStage = "check-evidence-target";
   await assertEvidenceTargetFresh(settings);
 
   const account = privateKeyToAccount(settings.privateKey);
   const publicClient = createPublicClient({ chain: sepolia, transport: http(settings.rpcUrl) });
+  safeFailureStage = "read-service-preflight";
   const [health, market, initialPositions] = await Promise.all([
     readApi(settings, "/v1/health", healthViewSchema),
     readApi(settings, `/v1/markets/${settings.marketId}`, marketViewSchema),
@@ -118,11 +121,13 @@ test("resolves from the exact first observation and redeems the winning position
     throw new Error("The configured position is not owned by this wallet in the configured market.");
   }
 
+  safeFailureStage = "verify-bundle-and-rounds";
   const bundle = await verifyBundleAndRoundEvidence(publicClient, market, health.catalogRevision, settings);
   if (bundle.expectedWinner !== initialPosition.side || bundle.expectedWinner !== settings.expectedWinner) {
     throw new Error("The independently derived Chainlink winner does not match the configured position side.");
   }
 
+  safeFailureStage = "open-recovery-journal";
   const journal = await openLiveRedemptionJournal({
     journalPath: redemptionJournalPath(settings.evidencePath),
     binding: {
@@ -146,6 +151,7 @@ test("resolves from the exact first observation and redeems the winning position
   let context: BrowserContext | undefined;
   let page: Page | undefined;
   try {
+    safeFailureStage = "reconcile-recovery-journal";
     await reconcileBareRedemptionIntents({
       journal,
       client: publicClient,
@@ -176,32 +182,57 @@ test("resolves from the exact first observation and redeems the winning position
       predecessorRoundId: settings.predecessorRoundId,
       journal,
     });
+    safeFailureStage = "launch-browser";
     browser = await launchLiveBrowser();
     context = await liveContext(browser, settings, wallet.install);
     page = await context.newPage();
 
     let resolutionReceipt = await receiptForRecordedAction(journal, publicClient, "resolution", bundle.resolver);
     if (!resolutionReceipt) {
+      safeFailureStage = "check-unresolved-browser-position";
       const currentlyResolved = await publicClient.readContract({ address: bundle.resolver, abi: priceBinaryResolverAbi, functionName: "resolved" });
       if (currentlyResolved || initialPosition.state !== "AWAITING_RESOLUTION") {
         throw new Error("A fresh browser resolution requires an unresolved resolver and AWAITING_RESOLUTION position.");
       }
+      safeFailureStage = "navigate-to-browser-position";
       await page.goto(`/positions/${settings.positionId}`);
-      await connect(page);
+      safeFailureStage = "locate-browser-wallet-connect";
+      const connectButton = page.getByRole("button", { name: "Connect browser wallet" });
+      const disconnectButton = page.getByTitle("Disconnect wallet");
+      await expect(connectButton.or(disconnectButton).first()).toBeVisible();
+      if (!(await disconnectButton.isVisible())) {
+        safeFailureStage = "request-browser-wallet-connect";
+        await connectButton.click();
+      }
+      safeFailureStage = "wait-for-browser-wallet-connect";
+      try {
+        await expect(disconnectButton).toBeVisible();
+      } catch (reason) {
+        const methods = wallet.requestedMethods();
+        safeFailureStage = `wait-for-browser-wallet-connect:${methods.length > 0 ? methods.join(",") : "no-provider-request"}`;
+        throw reason;
+      }
+      safeFailureStage = "verify-browser-resolution-evidence";
       const readyEvidence = page.locator(".resolution-evidence").filter({ hasText: "Resolver ready" });
       await expect(readyEvidence).toContainText(`Selected round ${settings.selectedRoundId.toString()}`);
       await expect(readyEvidence).toContainText(`adjacent predecessor ${settings.predecessorRoundId.toString()}`);
+      safeFailureStage = "record-browser-safe-snapshot";
       const browserSnapshot = await browserSafeSnapshot(publicClient, readyEvidence);
       await recordOrConfirmRetryBrowserEvidence(journal, browserSnapshot);
+      safeFailureStage = "submit-browser-resolution";
       await page.getByRole("button", { name: "Resolve market with this evidence" }).click();
+      safeFailureStage = "wait-for-browser-resolution-receipt";
       await expect(page.getByText("Objective resolution receipt confirmed", { exact: true })).toBeVisible({ timeout: 180_000 });
+      safeFailureStage = "verify-browser-resolution-write-count";
       await expect.poll(() => wallet.writes().length).toBe(1);
+      safeFailureStage = "read-browser-resolution-journal";
       resolutionReceipt = await receiptForRecordedAction(journal, publicClient, "resolution", bundle.resolver);
       if (!resolutionReceipt) throw new Error("The browser resolution did not leave a submitted journal action.");
     }
 
     const resolutionEvent = validateResolutionReceipt(resolutionReceipt, bundle, settings);
     await confirmIfSubmitted(journal, "resolution", resolutionReceipt);
+    safeFailureStage = "wait-for-redeemable-position";
     let redemptionExpectation = journal.snapshot().redemptionExpectation;
     if (!redemptionExpectation) {
       const redeemablePosition = await waitForPositionState(settings, account.address, settings.positionId, "REDEEMABLE");
@@ -219,6 +250,7 @@ test("resolves from the exact first observation and redeems the winning position
 
     let redemptionReceipt = await receiptForRecordedAction(journal, publicClient, "redemption", bundle.conditionalTokens);
     if (!redemptionReceipt) {
+      safeFailureStage = "browser-redemption";
       await page.goto(`/positions/${settings.positionId}`);
       await connect(page);
       await expect(page.locator(".status-banner strong")).toHaveText("REDEEMABLE");
@@ -230,6 +262,7 @@ test("resolves from the exact first observation and redeems the winning position
       if (!redemptionReceipt) throw new Error("The browser redemption did not leave a submitted journal action.");
     }
 
+    safeFailureStage = "validate-redemption-proof";
     const payout = await validateRedemptionReceipt(
       publicClient,
       redemptionReceipt,
@@ -239,6 +272,7 @@ test("resolves from the exact first observation and redeems the winning position
       redemptionExpectation,
     );
     await confirmIfSubmitted(journal, "redemption", redemptionReceipt);
+    safeFailureStage = "wait-for-redeemed-projection";
     const finalPosition = await waitForPositionState(settings, account.address, settings.positionId, "REDEEMED");
     if (finalPosition.shares !== "0.000000") throw new Error("The final safe-block projection did not consume the redeemed shares.");
 
@@ -253,6 +287,7 @@ test("resolves from the exact first observation and redeems the winning position
       || !finalJournal.browserEvidence
     ) throw new Error("The final journal does not prove one exact durable transaction per action.");
 
+    safeFailureStage = "write-public-evidence";
     await writeEvidence(settings, {
       healthCatalogRevision: health.catalogRevision,
       market,
@@ -272,7 +307,7 @@ test("resolves from the exact first observation and redeems the winning position
     await journal.close();
   }
   } catch {
-    throw new Error("The live Sepolia redemption proof failed safely. Provider credentials and signed transaction material were suppressed; inspect the private journal and redacted local logs.");
+    throw new Error(`The live Sepolia redemption proof failed safely during ${safeFailureStage}. Provider credentials and signed transaction material were suppressed; inspect the private journal and redacted local logs.`);
   }
 });
 
@@ -626,8 +661,10 @@ async function liveContext(browser: Browser, settings: LiveRedemptionSettings, i
 
 async function connect(page: Page): Promise<void> {
   const button = page.getByRole("button", { name: "Connect browser wallet" });
-  if (await button.isVisible()) await button.click();
-  await expect(page.getByTitle("Disconnect wallet")).toBeVisible();
+  const connected = page.getByTitle("Disconnect wallet");
+  await expect(button.or(connected).first()).toBeVisible();
+  if (!(await connected.isVisible())) await button.click();
+  await expect(connected).toBeVisible();
 }
 
 function exactPosition(positions: readonly PositionView[], positionId: Hex): PositionView {

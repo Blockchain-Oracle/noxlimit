@@ -59,9 +59,11 @@ export type LiveRedemptionWalletInput = Readonly<{
 export function createLiveSepoliaRedemptionWallet(input: LiveRedemptionWalletInput) {
   const account = privateKeyToAccount(input.privateKey);
   const walletClient = createWalletClient({ account, chain: sepolia, transport: http(input.rpcUrl) });
+  const requestedMethods: string[] = [];
 
   const request = async (raw: unknown): Promise<unknown> => {
     const providerRequest = parseProviderRequest(raw);
+    requestedMethods.push(safeMethodName(providerRequest.method));
     switch (providerRequest.method) {
       case "eth_requestAccounts":
       case "eth_accounts":
@@ -162,7 +164,12 @@ export function createLiveSepoliaRedemptionWallet(input: LiveRedemptionWalletInp
     address: account.address,
     install,
     writes: () => writesFromJournal(input),
+    requestedMethods: () => [...requestedMethods],
   };
+}
+
+function safeMethodName(value: string): string {
+  return /^[a-zA-Z0-9_]{1,64}$/.test(value) ? value : "unknown";
 }
 
 function authorizeTransaction(

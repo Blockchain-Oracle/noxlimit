@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "kind": "NOXLIMIT_SEPOLIA_OBJECTIVE_RESOLUTION_POLICY_REJECTION",
+  "recordedAt": "2026-07-29T11:42:28Z",
+  "chainId": 11155111,
+  "catalogRevision": "0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899",
+  "sourceCommit": "c07364381c415068e7055be0d342b95b8e7bae34",
+  "market": {
+    "marketId": "0x430fec6ab7fe5cf24a07547615c11aad83bea4f4a7946ec7ad61e22b30d7a07d",
+    "asset": "ETH/USD",
+    "question": "Will ETH/USD be at or above $1,900 at 2026-07-29T10:00:00Z?",
+    "questionId": "0xc9a5d37e4e371a3ec71725cd616dc4033b742332c66a01f1cd1bcac03a20ebee",
+    "conditionId": "0xccf0d417261bd5e314ac8784840013859f77f6ec98f9a24c1d794ae127ca9a2a",
+    "resolver": "0xB42798FD7177954ca30f7eaE6FC9932069b9D66E",
+    "conditionalTokens": "0x5f3198E99F74A9AaA82386e275395D57401C953D"
+  },
+  "snapshot": {
+    "tagAtSelection": "safe",
+    "blockNumber": "11375220",
+    "blockHash": "0xfdb50543611b442041d88d99dd06ce74119e63082e446b38d66779003eabee97",
+    "blockTimestamp": "1785324384",
+    "canonicalHashRechecked": true
+  },
+  "oracle": {
+    "source": "CHAINLINK",
+    "proxy": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+    "description": "ETH / USD",
+    "decimals": 8
+  },
+  "policy": {
+    "policyVersion": "chainlink-first-observation-v1",
+    "comparison": ">=",
+    "strikePriceWad": "1900000000000000000000",
+    "resolvesAt": "1785319200",
+    "maximumObservationDelaySeconds": "3600",
+    "latestAllowedObservedAt": "1785322800"
+  },
+  "candidatePair": {
+    "firstPostResolution": {
+      "roundId": "18446744073709586444",
+      "answer": "190981780000",
+      "normalizedCandidatePriceWad": "1909817800000000000000",
+      "startedAt": "1785322824",
+      "updatedAt": "1785322824",
+      "answeredInRound": "18446744073709586444"
+    },
+    "adjacentPredecessor": {
+      "roundId": "18446744073709586443",
+      "answer": "192055730147",
+      "startedAt": "1785319188",
+      "updatedAt": "1785319188",
+      "answeredInRound": "18446744073709586443"
+    },
+    "samePhaseAdjacent": true,
+    "roundIdDifference": "1",
+    "predecessorSecondsBeforeResolution": "12",
+    "selectedSecondsAfterResolution": "3624"
+  },
+  "rejection": {
+    "code": "FIRST_POST_RESOLUTION_OBSERVATION_EXCEEDS_MAXIMUM_DELAY",
+    "terminalForDeployedPolicy": true,
+    "excessSeconds": "24",
+    "selectorExitCode": 1,
+    "message": "first post-resolution observation 18446744073709586444 at 1785322824 exceeds maximum delay 1785322800"
+  },
+  "onchainState": {
+    "resolved": false,
+    "settlementRoundId": "0",
+    "predecessorRoundId": "0",
+    "settlementPriceWad": "0",
+    "settlementObservedAt": "0",
+    "payoutDenominator": "0"
+  },
+  "operatorAction": {
+    "selectorNetwork": "sepolia",
+    "accountConfigured": false,
+    "resolutionWriteAttempted": false,
+    "transactionHash": null
+  },
+  "settlement": {
+    "accepted": false,
+    "winner": null,
+    "payoutVector": null
+  },
+  "checks": [
+    "CATALOG_BOUND",
+    "SAFE_BLOCK_PINNED",
+    "CANONICAL_BLOCK_HASH_RECHECKED",
+    "EXACT_ADJACENT_ROUND_PAIR",
+    "FIRST_POST_RESOLUTION_OBSERVATION_IDENTIFIED",
+    "IMMUTABLE_MAXIMUM_DELAY_REJECTED",
+    "NO_RESOLUTION_WRITE",
+    "RESOLVER_REMAINS_UNRESOLVED",
+    "CTF_PAYOUT_REMAINS_UNSET"
+  ]
+}

@@ -10,6 +10,7 @@ import { zeroAddress, type Address, type Hex } from "viem";
 import {
   OperatorConfigurationError,
   HORIZON_SECONDS,
+  MINIMUM_SEPOLIA_OBSERVATION_DELAY_SECONDS,
   OFFICIAL_SEPOLIA_CHAINLINK_FEEDS,
   PINNED_CONDITIONAL_TOKENS,
   PINNED_FPMM_FACTORY,
@@ -51,7 +52,8 @@ function env(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
     NOXLIMIT_STARTS_AT: "1924992000",
     NOXLIMIT_TRADING_CLOSES_AT: "1924995420",
     NOXLIMIT_RESOLVES_AT: "1924995600",
-    NOXLIMIT_MAXIMUM_OBSERVATION_DELAY_SECONDS: "300",
+    NOXLIMIT_MAXIMUM_OBSERVATION_DELAY_SECONDS:
+      MINIMUM_SEPOLIA_OBSERVATION_DELAY_SECONDS.toString(),
     NOXLIMIT_FPMM_FEE_BPS: "200",
     NOXLIMIT_POOL_SEED_ATOMS: "50000000",
     NOXLIMIT_EVALUATION_TIMEOUT_SECONDS: "120",
@@ -381,6 +383,30 @@ describe("operator configuration and manifest helpers", () => {
       () => parseBundleConfig(env({ NOXLIMIT_WORKER: zeroAddress }), 1_900_000_000n),
       OperatorConfigurationError,
     );
+    for (const delay of ["3600", "14399"]) {
+      assert.throws(
+        () =>
+          parseBundleConfig(
+            env({ NOXLIMIT_MAXIMUM_OBSERVATION_DELAY_SECONDS: delay }),
+            1_900_000_000n,
+          ),
+        /must be at least 14400 seconds/,
+      );
+    }
+    assert.equal(
+      parseBundleConfig(
+        env({ NOXLIMIT_MAXIMUM_OBSERVATION_DELAY_SECONDS: "14400" }),
+        1_900_000_000n,
+      ).maximumObservationDelaySeconds,
+      14_400n,
+    );
+    assert.equal(
+      parseBundleConfig(
+        env({ NOXLIMIT_MAXIMUM_OBSERVATION_DELAY_SECONDS: "14401" }),
+        1_900_000_000n,
+      ).maximumObservationDelaySeconds,
+      14_401n,
+    );
     assert.throws(
       () => parseBundleConfig(env({ NOXLIMIT_ASSET: "SOL/USD" }), 1_900_000_000n),
       /Pyth path/,
@@ -632,6 +658,28 @@ describe("operator configuration and manifest helpers", () => {
     );
   });
 
+  it("rejects a newly staged market below the Sepolia observation-delay floor", async () => {
+    const config = parseBundleConfig(env(), 1_900_000_000n);
+    const authority = await loadCatalogAuthority();
+    const history = await loadCatalogHistory(config.catalogHistoryPaths, authority);
+    const record = recordFor(config, "a");
+    const identity = record.identity as Record<string, unknown>;
+    const resolverPolicy = identity.resolverPolicy as Record<string, unknown>;
+    resolverPolicy.maximumObservationDelaySeconds = "3600";
+
+    assert.throws(
+      () =>
+        buildCatalogCandidate(
+          history,
+          record,
+          "2030-12-31T12:00:00.000Z",
+          1_000n,
+          authority,
+        ),
+      /maximum observation delay must be at least 14400 seconds/,
+    );
+  });
+
   it("cuts over two simultaneously closed axes in one validated catalog revision", async () => {
     const fixture = await stagedTwoAxisCutover();
     const previous = fixture.history.at(-1);
@@ -799,6 +847,35 @@ describe("operator configuration and manifest helpers", () => {
     const current = fixture.history.at(-1);
     assert.ok(current);
     const targetId = fixture.pairs[0].successorMarketId.toLowerCase();
+    const unsafeDelay = {
+      ...current,
+      markets: current.markets.map((record) => {
+        if (String(record.marketId).toLowerCase() !== targetId) return record;
+        return {
+          ...record,
+          identity: {
+            ...(record.identity as Record<string, unknown>),
+            resolverPolicy: {
+              ...((record.identity as Record<string, unknown>)
+                .resolverPolicy as Record<string, unknown>),
+              maximumObservationDelaySeconds: "3600",
+            },
+          },
+        };
+      }),
+    };
+    assert.throws(
+      () =>
+        buildCatalogMultiCutoverCandidate(
+          [...fixture.history.slice(0, -1), unsafeDelay],
+          fixture.pairs,
+          fixture.effectiveAt,
+          fixture.effectiveBlock,
+          fixture.authority,
+        ),
+      /maximum observation delay must be at least 14400 seconds/,
+    );
+
     const tampered = {
       ...current,
       markets: current.markets.map((record) => {
@@ -981,9 +1058,11 @@ describe("operator configuration and manifest helpers", () => {
       strikePriceWad: 65_000n * 10n ** 18n,
       tradingClosesAt: 100n,
       resolvesAt: 200n,
-      maximumObservationDelay: 300n,
+      maximumObservationDelay: MINIMUM_SEPOLIA_OBSERVATION_DELAY_SECONDS,
     } as const;
     assert.doesNotThrow(() => assertResolverIdentity(expected, expected));
+    const historical = { ...expected, maximumObservationDelay: 3_600n };
+    assert.doesNotThrow(() => assertResolverIdentity(historical, historical));
     assert.throws(
       () => assertResolverIdentity({ ...expected, conditionId: hash("4") }, expected),
       /condition identity mismatch/,

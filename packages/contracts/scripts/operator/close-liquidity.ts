@@ -59,7 +59,10 @@ function confirmations(): number {
   return value;
 }
 
+let safeFailureStage = "initialize";
+
 async function main(): Promise<void> {
+  safeFailureStage = "parse-configuration";
   requireExplicitWrite(process.env, "CLOSE_SEPOLIA_LIQUIDITY");
   const conditionalTokens = address("NOXLIMIT_CONDITIONAL_TOKENS");
   const collateral = address("NOXLIMIT_COLLATERAL_ADDRESS");
@@ -72,6 +75,7 @@ async function main(): Promise<void> {
   const existingEvidence = await readJsonIfExists(outputPath);
   if (existingEvidence === undefined) await assertOutputReady(outputPath);
 
+  safeFailureStage = "connect-sepolia-operator";
   const connection = await network.create();
   if (connection.networkName !== "sepoliaOperator") {
     throw new OperatorConfigurationError("liquidity close must use the explicit sepoliaOperator network");
@@ -89,6 +93,7 @@ async function main(): Promise<void> {
   if (chainId !== ETHEREUM_SEPOLIA_CHAIN_ID) {
     throw new OperatorConfigurationError(`refusing liquidity close on chain ${chainId}`);
   }
+  safeFailureStage = "verify-contract-code";
   for (const [label, target] of [
     ["Conditional Tokens", conditionalTokens],
     ["collateral", collateral],
@@ -98,6 +103,7 @@ async function main(): Promise<void> {
     const code = await publicClient.getCode({ address: target });
     if (!code || code === "0x") throw new OperatorConfigurationError(`${label} has no runtime code`);
   }
+  safeFailureStage = "verify-market-bindings";
   const [
     boundConditionalTokens,
     boundCollateral,
@@ -148,6 +154,7 @@ async function main(): Promise<void> {
     );
   }
 
+  safeFailureStage = "derive-outcome-positions";
   const [yesCollection, noCollection] = await Promise.all([
     publicClient.readContract({
       address: conditionalTokens,
@@ -208,6 +215,7 @@ async function main(): Promise<void> {
     return { lpShares, yesBalance, noBalance, payoutDenominator, collateralBalance };
   };
 
+  safeFailureStage = "read-pre-close-state";
   const before = await state();
   if (existingEvidence !== undefined) {
     const prior = existingEvidence as Record<string, unknown>;
@@ -245,12 +253,14 @@ async function main(): Promise<void> {
     redeemPositions: null,
   };
   if (beforePlan.removeFunding) {
+    safeFailureStage = "submit-remove-funding";
     receipts.removeFunding = await operator.writeContract({
       address: fpmm,
       abi: fpmmAbi,
       functionName: "removeFunding",
       args: [before.lpShares],
     });
+    safeFailureStage = "confirm-remove-funding";
     const removeReceipt = await publicClient.waitForTransactionReceipt({
       hash: receipts.removeFunding,
       confirmations: confirmationCount,
@@ -259,15 +269,18 @@ async function main(): Promise<void> {
       throw new OperatorConfigurationError(`removeFunding reverted: ${receipts.removeFunding}`);
     }
   }
+  safeFailureStage = "read-post-removal-state";
   const afterRemoval = beforePlan.removeFunding ? await state() : before;
   const afterRemovalPlan = planLiquidityClose(afterRemoval);
   if (afterRemovalPlan.redeemPositions) {
+    safeFailureStage = "submit-redeem-positions";
     receipts.redeemPositions = await operator.writeContract({
       address: conditionalTokens,
       abi: conditionalTokensAbi,
       functionName: "redeemPositions",
       args: [collateral, zeroHash, conditionId, [1n, 2n]],
     });
+    safeFailureStage = "confirm-redeem-positions";
     const redeemReceipt = await publicClient.waitForTransactionReceipt({
       hash: receipts.redeemPositions,
       confirmations: confirmationCount,
@@ -276,6 +289,7 @@ async function main(): Promise<void> {
       throw new OperatorConfigurationError(`redeemPositions reverted: ${receipts.redeemPositions}`);
     }
   }
+  safeFailureStage = "read-post-close-state";
   const after = await state();
   if (after.lpShares !== 0n) {
     throw new OperatorConfigurationError("operator still owns FPMM LP shares after close");
@@ -302,6 +316,7 @@ async function main(): Promise<void> {
     unresolvedPositionsRemain:
       after.payoutDenominator === 0n && (after.yesBalance > 0n || after.noBalance > 0n),
   };
+  safeFailureStage = "write-close-evidence";
   await writeJsonExclusive(outputPath, evidence);
   process.stdout.write(
     `${JSON.stringify({
@@ -319,6 +334,6 @@ try {
 } catch (error) {
   rethrowSanitizedOperatorFailure(
     error,
-    "Sepolia liquidity close failed unexpectedly; inspect onchain state before retrying",
+    `Sepolia liquidity close failed unexpectedly during ${safeFailureStage}; inspect onchain state before retrying`,
   );
 }

@@ -35,6 +35,11 @@ export const PINNED_FPMM_FACTORY = {
 const CHAINLINK_PROXY_RUNTIME_CODE_HASH =
   "0x9190afba2a699a9627d64ed68c7cc60e4005a8830b33183c4413b4e1a93b9ccd" as Hex;
 
+// Sepolia BTC/USD and ETH/USD observations are commonly a little more than one hour apart.
+// Four hours preserves a bounded outage policy while leaving enough room for ordinary cadence
+// jitter and missed testnet reports. First-observation adjacency still prevents round cherry-pick.
+export const MINIMUM_SEPOLIA_OBSERVATION_DELAY_SECONDS = 14_400n;
+
 export const OFFICIAL_SEPOLIA_CHAINLINK_FEEDS = {
   "BTC/USD": {
     proxy: getAddress("0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43"),
@@ -451,6 +456,13 @@ export function parseBundleConfig(
 
   if (config.maximumObservationDelaySeconds > UINT64_MAX) {
     throw new OperatorConfigurationError("maximum observation delay exceeds uint64");
+  }
+  if (
+    config.maximumObservationDelaySeconds < MINIMUM_SEPOLIA_OBSERVATION_DELAY_SECONDS
+  ) {
+    throw new OperatorConfigurationError(
+      `maximum observation delay must be at least ${MINIMUM_SEPOLIA_OBSERVATION_DELAY_SECONDS} seconds for the official Sepolia feeds`,
+    );
   }
   for (const [name, value] of [
     ["evaluation timeout", config.evaluationTimeoutSeconds],
@@ -930,6 +942,7 @@ export function buildCatalogCandidate(
   }
 
   const identity = recordIdentity(marketRecord);
+  assertFutureSepoliaResolverPolicy(marketRecord, `${identity.asset}:${identity.horizon}`);
   const routeByMarket = new Map(
     previous.routing.map((route) => [route.marketId.toLowerCase(), route] as const),
   );
@@ -1013,6 +1026,24 @@ function positiveRecordBigInt(
   return BigInt(value);
 }
 
+function assertFutureSepoliaResolverPolicy(
+  record: Record<string, unknown>,
+  label: string,
+): void {
+  const identity = recordObject(record, "identity");
+  const resolverPolicy = recordObject(identity, "resolverPolicy");
+  const delay = positiveRecordBigInt(
+    resolverPolicy,
+    "maximumObservationDelaySeconds",
+    `${label} maximum observation delay`,
+  );
+  if (delay < MINIMUM_SEPOLIA_OBSERVATION_DELAY_SECONDS) {
+    throw new OperatorConfigurationError(
+      `${label}: successor maximum observation delay must be at least ${MINIMUM_SEPOLIA_OBSERVATION_DELAY_SECONDS} seconds`,
+    );
+  }
+}
+
 export function buildCatalogCutoverCandidate(
   history: readonly CatalogManifestLike[],
   predecessorMarketId: Hex,
@@ -1049,6 +1080,10 @@ export function buildCatalogCutoverCandidate(
   ) {
     throw new OperatorConfigurationError("predecessor and successor must share one asset/horizon axis");
   }
+  assertFutureSepoliaResolverPolicy(
+    successor,
+    `${successorAxis.asset}:${successorAxis.horizon}`,
+  );
   const predecessorTimes = recordObject(predecessor, "times");
   const successorTimes = recordObject(successor, "times");
   if (
@@ -1215,6 +1250,7 @@ export function buildCatalogMultiCutoverCandidate(
       throw new OperatorConfigurationError(`multi-axis cutover contains duplicate axis ${axis}`);
     }
     axes.add(axis);
+    assertFutureSepoliaResolverPolicy(successor, axis);
 
     const predecessorTimes = recordObject(predecessor, "times");
     const predecessorClose = positiveRecordBigInt(
