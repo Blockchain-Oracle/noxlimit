@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 2,
+  "kind": "NOXLIMIT_SEPOLIA_LIQUIDITY_CLOSE",
+  "chainId": 11155111,
+  "operator": "0xA03D26E19ee4061A06a9a097010Bc06028Bba60A",
+  "conditionalTokens": "0x5f3198E99F74A9AaA82386e275395D57401C953D",
+  "collateral": "0x2B0F8B156a2870E53621802A618C3d0427A163A6",
+  "fpmm": "0x8Fcc4c208569aCD2fb48646d5518D145dF58565d",
+  "orderBook": "0x415aF93e0CC69da94E611B2EA0d8dbD85828484B",
+  "lpOwner": "0xA03D26E19ee4061A06a9a097010Bc06028Bba60A",
+  "conditionId": "0x09e933a6b6f90faa92ba0c5d210b8c11d81e6e77724ff5099334a3999a38a3d3",
+  "tradingClosesAt": "1785333000",
+  "preCloseSnapshot": {
+    "blockNumber": "11375988",
+    "blockHash": "0xfb244fab74d82fbd0d270d6d8c7582067e440ae7676743a4a0edd57acd73003f",
+    "timestamp": "1785334272"
+  },
+  "closedAtBlock": "11375990",
+  "closedAtTimestamp": "1785334296",
+  "positions": {
+    "yesPositionId": "52298530333813126787537312391821305242955803939656753122273850395859176818960",
+    "noPositionId": "10064638854755691838715551904210878263103441569997700744502124309336740033514"
+  },
+  "before": {
+    "lpShares": "50000000",
+    "yesBalance": "0",
+    "noBalance": "0",
+    "payoutDenominator": "0",
+    "collateralBalance": "0"
+  },
+  "after": {
+    "lpShares": "0",
+    "yesBalance": "50000000",
+    "noBalance": "50000000",
+    "payoutDenominator": "0",
+    "collateralBalance": "0"
+  },
+  "receipts": {
+    "removeFunding": "0xcfd96ad20aec7d2a6f82c30f908cfbb021d62a7118e7a861f0bf9b88a4ed52b5",
+    "redeemPositions": null
+  },
+  "redeemed": false,
+  "unresolvedPositionsRemain": true
+}

@@ -87,3 +87,8 @@ packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:ge
 packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:591
 packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:637
 packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:651
+
+# Reviewed false positives in revision-5 successor LP-close evidence: the public pinned
+# Conditional Tokens deployment address.
+.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-successor-liquidity-close.json:generic-api-key:6
+.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-successor-liquidity-close.json:generic-api-key:6
