@@ -3,27 +3,43 @@
 > **ACTIVE — the user explicitly authorized the polished build on 2026-07-28.**
 
 > **IMPLEMENTATION CHECKPOINT — Phases 0–5 and bounded operator hardening are complete. Phase 6 is
-> committed through BTC/ETH deployment/funding, three browser-off real order/fill flows,
-> predecessor LP close, and atomic paired successor activation at commit `c073643`. Runtime catalog
-> revision `5` is
-> `packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json`, hash
-> `0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`; original routes are
-> `RETIRED`, successors are `ACTIVE`, and the exercised service was `READY`. Fresh 2026-07-29
-> 12:08Z `pnpm check` passes contracts `77`, protocol `14`, catalog `6`, service `65`, and web `61`
-> (`223` total), including compile/type-check/test/build. The dedicated Playwright suite passes
+> committed through BTC/ETH deployment/funding, seven browser-off real order/fill flows, both
+> rotations, and retired-pool liquidity close. Commit `d28f307` published corrected-cutover catalog
+> revision `8` at
+> `packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json`, hash
+> `0x577593192efb7cf139267b3d076eb5e846fd15d1ab080611f9d504b716b4b427`, effective at block
+> `11375905` and `2026-07-29T13:53:36Z`. Corrected BTC
+> `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2` and ETH
+> `0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a` are `ACTIVE`; revisions
+> `6`/`7` were never served. The runtime used controlled stop → pointer → single startup for the
+> non-adjacent revision-5-to-8 adoption. Health was `READY` at `2026-07-29T15:33:41Z`; both
+> corrected markets were ordering-open and dynamically tradeable at the time-bound
+> `2026-07-29T15:34:12Z` market snapshot. The latest `pnpm check` passes contracts
+> `84`, protocol `14`, catalog `6`, service `69`, and web `62` (`235` total), including
+> compile/type-check/test/build. The dedicated Playwright suite passes
 > `45` journeys with `21` intentional skips and zero failures. Do not recreate these layers or modify
 > `spike/**`. BTC now completes the real browser resolution, winning-user redemption, and builder-LP
 > redemption path. ETH is terminally rejected: its unique first post-deadline observation arrived
 > 24 seconds outside the immutable 3,600-second bound, the selector made no write, and no ETH winner
-> exists. Both active revision-5 successors retain the same known liveness risk. Corrected BTC
-> `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2`
-> and ETH `0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a`
-> successors are now resolver-first deployed, immutable-validated, seeded with 50,000,000 YES /
-> 50,000,000 NO atoms, and staged `SUCCESSOR` in revisions `6`/`7`. Both use 14,400 seconds and
-> share the revision-5 close / corrected-successor start boundary `2026-07-29T13:50:00Z`;
-> quote freshness remains separately 3,600 seconds. Revision `5` stays current until one atomic
-> revision-`8` cutover. Local service/web container build/smoke passes, but public hosting, video,
-> X, and form/contact fields remain pending.**
+> exists. The active corrected successors use 14,400 seconds while quote freshness remains
+> separately 3,600 seconds. Both retired revision-5 pools now have zero LP shares, leaving their LP
+> owner with 50,000,000 YES plus 50,000,000 NO unresolved atoms per market under committed evidence.
+> Both corrected OrderBooks now return `nextOrderId = 3`; BTC NO/YES orders `1`/`2` and ETH
+> YES/NO orders `1`/`2` were browser-created, filled by the browser-off worker, and fresh-browser
+> confirmed. Their redacted records are
+> [BTC NO](../.thoughts/evidence/2026-07-29-r8-corrected-btc-no-order.json),
+> [BTC YES](../.thoughts/evidence/2026-07-29-r8-corrected-btc-yes-order.json),
+> [ETH YES](../.thoughts/evidence/2026-07-29-r8-corrected-eth-yes-order.json), and
+> [ETH NO](../.thoughts/evidence/2026-07-29-r8-corrected-eth-no-order.json).
+> Local service/web container build/smoke passes, but public hosting, video, X, and form/contact
+> fields remain pending. Billable hosting requires the user's explicit authorization. A complete
+> corrected-route vertical still requires objective resolution and user/builder redemptions.
+> Approved BTC/ETH 1h/24h breadth is complete in current revision `12`, whose ten records contain
+> four retired and six active routes. The service is `READY` on hash
+> `0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e`; the new routes were
+> truthfully `UPCOMING` before their shared start. Final default-branch handoff and the final
+> submission-commit
+> root/Playwright rerun also remain pending.**
 
 You are implementing the selected iExec WTF Hackathon product in this repository. This is not a
 new discovery, selection, or architecture exercise. Start by following `AGENTS.md` and the mandatory
@@ -106,8 +122,11 @@ clears the private maximum price, which is never persisted.
 Steps 1–4 below are the retained implementation contract and regression boundary; they and bounded
 operator hardening are implemented rather than a request to restart. Step 5 is partial/degraded:
 live deployment/funding/fills/LP close/successor cutover and one complete BTC resolution/redemption
-vertical are committed; ETH is a terminal immutable-policy rejection, and public release evidence
-remains pending.
+vertical on the predecessor route are committed; ETH is a terminal immutable-policy rejection.
+Both corrected revision-8 routes now have real browser-created, browser-off fills, but neither is a
+complete vertical until objective resolution and user/builder redemption are preserved. Approved
+BTC/ETH 1h/24h breadth is deployed and active in revision `12`.
+Public release evidence remains pending.
 
 ### 1. Harden the verified contract slice
 
@@ -177,7 +196,10 @@ history; do not edit them in place.
 Use the implemented deployment journal for every live bundle. It is created before the first
 write, cross-process locked, and bound to the exact plan/operator/chain/output paths, ordered
 expected steps, and frozen funding plan. Preserve `INTENT → SUBMITTED → CONFIRMED`; never blindly
-replace a submitted transaction. A bare intent requires explicit per-step `ADOPT` with the exact
+replace a submitted transaction. A submitted step may retry only after explicit attempt-bound
+`RETRY` and proof that its exact persisted receipt reverted at the configured confirmation depth;
+verify its sender, persist the failure receipt, and submit nothing for pending, successful,
+mismatched, or stale-attempt cases. A bare intent requires explicit per-step `ADOPT` with the exact
 transaction hash or `RETRY`, both bound to `expectedAttempt`. Keep secrets out of the journal, and
 publish only hash-verified create-only evidence/catalog outputs. Market duration and canonical
 question must match the declared 1h/4h/24h horizon exactly. When reusing operator-owned shared Test
@@ -242,27 +264,42 @@ authorization`, not chat and not one-tap wagering. An API/agent interface is sec
 
 **Current checkpoint:** the BTC NO, BTC YES, and ETH YES artifacts already prove signed funding
 where needed, direct Gateway input, real order creation, browser closure, browser-off FPMM fill, and
-fresh-browser `Filled` reconstruction on the original bundles. Both predecessor LP removals and the
-paired revision-5 successor cutover are committed. BTC resolution plus winning-user and builder-LP
-redemption are also committed. ETH's accountless selector proved its first observation was 24
-seconds beyond the immutable one-hour bound and stopped before a write. Do not rerun those writes or
-invent an ETH settlement merely to make the evidence symmetric.
+fresh-browser `Filled` reconstruction on the original bundles. Both predecessor LP removals, the
+historical paired revision-5 cutover, the corrected paired revision-8 cutover, and the retired
+revision-5 pool closes are committed. BTC resolution plus winning-user and builder-LP redemption are
+also committed. ETH's accountless selector proved its first observation was 24 seconds beyond the
+immutable one-hour bound and stopped before a write. Do not rerun those writes or invent an ETH
+settlement merely to make the evidence symmetric.
 
 The complete acceptance path spans real funding/onboarding, order creation, browser closure, worker
 evaluation, atomic FPMM fill, position display, objective resolution, and redemption. BTC now covers
 that entire path. ETH is terminally unavailable for this condition: do not poll or call the retired
-resolver again, substitute a later round, or claim the rejected price as a winner. Revision `5`
-remains the current routing, but both active successors carry the disclosed one-hour liveness risk.
-The
+resolver again, substitute a later round, or claim the rejected price as a winner. Revision `12` is
+current routing. Corrected BTC/ETH 1h/4h/24h are active under the 14,400-second observation-delay bound; the
+one-hour revision-5 routes are retired history. The
 [corrected strike plan](../.thoughts/evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json),
 [BTC deployment evidence](../.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json),
 and
 [ETH deployment evidence](../.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json)
-prove the four-hour replacements are ready but staged only. Keep revisions `6`/`7` non-current;
-at/after the shared close, publish and runtime-adopt one revision `8` that retires and activates
-both axes atomically. Run the clean unit, property, adversarial, integration, recovery, browser,
-and root checks again at the submission commit. Public hosting remains unverified despite passing
-local container build/check/smoke.
+prove the active four-hour replacements. Revisions `6`/`7` remain non-current staging history and
+were never served. Commit `d28f307` records the atomic activation; the non-adjacent runtime adoption
+used a controlled single-writer restart and reached `READY` on revision `8`. Retired-pool close
+evidence records zero LP shares and preserves unresolved complete sets for later settlement. The
+four verified BTC/ETH 1h/24h deployments then extended routing sequentially through current
+revision `12`, with four retired and six active records. The service is `READY` on the exact r12
+hash and correctly exposed the new future-start routes as `UPCOMING`. BTC 1h deployment also proved
+submitted recovery: its exact-estimate treasury-collateral transaction reverted out of gas, the
+journal preserved attempt 1, and attempt-bound `RETRY` succeeded after Hardhat
+`gasMultiplier = 1.2`; preserve the
+[redacted recovery evidence](../.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json).
+The
+clean unit, property, adversarial, integration, recovery, browser, and root checks now pass at `235`
+package tests plus `45` Playwright journeys (`21` intentional skips). Public hosting remains
+unverified despite passing local container build/check/smoke and must not create billable resources
+without explicit user authorization. Before submission, complete corrected-route objective
+settlement and user/builder redemptions, preserve the completed revision-12 breadth evidence,
+expose the final commit on the default-branch
+handoff, and rerun root `pnpm check` plus the dedicated Playwright suite at that exact commit.
 
 Browser assertions must prove card Trade actions cause no Gateway/wallet request before explicit
 review, design fixtures never ship as live responses, scroll changes focus without changing the

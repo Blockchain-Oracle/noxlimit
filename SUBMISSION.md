@@ -1,13 +1,18 @@
 # NoxLimit submission packet
 
-Status: **DRAFT — do not submit yet.** The product, live deployments, three fresh browser-off fills,
-predecessor LP close, paired successor activation, and one complete BTC browser-resolution/user-
+Status: **DRAFT — do not submit yet.** The product, live deployments, seven fresh browser-off fills,
+paired rotations, retired-pool liquidity closes, and one complete BTC browser-resolution/user-
 redemption/LP-redemption vertical have evidence. ETH is a terminal no-write policy rejection, not a
 second winner: its first post-deadline observation was 24 seconds outside the immutable one-hour
-bound. Corrected 14,400-second BTC/ETH successors are deployed, validated, seeded, and staged in
-catalog revisions `6`/`7`; revision `5` remains active until one atomic revision-`8` cutover at the
-shared `2026-07-29T13:50:00Z` boundary. Public hosting, video, X post, and organizer form/contact
-fields remain explicitly pending.
+bound. Catalog revision `12` is current at
+`packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json`, hash
+`0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e`. Six corrected/breadth
+BTC/ETH 1h/4h/24h markets are active. The exercised single-writer service reported `READY` on
+revision `12`; revision `8` previously reported `READY` at
+`2026-07-29T15:33:41Z`; at the `2026-07-29T15:34:12Z` market snapshot, both were ordering-open and
+dynamically tradeable. Those are time-bound observations. Public hosting, video, X post, and
+organizer form/contact fields remain
+explicitly pending.
 
 ## Submission copy
 
@@ -110,12 +115,11 @@ research material and is not part of the submission source release. See `LICENSE
   separately, while ETH remains unredeemable:
   `.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-close.json` and
   `.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-liquidity-close.json`.
-- [x] Paired cutover commit `c073643` publishes runtime catalog revision `5` at
+- [x] Historical paired cutover commit `c073643` published intermediate runtime catalog revision `5` at
   `packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json`, hash
   `0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`; original BTC/ETH routes
-  are `RETIRED` and both successors are `ACTIVE`.
-- [x] The exercised service reported `READY`; this is runtime evidence, not proof of a durable
-  public service URL.
+  became `RETIRED` and both first successors became `ACTIVE`. This is immutable history, not current
+  routing.
 - [x] BTC completed objective browser resolution and winning-user redemption:
   `.thoughts/evidence/2026-07-29-phase6-btc-resolution-redemption.json`.
 - [x] The builder's retained BTC position redeemed in transaction
@@ -126,8 +130,8 @@ research material and is not part of the submission source release. See `LICENSE
   winner exists, and ETH user/LP positions remain unredeemable:
   `.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-resolution-policy-rejection.json`.
 - [x] Future official Sepolia BTC/ETH deployments enforce a 14,400-second minimum observation-
-  delay bound while preserving unique first-observation adjacency. Both active revision-5
-  successors predate this guard and retain a disclosed one-hour liveness risk.
+  delay bound while preserving unique first-observation adjacency. The retired revision-5
+  successors predate this guard and retain their disclosed one-hour liveness risk as history.
 - [x] Corrected BTC market
   `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2`
   and corrected ETH market
@@ -138,26 +142,79 @@ research material and is not part of the submission source release. See `LICENSE
   [BTC deployment evidence](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json),
   and
   [ETH deployment evidence](./.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json)
-  support revisions `6`/`7`, where both remain `SUCCESSOR` pending the paired cutover.
+  support immutable staging revisions `6`/`7`; neither staging revision was ever served.
+- [x] Atomic cutover commit `d28f307` published corrected-cutover catalog revision `8` at
+  `packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json`, hash
+  `0x577593192efb7cf139267b3d076eb5e846fd15d1ab080611f9d504b716b4b427`. It became effective at
+  Sepolia block `11375905`
+  (`0x2a37a64bd6e1c86dd4bbb80f67cf803be9f58d93427fc84d26f59861fcbf1c76`) at
+  `2026-07-29T13:53:36Z`, retiring both revision-5 routes and activating corrected BTC
+  `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2` and ETH
+  `0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a` atomically.
+- [x] Runtime adoption used a controlled stop → pointer update → single startup because revision
+  `5` → `8` is non-adjacent. The exercised service reported `READY` on revision `8`, with both
+  corrected markets ordering-open and dynamically tradeable at the post-cutover
+  `2026-07-29T15:34:12Z` market snapshot. This time-bound runtime evidence is not proof of a durable
+  public URL.
+- [x] Sequential revisions `9`–`12` deploy and activate verified BTC/ETH 1h and 24h bundles beside
+  the corrected 4h pair. Current revision `12` has ten records—four retired and six active—and the
+  service is `READY` on catalog hash
+  `0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e`. Each new pool validates
+  50,000,000 YES, 50,000,000 NO, and 50,000,000 LP atoms. At adoption the new routes correctly
+  reported `UPCOMING` before their shared `2026-07-29T17:30:00Z` start. Evidence:
+  [strike plan](./.thoughts/evidence/2026-07-29-sepolia-btc-eth-1h-24h-strike-plan.json),
+  [BTC 1h](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment.json),
+  [ETH 1h](./.thoughts/evidence/2026-07-29-sepolia-eth-usd-1h-deployment.json),
+  [BTC 24h](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-24h-deployment.json), and
+  [ETH 24h](./.thoughts/evidence/2026-07-29-sepolia-eth-usd-24h-deployment.json).
+- [x] BTC 1h treasury-collateral attempt 1 reverted out of gas under an exact estimate. The journal
+  retained the receipt and explicit attempt-bound `RETRY` succeeded after Hardhat
+  `gasMultiplier = 1.2`; the
+  [redacted recovery record](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json)
+  preserves both attempts.
+- [x] Both corrected OrderBooks now return `nextOrderId = 3`. Four one-Test-USDC orders were
+  created in the browser, filled by the browser-off worker, and confirmed in fresh browsers:
+  [BTC NO order `1`](./.thoughts/evidence/2026-07-29-r8-corrected-btc-no-order.json),
+  [BTC YES order `2`](./.thoughts/evidence/2026-07-29-r8-corrected-btc-yes-order.json),
+  [ETH YES order `1`](./.thoughts/evidence/2026-07-29-r8-corrected-eth-yes-order.json), and
+  [ETH NO order `2`](./.thoughts/evidence/2026-07-29-r8-corrected-eth-no-order.json). Their
+  receipt-verified positions are 1,941,161, 1,978,831, 1,941,161, and 1,978,831 outcome atoms,
+  respectively, and neither OrderBook retains matching outcome-token dust. Each record contains
+  one direct Gateway post and no raw private maximum, key, signature, handle, or ciphertext.
+- [x] Both retired revision-5 pools then closed with zero LP shares while preserving 50,000,000 YES
+  plus 50,000,000 NO unresolved atoms per pool. BTC transaction
+  `0xe811190d41186d666b5b90b7938edcdd974a1a8c48fad9fa7f18b8ebf9946b4b` is in block `11375985`;
+  ETH transaction `0xcfd96ad20aec7d2a6f82c30f908cfbb021d62a7118e7a861f0bf9b88a4ed52b5` is in block `11375990`:
+  `.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-successor-liquidity-close.json` and
+  `.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-successor-liquidity-close.json`.
 - [x] Service and web container builds plus local smoke checks pass. This is not public hosting.
-- [x] Fresh 2026-07-29 12:08Z `pnpm check` passes contracts `77`, protocol `14`, catalog `6`,
-  service `65`, and web `61` (`223` package tests total), including compile/type-check/test/build.
+- [x] The latest `pnpm check` passes contracts `84`, protocol `14`, catalog `6`, service `69`, and
+  web `62` (`235` package tests total), including compile/type-check/test/build.
   The dedicated Playwright suite passes `45` journeys with `21` intentional skips and zero failures.
-  Re-run it and the dedicated Playwright suite at the final submission commit.
 
 ### Pending before submission
 
-- [ ] **PENDING — atomic revision-8 release cutover for both active revision-5 successors' disclosed
-  3,600-second liveness risk.** Keep the corrected replacements staged in revisions `6`/`7` until
-  both current routes close at `2026-07-29T13:50:00Z`; then publish and runtime-adopt one hash-linked
-  revision `8` that retires both current IDs and activates both corrected IDs. Do not edit revision
-  `5` in place, cut over one axis alone, or present a staging revision as active.
+- [ ] **PENDING — explicit user authorization for billable hosting:** do not create the always-on
+  service or other cloud resources until the user approves the target project, region, budget, and
+  alerts.
 - [ ] **PENDING — public hosted frontend URL:** `[HOSTED_FRONTEND_URL]`.
 - [ ] **PENDING — public hosted service health URL:** `[HOSTED_SERVICE_URL]/v1/health`.
-- [ ] **PENDING — final public repository/default-branch URL:** `[PUBLIC_REPOSITORY_URL]`.
+- [x] **VERIFIED — public repository URL:** `https://github.com/Blockchain-Oracle/noxlimit`. The
+  current public release work is on
+  [`codex/noxlimit-polished-product`](https://github.com/Blockchain-Oracle/noxlimit/tree/codex/noxlimit-polished-product),
+  including [cutover commit `d28f307`](https://github.com/Blockchain-Oracle/noxlimit/commit/d28f307)
+  and [PR #2](https://github.com/Blockchain-Oracle/noxlimit/pull/2).
+- [ ] **PENDING — final default-branch release handoff:** `main` currently trails the public release
+  branch. Merge/advance the default branch to the final submission commit, or use an explicitly
+  accepted exact release-branch/commit URL in the organizer form.
+- [ ] **PENDING — corrected-route settlement/redemption:** the revision-8 private order →
+  browser-off fill segment is verified on both sides of both markets. Complete objective
+  resolution, winning-user redemption, and builder-LP redemption before claiming either corrected
+  successor as a full vertical. The completed predecessor BTC vertical remains valid evidence.
 - [ ] **PENDING — demo video URL (maximum 4 minutes):** `[DEMO_VIDEO_URL]`.
 - [ ] **PENDING — published X post URL:** `[X_POST_URL]`.
-- [ ] **PENDING — final clean-run output and exact test counts recorded at the submission commit.**
+- [ ] **PENDING — final submission-commit verification:** rerun root `pnpm check` and the dedicated
+  Playwright suite at the exact submission commit and record the final counts/output.
 - [ ] **PENDING — verify no secrets, ignored raw mirrors, browser captures, or local journals are
   tracked.**
 
@@ -218,8 +275,9 @@ Show the architecture line:
 
 Close with: “NoxLimit adds a private resting order primitive to an unchanged public protocol. The
 BTC market, assets, liquidity, trade, oracle settlement, and redemption are real on Ethereum
-Sepolia; the ETH liveness failure is disclosed, and corrected four-hour successors are verified
-and awaiting one paired catalog cutover.”
+Sepolia; the ETH liveness failure is disclosed, and six BTC/ETH 1h/4h/24h routes are active together
+in revision 12. Both corrected four-hour markets now have real private-order fills; objective
+settlement/redemptions remain release work.”
 Display repository, hosted app, and `@iEx_ec`.
 
 ## X post draft
@@ -227,7 +285,7 @@ Display repository, hosted app, and `@iEx_ec`.
 > Built NoxLimit for @iEx_ec WTF: private resting limits for real YES/NO markets. Your max stays
 > encrypted in Nox while resting, then proof-authorizes one atomic FPMM trade on Sepolia.
 >
-> App: [HOSTED_FRONTEND_URL] Demo: [DEMO_VIDEO_URL] Code: [PUBLIC_REPOSITORY_URL]
+> App: [HOSTED_FRONTEND_URL] Demo: [DEMO_VIDEO_URL] Code: https://github.com/Blockchain-Oracle/noxlimit
 
 Before publishing, verify the final text and links fit X's current length/preview behavior, attach
 the short demo, and retain the resulting post URL.
@@ -236,7 +294,7 @@ the short demo, and retain the resulting post URL.
 
 - Project name: `NoxLimit`
 - Tagline: `Private resting limits for real onchain prediction markets.`
-- Repository: **PENDING** `[PUBLIC_REPOSITORY_URL]`
+- Repository: **VERIFIED** `https://github.com/Blockchain-Oracle/noxlimit`
 - Hosted frontend: **PENDING** `[HOSTED_FRONTEND_URL]`
 - Demo video: **PENDING** `[DEMO_VIDEO_URL]`
 - X post: **PENDING** `[X_POST_URL]`

@@ -7,30 +7,41 @@
   it or new executable evidence invalidates a load-bearing assumption. Prompt 4 is now the active
   implementation contract. The polished workspace contains the hardened contracts, shared
   protocol, deterministic catalog, restart-safe service, and responsive web product. The fresh
-  2026-07-29 12:08Z root `pnpm check` records contracts `77`, protocol `14`, catalog `6`, service
-  `65`, and web `61` passing tests (`223` total), with compile/type-check/test/build green. The
-  fresh dedicated Playwright snapshot records `45` passing journeys, `21` intentional project/
-  viewport skips, and zero failures; it must be rerun at the submission commit. Phases 0–5 and
-  bounded operator hardening are complete. Phase 6 is live and in progress: branch
-  `codex/noxlimit-polished-product` contains the paired revision-5 cutover at commit `c073643`, the
-  original BTC/ETH bundles are retired, both revision-5 successors are active, both predecessor LP
-  removals and three real browser-off order/fill flows are committed, and the exercised service was
-  `READY`. Phase 6 settlement is now partial/degraded: BTC completed real browser resolution,
+  post-breadth root `pnpm check` records contracts `84`, protocol `14`, catalog `6`, service `69`,
+  and web `62` passing tests (`235` total), with compile/type-check/test/build green. The dedicated
+  Playwright baseline records `45` passing journeys, `21` intentional project/viewport skips, and
+  zero failures; both gates must be rerun at the exact submission commit. Phases 0–5 and bounded
+  operator hardening are complete. Phase 6 includes the
+  verified atomic revision-`8` cutover at
+  commit `d28f307`: safe Sepolia block `11,375,905` at `2026-07-29T13:53:36Z`, block hash
+  `0x2a37a64bd6e1c86dd4bbb80f67cf803be9f58d93427fc84d26f59861fcbf1c76`, activated both corrected
+  14,400-second BTC/ETH routes together. The service adopted revision `8` through a controlled
+  stop → catalog-pointer update → single startup and reported `READY` on catalog hash
+  `0x577593192efb7cf139267b3d076eb5e846fd15d1ab080611f9d504b716b4b427`; staging revisions `6` and
+  `7` were never served. Both corrected markets remain catalog `ACTIVE`; at the
+  `2026-07-29T15:34:12Z` service snapshot, both reported lifecycle `ORDERING_OPEN` and dynamic
+  tradeability `TRADEABLE`.
+  Phase 6 settlement remains partial/degraded for the earlier evidence pair: BTC completed real
+  browser resolution,
   winning-user redemption, and builder-LP redemption; ETH cannot resolve under its immutable
   3,600-second observation-delay policy because the exact first post-deadline observation arrived
   3,624 seconds after `resolvesAt`, 24 seconds too late. The accountless selector rejected before
   any write, the ETH resolver/payout remain unset, and ETH user/LP positions remain unredeemable.
-  Both active revision-5 successors carry the same known 3,600-second liveness risk. Corrected
-  replacements are now deployed, immutable-validated, and builder-seeded with 50,000,000 YES and
-  50,000,000 NO atoms each: BTC market
-  `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2`
-  is staged `SUCCESSOR` in revision `6`, and ETH market
-  `0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a`
-  is added as `SUCCESSOR` in revision `7`. Both use a 14,400-second observation bound and share the
-  revision-5 close / corrected-successor start boundary `2026-07-29T13:50:00Z`. Revision `5`
-  remains the current `ACTIVE` routing until one atomic revision-`8` cutover retires both risky
-  routes and activates both corrected successors together. Public hosting and submission assets
-  remain pending.
+  The former revision-5 BTC/ETH routes are now `RETIRED`; their LP shares are zero, while each
+  unresolved pool removal correctly leaves 50,000,000 YES and 50,000,000 NO position atoms with
+  the builder. Both corrected OrderBooks now return `nextOrderId = 3`. Four one-Test-USDC orders—
+  BTC NO `1`, BTC YES `2`, ETH YES `1`, and ETH NO `2`—were created through the browser, filled by
+  the browser-off worker, and confirmed from a fresh browser. Their exact forwarded outcome-token
+  amounts are 1,941,161, 1,978,831, 1,941,161, and 1,978,831 atoms respectively; the corresponding
+  OrderBook balances are zero. The threshold-derived `minOut = 1,666,667` is public after
+  publication as designed; no evidence file stores the raw private maximum. Corrected-route
+  objective resolution, winning-user redemption, and builder-LP redemption remain pending.
+  The approved BTC/ETH 1h and 24h breadth is now deployed, independently validated, seeded, and
+  active alongside the corrected 4h pair in runtime catalog revision `12`. The final manifest has
+  ten immutable records: four retired and six active, covering BTC/ETH 1h/4h/24h. The service is
+  `READY` on revision `12`; at the post-adoption snapshot the new 1h/24h routes correctly reported
+  `UPCOMING` until their shared `2026-07-29T17:30:00Z` start. Public frontend/service hosting,
+  video, X post, and submission form/contact fields remain pending.
 - **Canonical architecture:**
   [`../architecture/2026-07-25-noxlimit-system-architecture.md`](../architecture/2026-07-25-noxlimit-system-architecture.md)
 - **Audit and authority policy:**
@@ -66,14 +77,44 @@
 - **Prompt 3 executable evidence and verdict:**
   [`../verification/2026-07-28-noxlimit-critical-path.md`](../verification/2026-07-28-noxlimit-critical-path.md)
 - **Public live trace:** [`../../spike/nox/evidence/sepolia-gate-c.json`](../../spike/nox/evidence/sepolia-gate-c.json)
-- **Phase 6 runtime catalog:** revision `5` at
+- **Current Phase 6 runtime catalog:** revision `12` at
+  [`../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json`](../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json),
+  catalog hash `0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e`.
+  It directly hash-links revision `11`
+  (`0x855f7b2de0298c831efc8510786d63bdfa062b8996c45fda3ed60037c72fb303`)
+  and became effective at safe Sepolia block `11,376,650` and
+  `2026-07-29T16:27:00Z`. Its ten records contain four retired historical routes and six `ACTIVE`
+  routes: corrected BTC/ETH 4h plus BTC/ETH 1h and 24h. The service adopted revisions `9` through
+  `12` sequentially and reports `READY` on the exact revision-12 hash. The four new routes were
+  `UPCOMING` at the adoption snapshot because their immutable `startsAt` is
+  `2026-07-29T17:30:00Z`; catalog activation is intentionally distinct from dynamic tradeability.
+- **Phase 6 breadth deployment evidence:** the synchronized
+  [`../evidence/2026-07-29-sepolia-btc-eth-1h-24h-strike-plan.json`](../evidence/2026-07-29-sepolia-btc-eth-1h-24h-strike-plan.json)
+  anchors the four new bundles. Revision `9` adds BTC 1h market
+  `0x0c552e5f150ec05e4ef39c4a7913ec4ac0a94b9fe71170538d452d3661e7b7ed`
+  with catalog hash `0x3fdb8c17958a56f89b19b8ab491ba458629d2762c69eacf4ad2b436c92d561f3`;
+  revision `10` adds ETH 1h market
+  `0x47d1776ad85039be6705753f9aa6879ae7349a617540a3b0a0ef71e2915bee07`
+  with hash `0xe0f239053009afa5c78d21df58cd66cc2200aa93222529d989e231da2c5776bd`;
+  revision `11` adds BTC 24h market
+  `0x5fdb953c06530f97653d665624c576d2303e62a64c5fd40f4ccfa84276a4a4e5`
+  with hash `0x855f7b2de0298c831efc8510786d63bdfa062b8996c45fda3ed60037c72fb303`;
+  and revision `12` adds ETH 24h market
+  `0xd171e879c281a1321dd37b9f2085554f155d717307477181fd3c42ac1231edbd`
+  with hash `0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e`.
+  Their four deployment records are
+  [BTC 1h](../evidence/2026-07-29-sepolia-btc-usd-1h-deployment.json),
+  [ETH 1h](../evidence/2026-07-29-sepolia-eth-usd-1h-deployment.json),
+  [BTC 24h](../evidence/2026-07-29-sepolia-btc-usd-24h-deployment.json), and
+  [ETH 24h](../evidence/2026-07-29-sepolia-eth-usd-24h-deployment.json). Independent validation for
+  every pool records 50,000,000 YES atoms, 50,000,000 NO atoms, and 50,000,000 LP shares.
+- **Phase 6 catalog chronology (historical, not current routing):** commit `c073643` published
+  revision `5` at
   [`../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json`](../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json),
-  catalog hash `0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`,
-  committed by paired cutover `c073643`. It routes original BTC/ETH market IDs `RETIRED` and both
-  verified successor IDs `ACTIVE` atomically.
-- **Phase 6 corrected successors staged, not active:** commit `d2dbc39` records revision `6` at
+  catalog hash `0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`.
+  Commit `d2dbc39` then recorded revision `6` at
   [`../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json`](../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json)
-  stages corrected BTC market
+  with corrected BTC market
   `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2` as `SUCCESSOR`;
   revision `7` at
   [`../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json`](../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json)
@@ -88,9 +129,17 @@
   [`../evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json`](../evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json)
   and
   [`../evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json`](../evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json).
-  Revision `5` stays live until a single post-boundary revision `8` retires both current routes and
-  activates both corrected IDs atomically; revisions `6` and `7` must not be served as active
-  catalogs.
+  Revisions `6` and `7` were staging-only and were never served; revision `8` is immutable
+  corrected-route history and revision `12` is current.
+- **Retired revision-5 successor liquidity close:**
+  [`../evidence/2026-07-29-sepolia-btc-usd-4h-successor-liquidity-close.json`](../evidence/2026-07-29-sepolia-btc-usd-4h-successor-liquidity-close.json)
+  records BTC transaction
+  `0xe811190d41186d666b5b90b7938edcdd974a1a8c48fad9fa7f18b8ebf9946b4b` at block `11,375,985`;
+  [`../evidence/2026-07-29-sepolia-eth-usd-4h-successor-liquidity-close.json`](../evidence/2026-07-29-sepolia-eth-usd-4h-successor-liquidity-close.json)
+  records ETH transaction
+  `0xcfd96ad20aec7d2a6f82c30f908cfbb021d62a7118e7a861f0bf9b88a4ed52b5` at block `11,375,990`.
+  Each close reduced builder LP shares from 50,000,000 to zero and left 50,000,000 YES plus
+  50,000,000 NO atoms as unresolved builder positions; no redemption is claimed.
 - **Phase 6 committed execution evidence:**
   [`../evidence/2026-07-29-phase6-btc-no-order.json`](../evidence/2026-07-29-phase6-btc-no-order.json),
   [`../evidence/2026-07-29-phase6-btc-yes-order.json`](../evidence/2026-07-29-phase6-btc-yes-order.json),
@@ -105,6 +154,15 @@
   [`../evidence/2026-07-29-sepolia-eth-usd-4h-resolution-policy-rejection.json`](../evidence/2026-07-29-sepolia-eth-usd-4h-resolution-policy-rejection.json):
   the unique first observation was 24 seconds outside the immutable bound, no resolution write was
   attempted, and no ETH winner exists.
+- **Revision-8 corrected-route execution evidence:**
+  [`../evidence/2026-07-29-r8-corrected-btc-no-order.json`](../evidence/2026-07-29-r8-corrected-btc-no-order.json),
+  [`../evidence/2026-07-29-r8-corrected-btc-yes-order.json`](../evidence/2026-07-29-r8-corrected-btc-yes-order.json),
+  [`../evidence/2026-07-29-r8-corrected-eth-yes-order.json`](../evidence/2026-07-29-r8-corrected-eth-yes-order.json),
+  and
+  [`../evidence/2026-07-29-r8-corrected-eth-no-order.json`](../evidence/2026-07-29-r8-corrected-eth-no-order.json)
+  record one direct Gateway post each, browser closure, API/fresh-browser fill confirmation, and
+  the public transaction hashes. Receipt and ERC-1155 reads independently verify all four fills.
+  Together with the three predecessor records, the product now has seven browser-off fills.
 - **Spike substrate:** pinned, unmodified Gnosis Conditional Tokens + FPMM. This is selected for
   the disposable verification slice, not asserted as an irreversible production-stack decision.
 - **Survivors:** One selected direction; one locally and live-verified disposable adapter; one real
@@ -180,25 +238,38 @@
   cross-process-locked journal before its first write. The journal freezes the plan/operator/chain/
   output binding, ordered expected steps, and exact funding plan; advances every write through
   `INTENT → SUBMITTED → CONFIRMED`; and requires attempt-bound explicit `ADOPT` or `RETRY` recovery
-  for a bare intent. It rejects secret-bearing payloads, stages and verifies final payloads before
-  create-only publication, and safely resumes submitted, confirmed, or partially published work.
+  for a bare intent. A submitted step accepts attempt-bound `RETRY` only after the runner proves its
+  exact persisted receipt reverted at the configured confirmation depth and verifies the sender;
+  pending, successful, mismatched, or stale-attempt cases submit nothing. It rejects secret-bearing
+  payloads, stages and verifies final payloads before create-only publication, and safely resumes
+  submitted, confirmed, or partially published work.
   Market configuration also enforces the exact declared 1h/4h/24h duration and canonical question;
   reused operator-owned Test USDC is minted only by the computed seed/treasury shortfall. New
   official Sepolia BTC/ETH deployments now require
-  `maximumObservationDelaySeconds >= 14,400`; the staged corrected BTC/ETH successors exercise that
+  `maximumObservationDelaySeconds >= 14,400`; the now-active corrected BTC/ETH successors exercise that
   floor without weakening the unique first-observation/adjacent-predecessor proof. Runtime quote
   freshness remains a separate 3,600-second policy.
+  The BTC 1h rollout exercised submitted-transaction recovery: an exactly estimated treasury-
+  collateral top-up reverted out of gas, the
+  [recovery record](../evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json) preserves
+  attempt 1 and its receipt, and the
+  explicit attempt-bound `RETRY` succeeded after the Hardhat gas multiplier was raised to `1.2`.
+  No journal was deleted or rewritten. A runtime-acceptance defect that rejected future `ACTIVE`
+  markets was fixed and covered at `69` service tests; runtime then adopted r9→r12 sequentially,
+  using one controlled restart to load the fix and adjacent verified adoption thereafter.
 - **Next workflow:** Preserve the completed BTC proof and the terminal ETH rejection. Do not keep
   polling the retired ETH resolver, submit an ETH resolution transaction, infer a winner from the
-  rejected observation, or substitute a later round. Treat the two active revision-5 successors as
-  current routing with a disclosed 3,600-second liveness risk. The corrected 14,400-second BTC/ETH
-  successors are already deployed, verified, seeded, and staged in revisions `6`/`7`; do not
-  activate either axis alone or serve either staging manifest as current. At the shared
-  `2026-07-29T13:50:00Z` close/start boundary, publish one hash-linked revision `8` that retires both
-  revision-5 active IDs and activates both corrected IDs atomically, then adopt it through the
-  verified runtime reload. Local service/web container builds and smoke checks pass, but public
-  frontend/service URLs, video, X post, repository/form/contact fields, and the final submission run
-  remain pending. Preserve `spike/**`; do not derive a competing plan, restart discovery, or repeat
+  rejected observation, or substitute a later round. Revision `12` is the current runtime routing;
+  do not roll back to revision `5`/`8` or serve staging revisions `6`/`7`. Preserve the retired
+  revision-5 liquidity-close evidence and its unresolved 50,000,000 YES / 50,000,000 NO positions
+  per market. Preserve the four corrected-route order/fill records and complete objective
+  resolution, winning-user redemption, and builder-LP redemption for the corrected routes; do not
+  call either route a complete vertical before those proofs exist. Preserve the completed BTC/ETH
+  1h/24h deployment and revision-9→12 runtime-adoption evidence; breadth is complete.
+  Public frontend/service hosting follows those live-product proofs, but
+  the proposed Cloud Run topology is billable and resource creation requires explicit user cost and
+  provider authorization. Then produce the video, X post, repository/form/contact fields, and final
+  submission run. Preserve `spike/**`; do not derive a competing plan, restart discovery, or repeat
   Prompt 3.
 - **Prompt 4:** [`../../prompts/04-polished-product-implementation.md`](../../prompts/04-polished-product-implementation.md)
   is authorized and active as the implementation handoff.
@@ -290,8 +361,9 @@ The research found feature-supply and product-investment signals for advanced pr
 orders, but no direct proof of privacy-specific demand. The released viewer/private-decrypt path,
 real FPMM deployment, asynchronous orchestration, escrow/custody, and measured evaluation leakage
 pass locally, and their combined live path passes on real builder-seeded Sepolia pools. Fresh-user
-funding and product UX now also have committed integrated evidence: three orders filled browser-off,
-the original pools closed, and verified successors activated in one catalog revision. The retired
+funding and product UX now also have committed integrated evidence: seven orders filled browser-off
+across predecessor and corrected routes, the original pools closed, and verified successors
+activated in one catalog revision. The retired
 BTC predecessor additionally completes objective resolution plus real winning-user and builder-LP
 redemption. The retired ETH predecessor is a recorded terminal policy rejection, not a second
 successful vertical: its first post-deadline observation was 24 seconds outside the immutable

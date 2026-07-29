@@ -55,6 +55,20 @@ export type DeploymentConfirmationInput = Readonly<{
   result?: JsonObject;
 }>;
 
+export type FailedDeploymentSubmission = Readonly<{
+  transactionHash: Hash;
+  blockNumber: string;
+  blockHash: Hash;
+  status: "reverted";
+}>;
+
+export type FailedDeploymentSubmissionInput = Readonly<{
+  transactionHash: Hash;
+  blockNumber: bigint | string;
+  blockHash: Hash;
+  status: "reverted";
+}>;
+
 export type DeploymentStepDisposition =
   | Readonly<{ action: "SUBMIT"; attempt: number }>
   | Readonly<{
@@ -67,14 +81,26 @@ export type DeploymentStepDisposition =
       attempt: number;
       transactionHash: Hash;
       confirmation: DeploymentConfirmation;
+    }>
+  | Readonly<{
+      action: "VERIFY_FAILED_SUBMISSION";
+      attempt: number;
+      transactionHash: Hash;
     }>;
 
-type StoredRecovery = Readonly<{
-  action: "ADOPT" | "RETRY";
-  expectedAttempt: number;
-  recordedAt: string;
-  transactionHash?: Hash;
-}>;
+type StoredRecovery =
+  | Readonly<{
+      action: "ADOPT";
+      expectedAttempt: number;
+      recordedAt: string;
+      transactionHash: Hash;
+    }>
+  | Readonly<{
+      action: "RETRY";
+      expectedAttempt: number;
+      recordedAt: string;
+      failedSubmission?: FailedDeploymentSubmission;
+    }>;
 
 type IntentStep = Readonly<{
   state: "INTENT";
@@ -389,11 +415,19 @@ export function parseDeploymentRecoveryJson(
 function validateStoredRecovery(value: unknown, label: string): StoredRecovery {
   const input = record(value, label);
   if (input.action === "RETRY") {
-    exactKeys(input, ["action", "expectedAttempt", "recordedAt"], [], label);
+    exactKeys(input, ["action", "expectedAttempt", "recordedAt"], ["failedSubmission"], label);
     return {
       action: "RETRY",
       expectedAttempt: requirePositiveInteger(input.expectedAttempt, `${label}.expectedAttempt`),
       recordedAt: requireTimestamp(input.recordedAt, `${label}.recordedAt`),
+      ...(input.failedSubmission === undefined
+        ? {}
+        : {
+            failedSubmission: validateFailedSubmission(
+              input.failedSubmission,
+              `${label}.failedSubmission`,
+            ),
+          }),
     };
   }
   if (input.action === "ADOPT") {
@@ -411,6 +445,41 @@ function validateStoredRecovery(value: unknown, label: string): StoredRecovery {
     };
   }
   throw configurationError(`${label}.action must be ADOPT or RETRY`);
+}
+
+function validateFailedSubmission(value: unknown, label: string): FailedDeploymentSubmission {
+  const input = record(value, label);
+  exactKeys(
+    input,
+    ["transactionHash", "blockNumber", "blockHash", "status"],
+    [],
+    label,
+  );
+  if (input.status !== "reverted") {
+    throw configurationError(`${label}.status must be reverted`);
+  }
+  return {
+    transactionHash: requireHash(input.transactionHash, `${label}.transactionHash`),
+    blockNumber: requireDecimal(input.blockNumber, `${label}.blockNumber`),
+    blockHash: requireHash(input.blockHash, `${label}.blockHash`),
+    status: "reverted",
+  };
+}
+
+function normalizeFailedSubmission(
+  input: FailedDeploymentSubmissionInput,
+): FailedDeploymentSubmission {
+  return validateFailedSubmission(
+    {
+      transactionHash: input.transactionHash,
+      blockNumber: typeof input.blockNumber === "bigint"
+        ? input.blockNumber.toString()
+        : input.blockNumber,
+      blockHash: input.blockHash,
+      status: input.status,
+    },
+    "failed submission",
+  );
 }
 
 function validateConfirmation(value: unknown, label: string): DeploymentConfirmation {
@@ -471,18 +540,30 @@ function validateStep(value: unknown, stepId: string): DeploymentJournalStep {
     recoveries,
   };
   let historicalAttempt = 1;
-  const adoptIndexes = recoveries.flatMap((recovery, index) =>
-    recovery.action === "ADOPT" ? [index] : [],
-  );
-  if (adoptIndexes.length > 1 || (adoptIndexes[0] !== undefined && adoptIndexes[0] !== recoveries.length - 1)) {
-    throw configurationError(`step ${stepId} has an invalid ADOPT recovery history`);
-  }
+  let adoptedHashForAttempt: Hash | undefined;
   for (let index = 0; index < recoveries.length; index += 1) {
     const recovery = recoveries[index]!;
     if (recovery.expectedAttempt !== historicalAttempt) {
       throw configurationError(`step ${stepId} recovery does not match its historical attempt`);
     }
-    if (recovery.action === "RETRY") historicalAttempt += 1;
+    if (recovery.action === "ADOPT") {
+      if (adoptedHashForAttempt !== undefined) {
+        throw configurationError(`step ${stepId} has duplicate ADOPT recovery for one attempt`);
+      }
+      adoptedHashForAttempt = recovery.transactionHash;
+    } else {
+      if (
+        recovery.failedSubmission !== undefined &&
+        adoptedHashForAttempt !== undefined &&
+        recovery.failedSubmission.transactionHash !== adoptedHashForAttempt
+      ) {
+        throw configurationError(
+          `step ${stepId} failed submission hash does not match its ADOPT recovery`,
+        );
+      }
+      historicalAttempt += 1;
+      adoptedHashForAttempt = undefined;
+    }
     if (
       index > 0 &&
       Date.parse(recovery.recordedAt) < Date.parse(recoveries[index - 1]!.recordedAt)
@@ -495,8 +576,8 @@ function validateStep(value: unknown, stepId: string): DeploymentJournalStep {
   }
   if (state === "INTENT") {
     exactKeys(input, commonRequired, [], `step ${stepId}`);
-    if (adoptIndexes.length > 0) {
-      throw configurationError(`step ${stepId} cannot remain INTENT after ADOPT`);
+    if (adoptedHashForAttempt !== undefined) {
+      throw configurationError(`step ${stepId} cannot remain INTENT after ADOPT in its current attempt`);
     }
     return { state, ...common };
   }
@@ -512,8 +593,7 @@ function validateStep(value: unknown, stepId: string): DeploymentJournalStep {
     if (Date.parse(submittedAt) < Date.parse(common.intentAt)) {
       throw configurationError(`step ${stepId}.submittedAt precedes its intent`);
     }
-    const adopted = recoveries.find((recovery) => recovery.action === "ADOPT");
-    if (adopted?.transactionHash !== undefined && adopted.transactionHash !== transactionHash) {
+    if (adoptedHashForAttempt !== undefined && adoptedHashForAttempt !== transactionHash) {
       throw configurationError(`step ${stepId} ADOPT hash does not match submission`);
     }
     return {
@@ -549,8 +629,7 @@ function validateStep(value: unknown, stepId: string): DeploymentJournalStep {
     if (Date.parse(confirmedAt) < Date.parse(submittedAt)) {
       throw configurationError(`step ${stepId}.confirmedAt precedes submission`);
     }
-    const adopted = recoveries.find((recovery) => recovery.action === "ADOPT");
-    if (adopted?.transactionHash !== undefined && adopted.transactionHash !== transactionHash) {
+    if (adoptedHashForAttempt !== undefined && adoptedHashForAttempt !== transactionHash) {
       throw configurationError(`step ${stepId} ADOPT hash does not match submission`);
     }
     return {
@@ -1048,6 +1127,23 @@ export class DeploymentJournal {
         return { action: "SUBMIT", attempt: 1 };
       }
       if (existing.state === "SUBMITTED") {
+        if (recovery !== undefined) {
+          if (recovery.expectedAttempt !== existing.attempt) {
+            throw configurationError(
+              `${stepId} recovery expected attempt ${recovery.expectedAttempt}, but current attempt is ${existing.attempt}`,
+            );
+          }
+          if (recovery.action !== "RETRY") {
+            throw configurationError(
+              `${stepId} is already SUBMITTED; only RETRY may apply after its persisted transaction is proven reverted`,
+            );
+          }
+          return {
+            action: "VERIFY_FAILED_SUBMISSION",
+            attempt: existing.attempt,
+            transactionHash: existing.transactionHash,
+          };
+        }
         return {
           action: "RESUME_SUBMITTED",
           attempt: existing.attempt,
@@ -1129,6 +1225,64 @@ export class DeploymentJournal {
         };
       });
       return { action: "SUBMIT", attempt: existing.attempt + 1 };
+    });
+  }
+
+  recordFailedSubmittedRetry(
+    stepIdValue: string,
+    input: FailedDeploymentSubmissionInput,
+  ): Promise<void> {
+    return this.#serialize(async () => {
+      const stepId = requireStepId(stepIdValue);
+      const failure = normalizeFailedSubmission(input);
+      const recovery = this.#recovery[stepId];
+      if (recovery?.action !== "RETRY") {
+        throw configurationError(
+          `${stepId} failed submission retry requires explicit RETRY recovery JSON`,
+        );
+      }
+      const existing = this.#record.steps[stepId];
+      if (existing?.state !== "SUBMITTED") {
+        throw configurationError(`${stepId} must be SUBMITTED before failed-transaction retry`);
+      }
+      if (recovery.expectedAttempt !== existing.attempt) {
+        throw configurationError(
+          `${stepId} recovery expected attempt ${recovery.expectedAttempt}, but current attempt is ${existing.attempt}`,
+        );
+      }
+      if (failure.transactionHash !== existing.transactionHash) {
+        throw configurationError(`${stepId} failed submission hash mismatch`);
+      }
+      const now = new Date().toISOString();
+      await this.#update((current) => {
+        const submitted = current.steps[stepId];
+        if (submitted?.state !== "SUBMITTED") {
+          throw configurationError(`${stepId} is no longer SUBMITTED`);
+        }
+        if (submitted.transactionHash !== failure.transactionHash) {
+          throw configurationError(`${stepId} failed submission hash mismatch`);
+        }
+        return {
+          ...current,
+          steps: {
+            ...current.steps,
+            [stepId]: {
+              state: "INTENT",
+              attempt: submitted.attempt + 1,
+              intentAt: now,
+              recoveries: [
+                ...submitted.recoveries,
+                {
+                  action: "RETRY",
+                  expectedAttempt: recovery.expectedAttempt,
+                  recordedAt: now,
+                  failedSubmission: failure,
+                },
+              ],
+            },
+          },
+        };
+      });
     });
   }
 
@@ -1349,7 +1503,7 @@ export async function openDeploymentJournal(
   let journal: DeploymentJournalRecord;
   if (existing === undefined) {
     if (Object.keys(recovery).length > 0) {
-      throw configurationError("recovery JSON requires an existing unresolved INTENT");
+      throw configurationError("recovery JSON requires an existing recoverable deployment step");
     }
     if (input.fundingPlan === undefined) {
       throw configurationError("funding plan is required when creating a fresh journal");
@@ -1397,12 +1551,26 @@ export async function openDeploymentJournal(
     }
     await verifyOutputState(journal);
     for (const stepId of Object.keys(recovery)) {
-      if (journal.steps[stepId]?.state !== "INTENT") {
-        throw configurationError(`recovery for ${stepId} requires an existing unresolved INTENT`);
+      const step = journal.steps[stepId];
+      const instruction = recovery[stepId]!;
+      if (step === undefined) {
+        throw configurationError(`recovery for ${stepId} requires an existing deployment step`);
       }
-      if (recovery[stepId]!.expectedAttempt !== journal.steps[stepId].attempt) {
+      if (instruction.action === "ADOPT" && step.state !== "INTENT") {
+        throw configurationError(`ADOPT recovery for ${stepId} requires an unresolved INTENT`);
+      }
+      if (
+        instruction.action === "RETRY" &&
+        step.state !== "INTENT" &&
+        step.state !== "SUBMITTED"
+      ) {
         throw configurationError(
-          `recovery for ${stepId} expected attempt ${recovery[stepId]!.expectedAttempt}, but current attempt is ${journal.steps[stepId].attempt}`,
+          `RETRY recovery for ${stepId} requires an unresolved INTENT or SUBMITTED transaction`,
+        );
+      }
+      if (instruction.expectedAttempt !== step.attempt) {
+        throw configurationError(
+          `recovery for ${stepId} expected attempt ${instruction.expectedAttempt}, but current attempt is ${step.attempt}`,
         );
       }
     }

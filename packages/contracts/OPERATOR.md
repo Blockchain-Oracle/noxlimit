@@ -63,8 +63,9 @@ The deployer automatically creates
 `<NOXLIMIT_EVIDENCE_OUTPUT_PATH>.journal.json` before its first chain write. The journal freezes the
 plan hash, operator, Sepolia chain, absolute output paths, ordered expected steps, and exact funding
 plan. A cross-process lock allows only one process to advance it. Steps persist as
-`INTENT → SUBMITTED → CONFIRMED`; submitted and confirmed steps resume without sending a
-replacement.
+`INTENT → SUBMITTED → CONFIRMED`. Confirmed steps and pending/successful submitted transactions
+resume without replacement. A submitted transaction may advance to a new attempt only through the
+failed-submission procedure below.
 
 If a process exits after recording `INTENT` but before recording its transaction hash, the next run
 fails closed. Inspect the operator account and chain first. Then set exactly one attempt-bound
@@ -77,6 +78,25 @@ NOXLIMIT_DEPLOYMENT_RECOVERY_JSON='{"resolverDeployment":{"action":"ADOPT","expe
 # Retry only after proving attempt 1 never broadcast a transaction.
 NOXLIMIT_DEPLOYMENT_RECOVERY_JSON='{"resolverDeployment":{"action":"RETRY","expectedAttempt":1}}'
 ```
+
+The same attempt-bound `RETRY` is also the only recovery for a persisted `SUBMITTED` transaction
+whose exact receipt has status `reverted` (including an out-of-gas receipt). Do not delete or edit
+the journal. Set recovery for only that step and rerun the normal deploy command:
+
+```bash
+NOXLIMIT_DEPLOYMENT_RECOVERY_JSON='{"fundingTreasuryCollateralTopUp":{"action":"RETRY","expectedAttempt":1}}' \
+NOXLIMIT_OPERATOR_CONFIRM=DEPLOY_SEPOLIA_BUNDLE \
+  pnpm --filter @noxlimit/contracts operator:deploy
+```
+
+Before a replacement can be sent, the operator waits for the journaled hash with the configured
+confirmation count, requires its receipt to be `reverted`, verifies the transaction sender is the
+bound operator, and records the failed hash, block number, and block hash in the journal's recovery
+history. Only then does it atomically create the next `INTENT` attempt and submit once. A pending
+receipt, a successful receipt, a receipt/hash mismatch, a sender mismatch, or a stale
+`expectedAttempt` fails closed and sends no replacement. If the process stops after advancing the
+attempt but before journaling its new hash, that new bare `INTENT` again requires an attempt-bound
+`ADOPT` or `RETRY`; never reuse the old recovery instruction.
 
 `expectedAttempt` is mandatory and prevents an old recovery instruction from applying to a later
 attempt. Recovery is per step; do not include unrelated entries. The journal rejects credentials,
@@ -150,10 +170,29 @@ NOXLIMIT_OPERATOR_CONFIRM=CLOSE_SEPOLIA_LIQUIDITY \
   source commits, safe strike/times/policies, and enough NLTUSDC/Test ETH for seed and treasury
   minimums. The plan uses no invented fallback for any of them.
 
-The current catalog is revision `5`: both original routes are retired and both successors are
-active. BTC has one complete browser → Nox → FPMM → objective resolution → user/LP redemption proof.
-ETH is a terminal no-write policy rejection, not a winner or a pending resolution. Both active
-successors predate the four-hour guard and retain a known 3,600-second liveness risk. Any release
-replacement must use a new resolver-first deployment, immutable verification, and hash-linked
-successor cutover; never edit revision `5` in place. Local container build/smoke passes, while public
-hosting remains pending.
+The current catalog is revision `12` at
+`packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json`, hash
+`0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e`.
+Corrected BTC `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2`
+and ETH `0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a`
+are active under the four-hour observation-delay guard. Revisions `6`/`7` are immutable staging
+history and were never served. The non-adjacent revision-5-to-8 runtime adoption used a controlled
+single-writer stop, pointer update, and one replacement startup. At the post-cutover 2026-07-29
+snapshot, the service reached `READY` on revision `8` and both corrected markets were ordering-open
+and dynamically tradeable; that market-state result is time-bound.
+
+Both revision-5 pools are retired with zero LP shares. Their committed close evidence records
+50,000,000 YES plus 50,000,000 NO unresolved atoms per pool: BTC transaction
+`0xe811190d41186d666b5b90b7938edcdd974a1a8c48fad9fa7f18b8ebf9946b4b` at block `11375985` and
+ETH transaction `0xcfd96ad20aec7d2a6f82c30f908cfbb021d62a7118e7a861f0bf9b88a4ed52b5` at block `11375990`.
+The earlier BTC condition has one complete browser → Nox → FPMM → objective resolution → user/LP
+redemption proof. The earlier ETH condition is a terminal no-write policy rejection, not a winner
+or pending resolution. Revisions `9`–`12` add independently verified BTC/ETH 1h and 24h bundles;
+the final manifest has four retired and six active routes and the service is `READY`. The BTC 1h
+treasury-collateral attempt-1 out-of-gas receipt and successful attempt-bound retry are preserved in
+[`../../.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json`](../../.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json).
+Local container build/smoke passes, while public hosting remains pending and must not provision
+billable resources without explicit user authorization. A complete corrected-route vertical remains
+release work. Both corrected OrderBooks now return `nextOrderId = 3`, and four
+browser-created, browser-off corrected-route fills are verified. Remaining full-vertical work is
+objective settlement plus winning-user and builder-LP redemption, not order creation or fill.

@@ -27,6 +27,22 @@ function hash(digit: string): Hash {
   return `0x${digit.repeat(64)}` as Hash;
 }
 
+function transactionReceipt(input: Readonly<{
+  transactionHash: Hash;
+  status: "success" | "reverted";
+  blockNumber?: bigint;
+  blockHash?: Hash;
+}>): TransactionReceipt {
+  return {
+    transactionHash: input.transactionHash,
+    blockNumber: input.blockNumber ?? 1_234n,
+    blockHash: input.blockHash ?? hash("e"),
+    contractAddress: null,
+    status: input.status,
+    logs: [],
+  } as unknown as TransactionReceipt;
+}
+
 const EXPECTED_STEPS = [
   "deployCollateral",
   "deployResolver",
@@ -258,6 +274,241 @@ describe("deployment journal", () => {
       assert.equal(disposition.confirmation.blockNumber, "1234");
       assert.equal(disposition.confirmation.contractAddress, address("3"));
       assert.deepEqual(disposition.confirmation.result, { deployedCodeHash: hash("4") });
+      await assert.rejects(
+        openDeploymentJournal({
+          ...resumeInput(input),
+          recoveryJson: JSON.stringify({
+            deployCollateral: { action: "RETRY", expectedAttempt: 1 },
+          }),
+        }),
+        /RETRY recovery.*requires an unresolved INTENT or SUBMITTED transaction/,
+      );
+    });
+  });
+
+  it("requires attempt-bound RETRY before a submitted transaction may enter failure verification", async () => {
+    await withTemporaryRoot(async (root) => {
+      const input = inputFor(root);
+      const initial = await openDeploymentJournal(input);
+      await initial.prepareStep("deployCollateral");
+      await initial.recordSubmitted("deployCollateral", hash("1"));
+
+      const retried = await openDeploymentJournal({
+        ...resumeInput(input),
+        recoveryJson: JSON.stringify({
+          deployCollateral: { action: "RETRY", expectedAttempt: 1 },
+        }),
+      });
+      assert.deepEqual(await retried.prepareStep("deployCollateral"), {
+        action: "VERIFY_FAILED_SUBMISSION",
+        attempt: 1,
+        transactionHash: hash("1"),
+      });
+      assert.equal(retried.snapshot().steps.deployCollateral?.state, "SUBMITTED");
+
+      await assert.rejects(
+        openDeploymentJournal({
+          ...resumeInput(input),
+          recoveryJson: JSON.stringify({
+            deployCollateral: { action: "RETRY", expectedAttempt: 2 },
+          }),
+        }),
+        /expected attempt 2, but current attempt is 1/,
+      );
+      await assert.rejects(
+        openDeploymentJournal({
+          ...resumeInput(input),
+          recoveryJson: JSON.stringify({
+            deployCollateral: {
+              action: "ADOPT",
+              expectedAttempt: 1,
+              transactionHash: hash("2"),
+            },
+          }),
+        }),
+        /ADOPT recovery.*requires an unresolved INTENT/,
+      );
+    });
+  });
+
+  it("retries exactly once after the persisted submitted hash is proven reverted", async () => {
+    await withTemporaryRoot(async (root) => {
+      const input = inputFor(root);
+      const operator = address("1");
+      const failedHash = hash("1");
+      const retryHash = hash("2");
+      const failedBlockHash = hash("3");
+      const initial = await openDeploymentJournal(input);
+      await initial.prepareStep("deployCollateral");
+      await initial.recordSubmitted("deployCollateral", failedHash);
+
+      const journal = await openDeploymentJournal({
+        ...resumeInput(input),
+        recoveryJson: JSON.stringify({
+          deployCollateral: { action: "RETRY", expectedAttempt: 1 },
+        }),
+      });
+      let submissions = 0;
+      const waited: Hash[] = [];
+      const receipt = await runJournaledDeploymentStep({
+        journal,
+        operator,
+        confirmations: 2,
+        stepId: "deployCollateral",
+        label: "collateral deployment",
+        client: {
+          async waitForTransactionReceipt({ hash: transactionHash }) {
+            waited.push(transactionHash);
+            return transactionHash === failedHash
+              ? transactionReceipt({
+                  transactionHash,
+                  status: "reverted",
+                  blockNumber: 500n,
+                  blockHash: failedBlockHash,
+                })
+              : transactionReceipt({
+                  transactionHash,
+                  status: "success",
+                  blockNumber: 501n,
+                  blockHash: hash("4"),
+                });
+          },
+          async getTransaction() {
+            return { from: operator };
+          },
+        },
+        submit: async () => {
+          submissions += 1;
+          return retryHash;
+        },
+      });
+
+      assert.equal(receipt.transactionHash, retryHash);
+      assert.deepEqual(waited, [failedHash, retryHash]);
+      assert.equal(submissions, 1);
+      const step = journal.snapshot().steps.deployCollateral;
+      assert.equal(step?.state, "CONFIRMED");
+      assert.equal(step?.attempt, 2);
+      assert.equal(step?.transactionHash, retryHash);
+      assert.deepEqual(step?.recoveries, [
+        {
+          action: "RETRY",
+          expectedAttempt: 1,
+          recordedAt: step?.recoveries[0]?.recordedAt,
+          failedSubmission: {
+            transactionHash: failedHash,
+            blockNumber: "500",
+            blockHash: failedBlockHash,
+            status: "reverted",
+          },
+        },
+      ]);
+
+      const reopened = await openDeploymentJournal(resumeInput(input));
+      assert.equal(reopened.snapshot().steps.deployCollateral?.attempt, 2);
+      assert.equal(reopened.snapshot().steps.deployCollateral?.state, "CONFIRMED");
+    });
+  });
+
+  it("never retries a submitted transaction that is successful or still pending", async () => {
+    for (const outcome of ["success", "pending"] as const) {
+      await withTemporaryRoot(async (root) => {
+        const input = inputFor(root);
+        const failedHash = hash("5");
+        const initial = await openDeploymentJournal(input);
+        await initial.prepareStep("deployCollateral");
+        await initial.recordSubmitted("deployCollateral", failedHash);
+        const journal = await openDeploymentJournal({
+          ...resumeInput(input),
+          recoveryJson: JSON.stringify({
+            deployCollateral: { action: "RETRY", expectedAttempt: 1 },
+          }),
+        });
+        let submissions = 0;
+
+        await assert.rejects(
+          runJournaledDeploymentStep({
+            journal,
+            operator: address("1"),
+            confirmations: 2,
+            stepId: "deployCollateral",
+            label: "collateral deployment",
+            client: {
+              async waitForTransactionReceipt() {
+                if (outcome === "pending") throw new Error("transaction still pending");
+                return transactionReceipt({
+                  transactionHash: failedHash,
+                  status: "success",
+                });
+              },
+              async getTransaction() {
+                return { from: address("1") };
+              },
+            },
+            submit: async () => {
+              submissions += 1;
+              return hash("6");
+            },
+          }),
+          outcome === "pending"
+            ? /transaction still pending/
+            : /RETRY refused because submitted transaction succeeded/,
+        );
+
+        assert.equal(submissions, 0);
+        const step = journal.snapshot().steps.deployCollateral;
+        assert.equal(step?.state, "SUBMITTED");
+        assert.equal(step?.attempt, 1);
+        assert.equal(step?.transactionHash, failedHash);
+        assert.deepEqual(step?.recoveries, []);
+      });
+    }
+  });
+
+  it("does not retry a reverted submitted transaction from a different sender", async () => {
+    await withTemporaryRoot(async (root) => {
+      const input = inputFor(root);
+      const failedHash = hash("7");
+      const initial = await openDeploymentJournal(input);
+      await initial.prepareStep("deployCollateral");
+      await initial.recordSubmitted("deployCollateral", failedHash);
+      const journal = await openDeploymentJournal({
+        ...resumeInput(input),
+        recoveryJson: JSON.stringify({
+          deployCollateral: { action: "RETRY", expectedAttempt: 1 },
+        }),
+      });
+      let submissions = 0;
+
+      await assert.rejects(
+        runJournaledDeploymentStep({
+          journal,
+          operator: address("1"),
+          confirmations: 2,
+          stepId: "deployCollateral",
+          label: "collateral deployment",
+          client: {
+            async waitForTransactionReceipt() {
+              return transactionReceipt({
+                transactionHash: failedHash,
+                status: "reverted",
+              });
+            },
+            async getTransaction() {
+              return { from: address("2") };
+            },
+          },
+          submit: async () => {
+            submissions += 1;
+            return hash("8");
+          },
+        }),
+        /journal transaction sender.*is not operator/,
+      );
+
+      assert.equal(submissions, 0);
+      assert.equal(journal.snapshot().steps.deployCollateral?.state, "SUBMITTED");
+      assert.equal(journal.snapshot().steps.deployCollateral?.attempt, 1);
     });
   });
 

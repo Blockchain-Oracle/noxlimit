@@ -36,7 +36,8 @@ export type LiveSettingsResult =
  * - LIVE_SEPOLIA_CONFIRM=RUN_REAL_SEPOLIA_WRITES
  * - LIVE_SEPOLIA_PRIVATE_KEY, LIVE_SEPOLIA_RPC_URL, LIVE_SEPOLIA_MARKET_ID
  * - LIVE_SEPOLIA_FUNDING_TREASURY_ADDRESS, LIVE_SEPOLIA_SIDE
- * - LIVE_SEPOLIA_FUNDING_MODE=REQUIRED for the first run, or ALREADY_FUNDED for the second
+ * - LIVE_SEPOLIA_FUNDING_MODE=REQUIRED to exercise funding, or ALREADY_FUNDED to reuse a
+ *   product-verified funded wallet
  * - LIVE_SEPOLIA_AMOUNT (capped at 25), LIVE_SEPOLIA_PRIVATE_MAXIMUM (capped at 1)
  *
  * Optional environment:

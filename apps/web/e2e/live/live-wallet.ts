@@ -54,10 +54,12 @@ export function createLiveSepoliaWallet(input: LiveWalletInput) {
   const account = privateKeyToAccount(input.privateKey);
   const walletClient = createWalletClient({ account, chain: sepolia, transport: http(input.rpcUrl) });
   const writes: RecordedWalletWrite[] = [];
+  const requestedMethods: string[] = [];
   let fundingSigned = false;
 
   const request = async (raw: unknown): Promise<unknown> => {
     const providerRequest = parseProviderRequest(raw);
+    requestedMethods.push(safeMethodName(providerRequest.method));
     switch (providerRequest.method) {
       case "eth_requestAccounts":
       case "eth_accounts":
@@ -100,7 +102,7 @@ export function createLiveSepoliaWallet(input: LiveWalletInput) {
         return hash;
       }
       default:
-        throw refused(`method ${providerRequest.method}`);
+        throw refused(`method ${safeMethodName(providerRequest.method)}`);
     }
   };
 
@@ -134,8 +136,13 @@ export function createLiveSepoliaWallet(input: LiveWalletInput) {
   return {
     address: account.address,
     install,
+    requestedMethods: () => [...requestedMethods],
     writes: () => [...writes] as readonly RecordedWalletWrite[],
   };
+}
+
+function safeMethodName(value: string): string {
+  return /^[a-zA-Z0-9_]{1,64}$/.test(value) ? value : "unknown";
 }
 
 function parseProviderRequest(raw: unknown): ProviderRequest {

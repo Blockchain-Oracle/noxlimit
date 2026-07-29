@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "kind": "NOXLIMIT_SEPOLIA_BREADTH_STRIKE_PLAN",
+  "chainId": 11155111,
+  "safeSnapshot": {
+    "blockNumber": "11376396",
+    "blockHash": "0x16212a48377fba94077a4995be4045c42dd6b3c1f103903f480e263b4e0060fc",
+    "blockTimestamp": "1785339312",
+    "observedAt": "2026-07-29T15:35:12.000Z"
+  },
+  "selectionPolicy": {
+    "rounding": "HALF_UP",
+    "BTC/USD": {
+      "tickUsd": "100",
+      "proxy": "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
+      "roundId": "18446744073709584259",
+      "answer": "6400465700000",
+      "feedDecimals": 8,
+      "priceUsd": "64004.65700000",
+      "priceObservedAt": "2026-07-29T14:43:36.000Z",
+      "strikeUsd": "64000",
+      "strikePriceWad": "64000000000000000000000"
+    },
+    "ETH/USD": {
+      "tickUsd": "10",
+      "proxy": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+      "roundId": "18446744073709586448",
+      "answer": "189522667848",
+      "feedDecimals": 8,
+      "priceUsd": "1895.22667848",
+      "priceObservedAt": "2026-07-29T15:04:12.000Z",
+      "strikeUsd": "1900",
+      "strikePriceWad": "1900000000000000000000"
+    }
+  },
+  "sharedPolicy": {
+    "startsAt": "1785346200",
+    "startsAtIso": "2026-07-29T17:30:00.000Z",
+    "maximumObservationDelaySeconds": "14400",
+    "oracleMaximumAgeSeconds": "3600",
+    "poolSeedAtoms": "50000000",
+    "marketVersion": "1"
+  },
+  "bundles": [
+    {
+      "asset": "BTC/USD",
+      "horizon": "1h",
+      "tradingClosesAt": "1785349500",
+      "tradingClosesAtIso": "2026-07-29T18:25:00.000Z",
+      "resolvesAt": "1785349800",
+      "resolvesAtIso": "2026-07-29T18:30:00.000Z"
+    },
+    {
+      "asset": "ETH/USD",
+      "horizon": "1h",
+      "tradingClosesAt": "1785349500",
+      "tradingClosesAtIso": "2026-07-29T18:25:00.000Z",
+      "resolvesAt": "1785349800",
+      "resolvesAtIso": "2026-07-29T18:30:00.000Z"
+    },
+    {
+      "asset": "BTC/USD",
+      "horizon": "24h",
+      "tradingClosesAt": "1785432300",
+      "tradingClosesAtIso": "2026-07-30T17:25:00.000Z",
+      "resolvesAt": "1785432600",
+      "resolvesAtIso": "2026-07-30T17:30:00.000Z"
+    },
+    {
+      "asset": "ETH/USD",
+      "horizon": "24h",
+      "tradingClosesAt": "1785432300",
+      "tradingClosesAtIso": "2026-07-30T17:25:00.000Z",
+      "resolvesAt": "1785432600",
+      "resolvesAtIso": "2026-07-30T17:30:00.000Z"
+    }
+  ]
+}

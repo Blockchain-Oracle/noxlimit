@@ -7,6 +7,8 @@ import { fileURLToPath } from "node:url";
 
 import { zeroAddress, type Address, type Hex } from "viem";
 
+import hardhatConfig from "../hardhat.config.js";
+
 import {
   OperatorConfigurationError,
   HORIZON_SECONDS,
@@ -343,6 +345,14 @@ async function stagedTwoAxisCutover(options: { successorStartsAt?: bigint } = {}
 }
 
 describe("operator configuration and manifest helpers", () => {
+  it("adds gas headroom to every automatic Sepolia operator write", () => {
+    const operatorNetwork = hardhatConfig.networks?.sepoliaOperator;
+    assert.ok(operatorNetwork);
+    assert.equal(operatorNetwork.type, "http");
+    assert.equal(operatorNetwork.gasMultiplier, 1.2);
+    assert.ok(operatorNetwork.gasMultiplier > 1);
+  });
+
   it("parses a complete nonzero plan without retaining secrets or authorizing writes", () => {
     const privateKey = `0x${"9".repeat(64)}`;
     const config = parseBundleConfig(

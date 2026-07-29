@@ -7,13 +7,23 @@ testnet software and must not be used with production-value assets.
 The commands below describe the implemented product. Current public release URLs and the manifest
 chosen for the final hosted release belong in `SUBMISSION.md` once verified.
 
-Current routing is catalog revision `5`. Corrected BTC
+Current routing is catalog revision `12` at
+`packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json`, hash
+`0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e`.
+The paired activation became effective at Sepolia block `11375905`
+(`0x2a37a64bd6e1c86dd4bbb80f67cf803be9f58d93427fc84d26f59861fcbf1c76`) at
+`2026-07-29T13:53:36Z`. Corrected BTC
 `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2` and ETH
-`0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a`
-successors are already deployed, validated, 50,000,000 YES / 50,000,000 NO seeded, and staged as
-`SUCCESSOR` in revisions `6`/`7`. Their shared start, and both revision-5 routes' close, is
-`2026-07-29T13:50:00Z`. Do not configure a hosted service to use either staging manifest. The next
-catalog action is one atomic revision `8` cutover after the boundary.
+`0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a` are `ACTIVE`; revisions
+`6`/`7` are staging history and were never served. The revision-5 pools are retired and have zero LP
+shares; their LP owner now holds 50,000,000 YES plus 50,000,000 NO unresolved atoms per market for
+later resolution and redemption. At the `2026-07-29T15:34:12Z` service snapshot, the corrected
+markets were ordering-open and dynamically tradeable; that observation is time-bound. Both
+corrected OrderBooks now return `nextOrderId = 3`, and two browser-created, browser-off fills per
+market are verified. Revision `12` carries ten records—four retired and six active—and adds verified
+BTC/ETH 1h and 24h routes beside the corrected 4h pair. The service is `READY` on r12; the new
+routes were `UPCOMING` before their shared `2026-07-29T17:30:00Z` start. Corrected-route objective
+settlement and user/builder redemption remain pending. Public hosting remains pending.
 
 ## Prerequisites
 
@@ -187,11 +197,16 @@ Recommended hosting boundaries:
 - redact credentials, signatures, handles/proofs, candidates, and private-input material;
 - deploy a new service process rather than overlapping two write-enabled replicas.
 
-## Cloud Run release profile after revision 8
+## Cloud Run release profile for revision 12
 
-Use this profile only after the atomic revision-8 manifest is committed, independently validated,
-and selected as current routing. Revisions `6` and `7` are staging history and must never be used as
-the hosted runtime catalog.
+Use this profile with the independently validated revision-12 manifest that is now current routing.
+Revisions `6` and `7` are staging history and must never be used as the hosted runtime catalog;
+revision `8` is immutable corrected-cutover history, not the current target.
+
+**Authorization gate:** this profile creates billable cloud resources, including an always-on
+single-writer service. Do not provision or deploy it until the user explicitly authorizes the
+hosting spend and confirms the target project, region, budget, and alerts. Local image/smoke evidence
+is not that authorization.
 
 - Deploy the service in one explicit region with fixed manual scaling of one instance, CPU available
   outside requests (`--no-cpu-throttling`), and no scale-to-zero. Set the container port to `8787`;
@@ -221,7 +236,7 @@ The service runtime boundary is:
 NODE_ENV=production
 HOST=0.0.0.0
 WEB_ORIGIN=https://<exact-web-origin>
-CATALOG_MANIFEST_PATH=packages/catalog/sepolia/<committed-revision-8-manifest>.json
+CATALOG_MANIFEST_PATH=packages/catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json
 FUNDING_TREASURY_ADDRESS=0x6b4Ce61906E7402e198Bd6D2bc73CEd24A721b78
 POLL_INTERVAL_MS=5000
 LOG_LEVEL=info
@@ -265,8 +280,9 @@ curl --fail --silent "https://<service-origin>/v1/markets"
 curl --fail --silent "https://<web-origin>/"
 ```
 
-Also compare the returned `catalogRevision` with the committed revision-8 hash and confirm that
-exactly one service revision receives traffic. Without a durable reload pointer and signal control,
+Also require the returned `catalogRevision` to equal
+`0x577593192efb7cf139267b3d076eb5e846fd15d1ab080611f9d504b716b4b427` and confirm that exactly one
+service revision receives traffic. Without a durable reload pointer and signal control,
 future catalog rotation requires a controlled image/service replacement and inherits the same
 single-writer rollout caveat.
 
@@ -303,7 +319,9 @@ The operator deploys resolver-first, creates a plan-bound cross-process-locked j
 each write through `INTENT → SUBMITTED → CONFIRMED`, verifies immutable bindings and runtime code,
 seeds the unchanged FPMM, and publishes evidence/catalog output create-only. Never delete or edit a
 journal to force progress. A bare intent requires the attempt-bound `ADOPT` or `RETRY` procedure in
-`OPERATOR.md` after independent chain inspection.
+`OPERATOR.md` after independent chain inspection. A persisted submitted transaction can be retried
+only through that same attempt-bound procedure after the runner proves its exact receipt reverted;
+pending or successful submissions are never replaced.
 
 For every new official Sepolia BTC/USD or ETH/USD bundle,
 `NOXLIMIT_MAXIMUM_OBSERVATION_DELAY_SECONDS` must be at least `14400`. The operator rejects a lower
@@ -320,16 +338,16 @@ NOXLIMIT_OPERATOR_CONFIRM=ACTIVATE_SEPOLIA_SUCCESSORS \
   pnpm --filter @noxlimit/contracts operator:activate-successors
 ```
 
-For the current BTC/ETH rotation, staging is complete. Use the
+For the completed BTC/ETH rotation, the fixed inputs were the
 [corrected strike plan](./.thoughts/evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json),
 [BTC deployment evidence](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json),
 and
 [ETH deployment evidence](./.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json)
-as the fixed inputs. Revisions `6` and `7` are immutable staging history, not runtime targets. Only
-after the safe block reaches the shared `2026-07-29T13:50:00Z` close may the activation command
-publish revision `8`, retiring both current revision-5 IDs and activating both corrected IDs in one
-manifest. If either axis cannot cut over, keep revision `5` current and fail closed; do not publish
-a one-axis activation.
+and revisions `6` and `7` are immutable staging history, not runtime targets. After the consensus-
+safe block crossed the shared `2026-07-29T13:50:00Z` boundary, the activation command published
+revision `8` in commit `d28f307`, retiring both revision-5 IDs and activating both corrected IDs in
+one manifest. Its effective block is `11375905`, effective time is `2026-07-29T13:53:36Z`, and
+catalog hash is `0x577593192efb7cf139267b3d076eb5e846fd15d1ab080611f9d504b716b4b427`.
 
 After reviewing the new hash-linked manifest, choose the adoption path from the service's current
 revision:
@@ -337,15 +355,41 @@ revision:
 - For one adjacent revision, atomically update the configured catalog pointer and send `SIGHUP`.
   The service verifies the direct hash link, builds a coherent projection, and keeps the old
   catalog active if acceptance fails.
-- For a deliberately skipped staging chain, such as the current revision-5 runtime adopting
-  revision 8 while revisions 6 and 7 remain immutable staging history, do **not** send `SIGHUP`.
-  Direct reload correctly rejects non-adjacent revisions, and revisions 6 and 7 must never be
-  served after their predecessor routes close. Stop the single writer, atomically repoint to the
-  reviewed revision-8 manifest, then start exactly one replacement process. Startup validates the
-  selected manifest directly. After the close boundary revision 5 is no longer a valid runtime
-  fallback, so a failed revision-8 start remains fail-closed downtime while the revision-8
-  dependency or configuration problem is corrected and retried. Never restore the closed
-  revision-5 pointer, and never run both writers concurrently.
+- For a deliberately skipped staging chain, do **not** send `SIGHUP`. Direct reload correctly
+  rejects non-adjacent revisions. Stop the single writer, atomically repoint to the reviewed target
+  manifest, then start exactly one replacement process; startup validates the selected manifest
+  directly. If the predecessor is closed, a failed target start remains fail-closed downtime while
+  the dependency or configuration problem is corrected and retried. Never restore a closed
+  predecessor pointer, and never run both writers concurrently. The completed revision-5-to-8
+  adoption followed this exact stop → pointer → single-startup path; revisions `6`/`7` were never
+  served, and the replacement reached `READY` on revision `8`.
+
+The completed breadth rollout then published and adopted four direct hash-linked revisions in
+order: r9 BTC 1h (`0x3fdb8c17958a56f89b19b8ab491ba458629d2762c69eacf4ad2b436c92d561f3`),
+r10 ETH 1h (`0xe0f239053009afa5c78d21df58cd66cc2200aa93222529d989e231da2c5776bd`),
+r11 BTC 24h (`0x855f7b2de0298c831efc8510786d63bdfa062b8996c45fda3ed60037c72fb303`),
+and r12 ETH 24h (`0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e`).
+One controlled restart loaded the corrected future-`ACTIVE` acceptance behavior; remaining adjacent
+adoptions proceeded sequentially. Never skip directly from r8 to r12 through SIGHUP. Current r12
+has ten records—four retired and six active—and the service reports `READY` on its exact hash.
+The new routes correctly remained `UPCOMING` before `startsAt`.
+
+BTC 1h deployment also exercised submitted-transaction recovery. Treasury-collateral top-up attempt
+1 reverted out of gas under an exact gas estimate. The journal preserved the reverted receipt;
+explicit attempt-bound `RETRY` submitted attempt 2 after setting Hardhat `gasMultiplier = 1.2`, and
+that retry succeeded. Do not erase or synthesize this history; use the
+[redacted recovery record](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json)
+and the normal procedure in `packages/contracts/OPERATOR.md`.
+
+After runtime adoption, the operator closed both retired revision-5 pools sequentially. BTC removal
+transaction `0xe811190d41186d666b5b90b7938edcdd974a1a8c48fad9fa7f18b8ebf9946b4b`
+confirmed at block `11375985`; ETH removal transaction
+`0xcfd96ad20aec7d2a6f82c30f908cfbb021d62a7118e7a861f0bf9b88a4ed52b5` confirmed at block
+`11375990`. Both evidence records show zero remaining LP shares and unresolved balances of
+50,000,000 YES plus 50,000,000 NO atoms; no redemption is implied before settlement:
+
+- `.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-successor-liquidity-close.json`;
+- `.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-successor-liquidity-close.json`.
 
 ## Objective resolution and redemption
 
@@ -393,6 +437,14 @@ LIVE_SEPOLIA_CONFIRM=RUN_REAL_SEPOLIA_WRITES \
   pnpm --filter @noxlimit/web test:e2e:live:sepolia
 ```
 
+The committed revision-8 runs are
+[BTC NO](./.thoughts/evidence/2026-07-29-r8-corrected-btc-no-order.json),
+[BTC YES](./.thoughts/evidence/2026-07-29-r8-corrected-btc-yes-order.json),
+[ETH YES](./.thoughts/evidence/2026-07-29-r8-corrected-eth-yes-order.json), and
+[ETH NO](./.thoughts/evidence/2026-07-29-r8-corrected-eth-no-order.json). Each redacted record
+contains one direct Gateway post plus public transaction hashes, never the raw private maximum or
+signing material.
+
 Objective browser resolution and redemption:
 
 ```bash
@@ -419,7 +471,15 @@ A hosted release is ready only when all of the following are true:
 - a fresh order fills against the real FPMM after browser closure;
 - objective resolution and real redemption have durable transaction evidence;
 - every relied-on active bundle has a settlement-liveness parameter accepted for the release;
-  revision-5 BTC/ETH successors currently carry a disclosed 3,600-second risk, while their verified
-  14,400-second replacements remain staged in revisions `6`/`7`. Keep the release gated until one
-  revision `8` retires and activates both axes atomically;
+  revision `12` carries corrected/breadth BTC/ETH bundles with the 14,400-second bound, while the
+  one-hour revision-5 bundles are retired history;
+- one fresh corrected revision-8 route completes the real funding → order → browser-off fill →
+  objective resolution → redemption vertical; the predecessor BTC proof does not satisfy this
+  successor-route gate;
+- the approved BTC/ETH 1h and 24h breadth is deployed, verified, seeded, cataloged, and preserved in
+  the current revision-12 hash chain;
+- the final submission commit passes root `pnpm check` and the dedicated Playwright suite, with the
+  exact results recorded in `SUBMISSION.md`;
+- the final repository/default-branch handoff exposes that submission commit, not only the public
+  release branch or draft pull request;
 - no mock market, sample balance, secret, or prototype fixture is loaded in production.

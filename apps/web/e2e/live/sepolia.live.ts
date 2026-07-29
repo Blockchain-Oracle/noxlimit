@@ -88,6 +88,7 @@ test("funds one wallet, creates one private order, closes, and reopens after a w
   let fundingHash: Hex | undefined;
   let ref: OrderRef | undefined;
   let gatewayPosts = 0;
+  liveStage("preflight complete");
   const firstBrowser = await launchLiveBrowser();
   let firstContext: BrowserContext | undefined;
   try {
@@ -98,8 +99,10 @@ test("funds one wallet, creates one private order, closes, and reopens after a w
       if (request.method() === "POST" && requestUrl.origin === GATEWAY_ORIGIN && requestUrl.pathname === "/v0/secrets") gatewayPosts += 1;
     });
 
-    fundingHash = await completeFunding(page, settings.fundingMode);
-    ref = await createPrivateOrder(page, settings, orderBook);
+    fundingHash = await completeFunding(page, settings.fundingMode, wallet.requestedMethods);
+    liveStage("funding complete");
+    ref = await createPrivateOrder(page, settings, orderBook, wallet.requestedMethods);
+    liveStage("order receipt confirmed");
     expect(gatewayPosts).toBe(1);
     expect(wallet.writes().filter((entry) => entry.kind === "ORDER_CREATE")).toHaveLength(1);
   } finally {
@@ -111,6 +114,7 @@ test("funds one wallet, creates one private order, closes, and reopens after a w
     throw new Error("The required live funding or order receipt was not captured.");
   }
   const filledOrder = await waitForFilledOrder(settings, ref);
+  liveStage("worker fill projected");
   const fillHash = await findFillHash(
     settings,
     publicClient,
@@ -146,7 +150,12 @@ test("funds one wallet, creates one private order, closes, and reopens after a w
     collateral,
     orderBook,
   });
+  liveStage("redacted evidence written");
 });
+
+function liveStage(stage: string): void {
+  console.info(`[live-sepolia] ${stage}`);
+}
 
 function launchLiveBrowser(): Promise<Browser> {
   return chromium.launch({
@@ -168,20 +177,41 @@ async function liveContext(
   return context;
 }
 
-async function connect(page: Page): Promise<void> {
+async function connect(page: Page, requestedMethods: () => readonly string[]): Promise<void> {
   const button = page.getByRole("button", { name: "Connect browser wallet" });
   const connected = page.getByTitle("Disconnect wallet");
+  const initialMethodCount = requestedMethods().length;
+  liveStage("waiting for wallet control");
   await expect(button.or(connected).first()).toBeVisible();
-  if (!(await connected.isVisible())) await button.click();
-  await expect(connected).toBeVisible();
+  liveStage("wallet control visible");
+  if (!(await connected.isVisible())) {
+    liveStage("requesting wallet connection");
+    await button.click();
+    liveStage("wallet connection click dispatched");
+  }
+  try {
+    await expect(connected).toBeVisible();
+  } catch (reason) {
+    const methods = requestedMethods().slice(initialMethodCount);
+    throw new Error(
+      `The browser wallet did not connect; observed provider methods: ${methods.length > 0 ? methods.join(",") : "none"}.`,
+      { cause: reason },
+    );
+  }
 }
 
-async function completeFunding(page: Page, mode: LiveFundingMode): Promise<Hex | undefined> {
+async function completeFunding(
+  page: Page,
+  mode: LiveFundingMode,
+  requestedMethods: () => readonly string[],
+): Promise<Hex | undefined> {
   await page.goto("/funding");
-  await connect(page);
+  liveStage("funding page loaded");
+  await connect(page, requestedMethods);
+  liveStage("wallet connected for funding");
   if (mode === "ALREADY_FUNDED") {
     const ready = page.getByRole("button", { name: "Funding not needed" });
-    await expect(ready, "ALREADY_FUNDED may proceed only after the product measures both balance targets as ready.").toBeDisabled();
+    await expect(ready, "ALREADY_FUNDED may proceed only after the product measures both trading minima as ready.").toBeDisabled();
     for (const label of ["Sepolia ETH", "Test USDC"] as const) {
       const row = page.getByRole("listitem").filter({ has: page.getByText(label, { exact: true }) });
       await expect(row).toContainText("Ready");
@@ -191,8 +221,11 @@ async function completeFunding(page: Page, mode: LiveFundingMode): Promise<Hex |
   const challenge = page.getByRole("button", { name: "Request funding challenge" });
   await expect(challenge, "Use a fresh/low-balance key so this proof exercises real in-product funding.").toBeEnabled();
   await challenge.click();
+  liveStage("funding challenge requested");
   await expect(page.getByText("Review signed request", { exact: true })).toBeVisible();
+  liveStage("funding challenge ready for signature");
   await page.getByRole("button", { name: "Sign and submit funding claim" }).click();
+  liveStage("funding signature submitted");
   const explorer = page.getByRole("link", { name: "View real funding transaction" });
   await expect(explorer).toBeVisible({ timeout: 120_000 });
   const hash = transactionHash(await explorer.getAttribute("href"));
@@ -200,9 +233,16 @@ async function completeFunding(page: Page, mode: LiveFundingMode): Promise<Hex |
   return hash;
 }
 
-async function createPrivateOrder(page: Page, settings: LiveSepoliaSettings, orderBook: Address): Promise<OrderRef> {
+async function createPrivateOrder(
+  page: Page,
+  settings: LiveSepoliaSettings,
+  orderBook: Address,
+  requestedMethods: () => readonly string[],
+): Promise<OrderRef> {
   await page.goto(`/markets/${settings.marketId}`);
-  await connect(page);
+  liveStage("market page loaded");
+  await connect(page, requestedMethods);
+  liveStage("wallet connected for order");
   await page.getByRole("button", { name: `Buy ${settings.side}`, exact: true }).click();
   await page.getByLabel(/Public amount/).fill(settings.amount);
   await page.getByLabel(/Private maximum price/).fill(settings.privateMaximum);
@@ -210,7 +250,9 @@ async function createPrivateOrder(page: Page, settings: LiveSepoliaSettings, ord
   await expect(review).toBeEnabled();
   await review.click();
   await expect(page.getByRole("heading", { name: "Review the protected order" })).toBeVisible();
+  liveStage("private order reviewed");
   await page.getByRole("button", { name: "Send to Nox and continue" }).click();
+  liveStage("Nox submission requested; awaiting order receipt");
   await page.waitForURL(/\/orders\/11155111\/0x[0-9a-fA-F]{40}\/[0-9]+$/, { timeout: 240_000 });
   const match = new URL(page.url()).pathname.match(/^\/orders\/(11155111)\/(0x[0-9a-fA-F]{40})\/([0-9]+)$/);
   if (!match || getAddress(match[2]!) !== orderBook) throw new Error("The confirmed order URL did not match the configured OrderBook.");

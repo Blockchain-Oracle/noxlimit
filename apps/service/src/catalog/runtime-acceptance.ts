@@ -17,9 +17,11 @@ export type EvaluatorCatalogRuntime = CatalogRuntime & Readonly<{
 }>;
 
 /**
- * Reject a fully staged catalog before it can become the public runtime when any newly open market
- * is not actually usable. Closed/retired history and not-yet-active successor records remain
- * adoptable without an evaluator so catalog history can advance independently of trading.
+ * Reject a fully staged catalog before it can become the public runtime when an ACTIVE market is
+ * neither a seeded future market nor an actually usable open market. Future ACTIVE markets remain
+ * truthfully non-tradeable until their immutable start time; only ORDERING_OPEN markets require a
+ * ready evaluator and completely clear dynamic tradeability gates. Closed/retired history and
+ * not-yet-active successor records remain adoptable independently of trading.
  */
 export async function assertStagedCatalogRuntimeAcceptable(
   runtime: EvaluatorCatalogRuntime,
@@ -32,6 +34,7 @@ export async function assertStagedCatalogRuntimeAcceptable(
   const issues: string[] = [];
 
   const activeCards: MarketStreamCardView[] = [];
+  const openActiveCards: MarketStreamCardView[] = [];
   for (const route of manifest.routing) {
     if (route.activation !== "ACTIVE") continue;
     const card = cardsById.get(route.marketId.toLowerCase());
@@ -43,12 +46,16 @@ export async function assertStagedCatalogRuntimeAcceptable(
     if (card.catalogActivation !== "ACTIVE") {
       issues.push(`${route.marketId}: staged activation does not match the ACTIVE catalog route`);
     }
-    if (card.lifecycle !== "ORDERING_OPEN") {
-      issues.push(`${route.marketId}: ACTIVE market lifecycle must be ORDERING_OPEN`);
+    if (card.lifecycle === "ORDERING_OPEN") {
+      openActiveCards.push(card);
+    } else if (card.lifecycle !== "UPCOMING") {
+      issues.push(
+        `${route.marketId}: ACTIVE market lifecycle ${card.lifecycle} is already closed or resolved`,
+      );
     }
   }
 
-  if (activeCards.length > 0 && !runtime.evaluatorReady) {
+  if (openActiveCards.length > 0 && !runtime.evaluatorReady) {
     issues.push("staged evaluator is unavailable for open active markets");
   }
 
@@ -62,6 +69,23 @@ export async function assertStagedCatalogRuntimeAcceptable(
     if (!isPositiveDecimal(card.yesAveragePrice) || !isPositiveDecimal(card.noAveragePrice)) {
       issues.push(`${card.marketId}: YES and NO pool quotes must both be nonzero`);
     }
+
+    if (card.lifecycle === "UPCOMING") {
+      if (
+        card.tradeability !== "ORDERING_CLOSED" ||
+        card.tradeabilityReasons[0] !== "ORDERING_CLOSED"
+      ) {
+        issues.push(
+          `${card.marketId}: UPCOMING ACTIVE market must remain non-tradeable as ORDERING_CLOSED`,
+        );
+      }
+      if (card.tradeabilityReasons.includes("NO_LIQUIDITY")) {
+        issues.push(`${card.marketId}: UPCOMING ACTIVE market reports no liquidity`);
+      }
+      continue;
+    }
+    if (card.lifecycle !== "ORDERING_OPEN") continue;
+
     const blockingReasons = card.tradeabilityReasons.filter((reason) =>
       LIVE_BLOCKING_REASONS.has(reason)
     );

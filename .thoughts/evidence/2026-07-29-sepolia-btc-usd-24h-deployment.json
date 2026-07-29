@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "kind": "NOXLIMIT_SEPOLIA_BUNDLE_DEPLOYMENT",
+  "chainId": 11155111,
+  "marketId": "0x5fdb953c06530f97653d665624c576d2303e62a64c5fd40f4ccfa84276a4a4e5",
+  "catalogRevisionCandidate": "0x855f7b2de0298c831efc8510786d63bdfa062b8996c45fda3ed60037c72fb303",
+  "operator": "0xA03D26E19ee4061A06a9a097010Bc06028Bba60A",
+  "deploymentPlanHash": "0x0b364fbc84bc674790f7a0fcbfe6b9551ca5a42fc3e3ac437552ef0f4385d720",
+  "addresses": {
+    "collateral": "0x2B0F8B156a2870E53621802A618C3d0427A163A6",
+    "settlementAdapter": "0xC87080063A85Ab82314B326c630160FB90597677",
+    "resolver": "0x9AaB998cdC2808e029eFF01096a4Afca56FeF77B",
+    "fpmm": "0x90005a3D8Fdcc7B6e2d47029fedC0aDB6B5c4d09",
+    "orderBook": "0xe78D3D17e9b8C03aCecA854b11a46dAa54F36672",
+    "fundingTreasury": "0x6b4Ce61906E7402e198Bd6D2bc73CEd24A721b78",
+    "conditionalTokens": "0x5f3198E99F74A9AaA82386e275395D57401C953D",
+    "fpmmFactory": "0xC3ab21B6339b4AAbA14915FC34794DbB12a8901C"
+  },
+  "identity": {
+    "questionId": "0x8fba0cdb22f04f437f7f9e9b42d62b04de12deae6deb52ae616c6bcf502224d4",
+    "conditionId": "0x7e9fe8f54de414e6d197ebe48e86d72f6e884f09347b0d16af608256fc97668e",
+    "assetId": "0xee62665949c883f9e0f6f002eac32e00bd59dfe6c34e92a91c37d6a8322d6489"
+  },
+  "builderSeededLiquidity": {
+    "requestedCompleteSetsAtoms": "50000000",
+    "poolYesBalance": "50000000",
+    "poolNoBalance": "50000000",
+    "lpShares": "50000000"
+  },
+  "funding": {
+    "sharedTreasuryReused": true,
+    "minimumNativeWei": "100000000000000000",
+    "minimumCollateralAtoms": "250000000",
+    "nativeTopUpWei": "0",
+    "collateralTopUpAtoms": "0",
+    "operatorCollateralMintAtoms": "50000000"
+  },
+  "receipts": {
+    "collateral": null,
+    "operatorCollateralMint": "0x141983d6ef9b682af6e646bc381f2bd1c3ed3c86b5d044b4902a7c6a3f067d3b",
+    "settlementAdapter": "0xd1d20dffa23d314cdda5fa8a228919d3e845668145cd6daa0dd563aa13d1732c",
+    "resolver": "0x96260c993af54358be8607033f3eecb4b5d473b459d45cd52c2996f61d80f747",
+    "prepareCondition": "0x073d9db3d4ea233b9bf9b6268f28b2de7d5d63e6b4a72608c1b5ff74041d2970",
+    "fpmm": "0x9d52e76cb18580705d6f8cb9bfb244e7c96191a8472c1354064d7004f61ff29f",
+    "fpmmSeedApproval": "0xf2505d6464ba5b2af323c56092934266dd4c93769c0da3712836b5cae6ffb9a2",
+    "seedLiquidity": "0x10aa1b2bb19690a4a10379b37db6582e4f1784959c1a1df9a000ccea6fd7d51e",
+    "orderBook": "0xe422e179abb1ecc17cd7f8d9c4c3f187aa47ce04da101a8a870a2d1e39cbb35f",
+    "fundingTreasury": null,
+    "fundTreasuryCollateral": null,
+    "fundTreasuryNative": null
+  },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-29T16:21:36.000Z",
+    "verifiedAtBlock": "11376623",
+    "verifiedBy": "0xA03D26E19ee4061A06a9a097010Bc06028Bba60A",
+    "evidenceRef": ".thoughts/evidence/2026-07-29-sepolia-btc-usd-24h-deployment.json",
+    "runtimeCodeHashes": {
+      "collateral": "0x63d2cbe6d5b8f50c9732dea3dbc69d68382f6057d15e698c5ce75da1b303ec8c",
+      "settlementAdapter": "0x610e161c52e88a4e54cf962b5ee71301150e1d93f655088fafd26d72c18c6db1",
+      "conditionalTokens": "0x3fabb10bb08ca7d52b1806ff2802b039fcfa203300c72752b78774d91ca5239d",
+      "resolver": "0xf96ff846b425d3157f8288b19bfdda042d3800e0ea025bdbf70ada600f555cf5",
+      "fpmm": "0xc80e727e8099b094e7ed192de60832c5903f06f111d71349be4861f72d2423ef",
+      "orderBook": "0xbe74f1d2afb836256abd152c43196a2971d7c23a477b5bae54552dca04eda4e5"
+    }
+  },
+  "infrastructureRuntimeCodeHashes": {
+    "fpmmFactory": "0x3a936a16b5fc3c8cdc1b0e155a325696016f8feadfc63002ed22bf0382618213",
+    "chainlinkProxy": "0x9190afba2a699a9627d64ed68c7cc60e4005a8830b33183c4413b4e1a93b9ccd",
+    "fundingTreasury": "0x26ed2b3bfcad33d08fdba3e5fc521cc87564ef29c1401475ed9d389c9b959de1"
+  }
+}

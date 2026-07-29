@@ -37,6 +37,63 @@ describe("staged catalog runtime acceptance", () => {
     await expect(assertStagedCatalogRuntimeAcceptable(staged)).resolves.toBeUndefined();
   });
 
+  it("accepts a verified seeded future ACTIVE market without pretending it is tradeable", async () => {
+    const initial = createSepoliaBootstrapManifest();
+    const candidate = nextRevision(initial);
+    const upcomingCard = marketCard(candidate.markets[0]!, {
+      lifecycle: "UPCOMING",
+      tradeability: "ORDERING_CLOSED",
+      tradeabilityReasons: ["ORDERING_CLOSED", "EVALUATOR_UNAVAILABLE"],
+    });
+
+    await expect(
+      assertStagedCatalogRuntimeAcceptable(runtime(candidate, false, [upcomingCard])),
+    ).resolves.toBeUndefined();
+  });
+
+  it("keeps the evaluator gate strict for an ORDERING_OPEN ACTIVE market", async () => {
+    const initial = createSepoliaBootstrapManifest();
+    const candidate = nextRevision(initial);
+    const openCard = marketCard(candidate.markets[0]!, {
+      tradeability: "EVALUATOR_UNAVAILABLE",
+      tradeabilityReasons: ["EVALUATOR_UNAVAILABLE"],
+    });
+
+    await expect(
+      assertStagedCatalogRuntimeAcceptable(runtime(candidate, false, [openCard])),
+    ).rejects.toThrow("staged evaluator is unavailable for open active markets");
+  });
+
+  it("rejects an UPCOMING ACTIVE market that claims to be tradeable", async () => {
+    const initial = createSepoliaBootstrapManifest();
+    const candidate = nextRevision(initial);
+    const upcomingCard = marketCard(candidate.markets[0]!, {
+      lifecycle: "UPCOMING",
+    });
+
+    await expect(
+      assertStagedCatalogRuntimeAcceptable(runtime(candidate, true, [upcomingCard])),
+    ).rejects.toThrow("UPCOMING ACTIVE market must remain non-tradeable as ORDERING_CLOSED");
+  });
+
+  it("rejects an UPCOMING ACTIVE market without positive pool liquidity", async () => {
+    const initial = createSepoliaBootstrapManifest();
+    const candidate = nextRevision(initial);
+    const upcomingCard = marketCard(candidate.markets[0]!, {
+      lifecycle: "UPCOMING",
+      tradeability: "ORDERING_CLOSED",
+      tradeabilityReasons: ["ORDERING_CLOSED", "NO_LIQUIDITY"],
+      yesAveragePrice: "0",
+      noAveragePrice: "0",
+      completeSetDepth: "0",
+      completeSetDepthAtoms: "0",
+    });
+
+    await expect(
+      assertStagedCatalogRuntimeAcceptable(runtime(candidate, false, [upcomingCard])),
+    ).rejects.toThrow("complete-set depth must be positive");
+  });
+
   it("rejects an unsafe open candidate and leaves the previous runtime active", async () => {
     const initial = createSepoliaBootstrapManifest();
     const candidate = nextRevision(initial);
@@ -97,7 +154,12 @@ describe("staged catalog runtime acceptance", () => {
     ).rejects.toThrow("active market is missing from the staged read model");
   });
 
-  it.each(["UPCOMING", "ORDERING_CLOSED", "AWAITING_RESOLUTION", "RESOLVED_YES"] as const)(
+  it.each([
+    "ORDERING_CLOSED",
+    "AWAITING_RESOLUTION",
+    "RESOLVED_YES",
+    "RESOLVED_NO",
+  ] as const)(
     "rejects an ACTIVE route whose staged lifecycle is %s",
     async (lifecycle) => {
       const initial = createSepoliaBootstrapManifest();
@@ -110,7 +172,7 @@ describe("staged catalog runtime acceptance", () => {
 
       await expect(
         assertStagedCatalogRuntimeAcceptable(runtime(candidate, true, [card])),
-      ).rejects.toThrow("ACTIVE market lifecycle must be ORDERING_OPEN");
+      ).rejects.toThrow(`ACTIVE market lifecycle ${lifecycle} is already closed or resolved`);
     },
   );
 });

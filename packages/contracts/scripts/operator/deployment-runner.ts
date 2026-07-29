@@ -65,11 +65,49 @@ function assertSuccessful(receipt: TransactionReceipt, label: string): void {
   }
 }
 
+function assertReceiptHash(receipt: TransactionReceipt, hash: Hash, label: string): void {
+  if (receipt.transactionHash !== hash) {
+    throw new OperatorConfigurationError(
+      `${label} receipt hash ${receipt.transactionHash} does not match journal transaction ${hash}`,
+    );
+  }
+}
+
+async function assertOperatorTransaction(
+  client: DeploymentReceiptClient,
+  hash: Hash,
+  operator: Address,
+  label: string,
+): Promise<void> {
+  const transaction = await client.getTransaction({ hash });
+  if (getAddress(transaction.from) !== getAddress(operator)) {
+    throw new OperatorConfigurationError(
+      `${label} journal transaction sender ${transaction.from} is not operator ${operator}`,
+    );
+  }
+}
+
+async function submitAndJournal(input: JournaledDeploymentStepInput): Promise<Hash> {
+  let hash: Hash;
+  try {
+    hash = await input.submit();
+  } catch (reason) {
+    const detail = reason instanceof Error ? reason.message : "unknown submission failure";
+    throw new OperatorConfigurationError(
+      `${input.label} submission failed after its INTENT was journaled; inspect the operator account before explicit RETRY or ADOPT recovery: ${detail}`,
+    );
+  }
+  await input.journal.recordSubmitted(input.stepId, hash);
+  return hash;
+}
+
 /**
- * Execute one transaction from the journal's frozen manifest. A SUBMITTED or CONFIRMED step is
- * always recovered from its persisted hash, so restarting the deployment process cannot submit a
- * second transaction for that step. A bare INTENT remains fail-closed in DeploymentJournal until
- * the operator provides an attempt-bound ADOPT or RETRY decision.
+ * Execute one transaction from the journal's frozen manifest. A SUBMITTED step is recovered from
+ * its persisted hash unless an attempt-bound RETRY is present. That RETRY can advance only after
+ * the configured receipt client proves the exact hash reverted with the configured confirmations
+ * and the transaction sender matches the operator. Pending or successful submissions are never
+ * replaced. A bare INTENT remains fail-closed until the operator provides attempt-bound ADOPT or
+ * RETRY recovery.
  */
 export async function runJournaledDeploymentStep(
   input: JournaledDeploymentStepInput,
@@ -77,15 +115,32 @@ export async function runJournaledDeploymentStep(
   const disposition = await input.journal.prepareStep(input.stepId);
   let hash: Hash;
   if (disposition.action === "SUBMIT") {
-    try {
-      hash = await input.submit();
-    } catch (reason) {
-      const detail = reason instanceof Error ? reason.message : "unknown submission failure";
+    hash = await submitAndJournal(input);
+  } else if (disposition.action === "VERIFY_FAILED_SUBMISSION") {
+    const failedHash = disposition.transactionHash;
+    const failedReceipt = await input.client.waitForTransactionReceipt({
+      hash: failedHash,
+      confirmations: input.confirmations,
+    });
+    assertReceiptHash(failedReceipt, failedHash, input.label);
+    if (failedReceipt.status === "success") {
       throw new OperatorConfigurationError(
-        `${input.label} submission failed after its INTENT was journaled; inspect the operator account before explicit RETRY or ADOPT recovery: ${detail}`,
+        `${input.label} RETRY refused because submitted transaction succeeded: ${failedHash}`,
       );
     }
-    await input.journal.recordSubmitted(input.stepId, hash);
+    await assertOperatorTransaction(
+      input.client,
+      failedHash,
+      input.operator,
+      input.label,
+    );
+    await input.journal.recordFailedSubmittedRetry(input.stepId, {
+      transactionHash: failedHash,
+      blockNumber: failedReceipt.blockNumber,
+      blockHash: failedReceipt.blockHash,
+      status: "reverted",
+    });
+    hash = await submitAndJournal(input);
   } else {
     hash = disposition.transactionHash;
   }
@@ -94,13 +149,9 @@ export async function runJournaledDeploymentStep(
     hash,
     confirmations: input.confirmations,
   });
+  assertReceiptHash(receipt, hash, input.label);
   assertSuccessful(receipt, input.label);
-  const transaction = await input.client.getTransaction({ hash });
-  if (getAddress(transaction.from) !== getAddress(input.operator)) {
-    throw new OperatorConfigurationError(
-      `${input.label} journal transaction sender ${transaction.from} is not operator ${input.operator}`,
-    );
-  }
+  await assertOperatorTransaction(input.client, hash, input.operator, input.label);
 
   if (disposition.action === "RESUME_CONFIRMED") {
     const confirmation = disposition.confirmation;

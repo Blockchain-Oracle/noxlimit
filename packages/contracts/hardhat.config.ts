@@ -26,6 +26,10 @@ export default defineConfig({
       chainType: "l1",
       url: configVariable("SEPOLIA_RPC_URL"),
       accounts: [configVariable("SEPOLIA_OPERATOR_PRIVATE_KEY")],
+      // Viem leaves `gas` unset for wallet writes, native transfers, and deployments. Hardhat
+      // estimates it immediately before signing, so keep bounded headroom above an exact RPC
+      // estimate instead of turning estimator variance into an out-of-gas transaction.
+      gasMultiplier: 1.2,
     },
   },
 });

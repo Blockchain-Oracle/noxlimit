@@ -83,11 +83,11 @@ hardcoded placeholder addresses as deployment evidence.
 
 ## Post-hardening operator evidence
 
-The fresh 2026-07-29 12:08Z package snapshot passes `77` contract tests. Together with the workspace
-verification it records protocol `14`, catalog `6`, service `65`, and web `61` passing (`223`
-package tests total), with root compile/type-check/test/build green. The fresh dedicated
+The latest package snapshot passes `84` contract tests. Together with the workspace verification it
+records protocol `14`, catalog `6`, service `69`, and web `62` passing (`235` package tests total),
+with root compile/type-check/test/build green. The dedicated
 Playwright snapshot records `45` passing, `21` intentional project/viewport skips, and zero
-failures; rerun it at the submission commit.
+failures. Root and Playwright gates must be rerun and recorded at the final submission commit.
 
 The deployment path is locally hardened around a resumable journal:
 
@@ -96,9 +96,12 @@ The deployment path is locally hardened around a resumable journal:
   plan;
 - a cross-process lock permits one journal writer, and each step advances through
   `INTENT → SUBMITTED → CONFIRMED`;
-- submitted and confirmed transactions resume without blind replacement. A bare intent fails
-  closed until an explicit per-step `ADOPT` with its exact transaction hash or `RETRY` is supplied;
-  either action must match `expectedAttempt`;
+- confirmed transactions and pending/successful submitted transactions resume without blind
+  replacement. A bare intent fails closed until an explicit per-step `ADOPT` with its exact
+  transaction hash or `RETRY` is supplied. A `SUBMITTED` step accepts only attempt-bound `RETRY`,
+  and only after the runner proves the exact persisted receipt reverted with the configured
+  confirmations and verifies its sender; the journal preserves that failure receipt before one
+  new attempt. Pending, successful, mismatched, and stale-attempt cases send no replacement;
 - JSON validation rejects secret-bearing fields. Final payloads are staged and hash-checked before
   create-only evidence/catalog output, and a crash between output writes resumes idempotently;
 - market duration must match its declared `1h`, `4h`, or `24h` horizon exactly, and its question
@@ -110,10 +113,22 @@ The deployment path is locally hardened around a resumable journal:
 ## Live Phase 6 operator evidence
 
 The operator guarantees above have now been exercised on branch
-`codex/noxlimit-polished-product`. Paired cutover commit `c073643` publishes catalog revision `5` at
+`codex/noxlimit-polished-product`. Paired cutover commit `c073643` first published intermediate
+catalog revision `5` at
 [`../catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json`](../catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json),
 with catalog hash `0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`.
-The original BTC/ETH 4h bundles are `RETIRED` and both verified successors are `ACTIVE`.
+That immutable revision is historical. Commit `d28f307` published corrected-cutover revision `8` at
+[`../catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json`](../catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json),
+hash `0x577593192efb7cf139267b3d076eb5e846fd15d1ab080611f9d504b716b4b427`.
+It became effective at block `11375905` and `2026-07-29T13:53:36Z`, retiring both revision-5 routes
+and activating corrected BTC
+`0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2` and ETH
+`0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a` atomically. Revisions `6`
+and `7` were staging history only and were never served. Because the runtime skipped those two
+revisions, adoption used a controlled single-writer stop, pointer update, and one startup rather
+than a non-adjacent `SIGHUP`; at the post-cutover 2026-07-29 snapshot, the service reached `READY`
+on revision `8` and both corrected markets were ordering-open and dynamically tradeable. That
+market-state observation is time-bound.
 
 Three committed browser-off traces prove direct-Gateway order creation and real FPMM fills on the
 original bundles. The earlier BTC/ETH liquidity-close artifacts prove builder LP removal after
@@ -134,9 +149,36 @@ Do not select a later round or claim an ETH winner.
 
 The operator now rejects future official Sepolia BTC/ETH deployments with an observation-delay
 value below 14,400 seconds while preserving unique first-observation adjacency. Runtime quote
-freshness remains independently 3,600 seconds. Both active revision-5 successors predate the guard
-and retain the known one-hour liveness risk. The exercised service reported `READY`, and local
-service/web container build/smoke passes, but no public service/frontend URL is verified.
+freshness remains independently 3,600 seconds. The current corrected BTC/ETH bundles exercise that
+four-hour floor; the one-hour revision-5 bundles are retired history. Their pools were closed after
+cutover with zero LP shares, leaving the LP owner with 50,000,000 YES plus 50,000,000 NO unresolved
+atoms per market. BTC close
+transaction `0xe811190d41186d666b5b90b7938edcdd974a1a8c48fad9fa7f18b8ebf9946b4b`
+confirmed at block `11375985`; ETH transaction
+`0xcfd96ad20aec7d2a6f82c30f908cfbb021d62a7118e7a861f0bf9b88a4ed52b5` confirmed at block
+`11375990`. Evidence is
+[`../../.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-successor-liquidity-close.json`](../../.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-successor-liquidity-close.json)
+and
+[`../../.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-successor-liquidity-close.json`](../../.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-successor-liquidity-close.json).
+Four subsequent deployments extend the active chain through current revision `12` at
+[`../catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json`](../catalog/sepolia/markets-2026-07-29-btc-eth-horizons-eth-24h.json),
+hash `0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e`.
+It has ten records—four retired and six active—covering BTC/ETH 1h/4h/24h, and the service is
+`READY`. BTC 1h deployment safely recovered an out-of-gas treasury-collateral submission with an
+attempt-bound retry after setting Hardhat `gasMultiplier = 1.2`; the journal-preserved record is
+[`../../.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json`](../../.thoughts/evidence/2026-07-29-sepolia-btc-usd-1h-deployment-recovery.json).
+Local service/web container build/smoke passes, but no public service/frontend URL is verified and
+billable hosting is not authorized by these local checks. Remaining product evidence includes one
+complete corrected revision-8 route vertical. Corrected-route order execution itself is now verified: both
+OrderBooks return `nextOrderId = 3`, with BTC NO/YES and ETH YES/NO browser-created, browser-off
+fills recorded in
+[`../../.thoughts/evidence/2026-07-29-r8-corrected-btc-no-order.json`](../../.thoughts/evidence/2026-07-29-r8-corrected-btc-no-order.json),
+[`../../.thoughts/evidence/2026-07-29-r8-corrected-btc-yes-order.json`](../../.thoughts/evidence/2026-07-29-r8-corrected-btc-yes-order.json),
+[`../../.thoughts/evidence/2026-07-29-r8-corrected-eth-yes-order.json`](../../.thoughts/evidence/2026-07-29-r8-corrected-eth-yes-order.json),
+and
+[`../../.thoughts/evidence/2026-07-29-r8-corrected-eth-no-order.json`](../../.thoughts/evidence/2026-07-29-r8-corrected-eth-no-order.json).
+Objective settlement plus user/builder redemptions remain before either corrected route can be
+called a complete vertical.
 
 ## Commands
 
