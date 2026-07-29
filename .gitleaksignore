@@ -1,0 +1,4 @@
+# Reviewed false positives: the JSON values are the same public Ethereum Sepolia
+# Conditional Tokens contract address recorded in two create-only evidence files.
+.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-close.json:generic-api-key:6
+.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-liquidity-close.json:generic-api-key:6
