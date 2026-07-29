@@ -3,7 +3,11 @@ import type { HealthView } from "@noxlimit/protocol";
 import type { PublicClient } from "viem";
 
 import { LiveMarketReader } from "../chain/market-reader.js";
-import { ReplayEngine, type ReplayLogSource } from "../chain/replay-engine.js";
+import {
+  ReplayEngine,
+  type ReplayLogSource,
+  type ReplaySnapshot,
+} from "../chain/replay-engine.js";
 import { replayTargetsForManifest } from "../chain/replay-targets.js";
 import { ViemReplayLogSource } from "../chain/viem-log-source.js";
 import { CompositeReplayProjector } from "../projections/composite-projector.js";
@@ -22,7 +26,7 @@ export type CatalogProjectionRuntime = {
   marketReader: LiveMarketReader;
   replay: ReplayEngine;
   readModel: LiveReadModel;
-  safeBlock: bigint;
+  snapshot: ReplaySnapshot;
 };
 
 /**
@@ -63,7 +67,7 @@ export async function buildCatalogProjectionRuntime(input: {
   const recovered = await replay.rebuild(replayTargetsForManifest(input.manifest));
   store.replaceMarkets(
     input.manifest.catalogRevision,
-    await marketReader.hydrateAll(recovered.safeBlock),
+    await marketReader.hydrateAll(recovered.snapshot),
   );
   return {
     manifest: input.manifest,
@@ -72,6 +76,6 @@ export async function buildCatalogProjectionRuntime(input: {
     marketReader,
     replay,
     readModel: new LiveReadModel(store, marketReader),
-    safeBlock: recovered.safeBlock,
+    snapshot: recovered.snapshot,
   };
 }

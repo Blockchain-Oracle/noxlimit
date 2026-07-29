@@ -28,6 +28,7 @@ import {
   resolveStartupCatalogPath,
 } from "./catalog/reload-pointer.js";
 import { assertStagedCatalogRuntimeAcceptable } from "./catalog/runtime-acceptance.js";
+import type { ReplaySnapshot } from "./chain/replay-engine.js";
 import { loadConfig } from "./config/env.js";
 import { OnchainFundingCoordinator } from "./funding/coordinator.js";
 import { FundingUnavailable } from "./funding/unavailable.js";
@@ -99,18 +100,15 @@ type ServiceCatalogRuntime = CatalogProjectionRuntime & {
   evaluatorDetail?: string;
   worker?: WorkerRuntime;
   evaluatorProbe?: EvaluatorReadinessProbe;
-  lastSafeBlock: bigint;
+  lastSnapshot: ReplaySnapshot;
   lastSuccessfulAt?: string;
 };
 
 const buildRuntime = async (manifest: CatalogManifest): Promise<ServiceCatalogRuntime> => {
-  const head = await typedPublicClient.getBlockNumber();
-  const safeBlock = head > 6n ? head - 6n : 0n;
   const evaluatorState: { ready: boolean } = { ready: false };
   const initialHealth = healthFor({
     manifest,
-    head,
-    safeBlock,
+    snapshot: { headBlock: 0n, safeBlock: 0n },
     evaluatorReady: false,
     evaluatorDetail: evaluatorInitializationDetail,
     status: "STARTING",
@@ -151,18 +149,17 @@ const buildRuntime = async (manifest: CatalogManifest): Promise<ServiceCatalogRu
       })
     : undefined;
   const readiness = evaluatorProbe
-    ? await evaluatorProbe.check(projection.safeBlock)
+    ? await evaluatorProbe.check(projection.snapshot.safeBlock)
     : { ready: false, detail: evaluatorInitializationDetail };
   evaluatorState.ready = readiness.ready;
   projection.store.replaceMarkets(
     manifest.catalogRevision,
-    await projection.marketReader.hydrateAll(projection.safeBlock),
+    await projection.marketReader.hydrateAll(projection.snapshot),
   );
   const lastSuccessfulAt = new Date().toISOString();
   projection.store.setHealth(healthFor({
     manifest,
-    head,
-    safeBlock: projection.safeBlock,
+    snapshot: projection.snapshot,
     evaluatorReady: readiness.ready,
     evaluatorDetail: readiness.detail,
     lastSuccessfulAt,
@@ -175,7 +172,7 @@ const buildRuntime = async (manifest: CatalogManifest): Promise<ServiceCatalogRu
     ...(readiness.detail ? { evaluatorDetail: readiness.detail } : {}),
     ...(worker ? { worker } : {}),
     ...(evaluatorProbe ? { evaluatorProbe } : {}),
-    lastSafeBlock: projection.safeBlock,
+    lastSnapshot: projection.snapshot,
     lastSuccessfulAt,
   };
 };
@@ -208,16 +205,15 @@ const poll = async (): Promise<void> => {
   try {
     await catalogs.withActive(async (runtime) => {
       const result = await runtime.replay.poll();
-      const currentHead = await typedPublicClient.getBlockNumber();
       if (runtime.evaluatorProbe) {
-        const readiness = await runtime.evaluatorProbe.check(result.safeBlock);
+        const readiness = await runtime.evaluatorProbe.check(result.snapshot.safeBlock);
         runtime.evaluatorState.ready = readiness.ready;
         runtime.evaluatorReady = readiness.ready;
         runtime.evaluatorDetail = readiness.detail;
       }
       runtime.store.replaceMarkets(
         runtime.manifest.catalogRevision,
-        await runtime.marketReader.hydrateAll(result.safeBlock),
+        await runtime.marketReader.hydrateAll(result.snapshot),
       );
       const workerTicks = runtime.worker && runtime.evaluatorReady
         ? await runtime.worker.tick()
@@ -228,12 +224,11 @@ const poll = async (): Promise<void> => {
       if (retryableOrderCount > 0) {
         app.log.warn({ retryableOrderCount }, "evaluator orders will retry on the next tick");
       }
-      runtime.lastSafeBlock = result.safeBlock;
+      runtime.lastSnapshot = result.snapshot;
       runtime.lastSuccessfulAt = new Date().toISOString();
       runtime.store.setHealth(healthFor({
         manifest: runtime.manifest,
-        head: currentHead,
-        safeBlock: result.safeBlock,
+        snapshot: result.snapshot,
         evaluatorReady: runtime.evaluatorReady,
         evaluatorDetail: retryableOrderCount > 0
           ? "Evaluator order retries are pending."
@@ -245,11 +240,16 @@ const poll = async (): Promise<void> => {
   } catch (error) {
     app.log.error({ error: safeErrorSummary(error) }, "background reconciliation failed");
     const runtime = catalogs.active;
-    const currentHead = await typedPublicClient.getBlockNumber().catch(() => runtime.lastSafeBlock);
+    // There is no new successful replay snapshot. A fresh head paired with the last completed safe
+    // block intentionally measures real accumulated lag while the service retries recovery.
+    const currentHead = await typedPublicClient.getBlockNumber()
+      .catch(() => runtime.lastSnapshot.headBlock);
     runtime.store.setHealth(healthFor({
       manifest: runtime.manifest,
-      head: currentHead,
-      safeBlock: runtime.lastSafeBlock,
+      snapshot: {
+        headBlock: currentHead,
+        safeBlock: runtime.lastSnapshot.safeBlock,
+      },
       evaluatorReady: runtime.evaluatorReady,
       evaluatorDetail: "Background reconciliation failed; retrying.",
       lastSuccessfulAt: runtime.lastSuccessfulAt,
@@ -299,8 +299,7 @@ await app.listen({ host: config.HOST, port: config.PORT });
 
 function healthFor(input: {
   manifest: CatalogManifest;
-  head: bigint;
-  safeBlock: bigint;
+  snapshot: ReplaySnapshot;
   evaluatorReady: boolean;
   evaluatorDetail?: string;
   lastSuccessfulAt?: string;
@@ -311,10 +310,12 @@ function healthFor(input: {
     status: input.status,
     chainId: 11_155_111,
     catalogRevision: input.manifest.catalogRevision,
-    headBlock: input.head.toString(),
-    safeBlock: input.safeBlock.toString(),
+    headBlock: input.snapshot.headBlock.toString(),
+    safeBlock: input.snapshot.safeBlock.toString(),
     indexerLagBlocks: (
-      input.head > input.safeBlock ? input.head - input.safeBlock : 0n
+      input.snapshot.headBlock > input.snapshot.safeBlock
+        ? input.snapshot.headBlock - input.snapshot.safeBlock
+        : 0n
     ).toString(),
     evaluator: {
       status: input.evaluatorReady && !input.evaluatorDetail

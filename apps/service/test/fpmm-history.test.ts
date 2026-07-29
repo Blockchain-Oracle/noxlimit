@@ -173,7 +173,7 @@ describe("FPMM outcome-price projection", () => {
       ),
     ];
     const source: ReplayLogSource = {
-      getSafeHead: async () => 106n,
+      getSnapshot: async () => ({ headBlock: 112n, safeBlock: 106n }),
       getBlockHash: async () => safeHash,
       getLogs: async ({ address, fromBlock, toBlock }) => logs.filter(
         (log) => log.address.toLowerCase() === address.toLowerCase() &&
@@ -238,7 +238,7 @@ describe("FPMM outcome-price projection", () => {
     const reader = new LiveMarketReader(client, manifest, () => true, projector);
 
     await projector.complete(150n);
-    const sparse = await reader.hydrateAll(150n);
+    const sparse = await reader.hydrateAll({ headBlock: 156n, safeBlock: 150n });
     expect(sparse[0]?.card.preview).toMatchObject({ mode: "UNDERLYING", limitedHistory: true });
 
     await projector.apply(fundingLog(record.contracts.fpmm, 120n, testHash("1"), testHash("a")));
@@ -251,7 +251,7 @@ describe("FPMM outcome-price projection", () => {
       calcBuyAmount(INITIAL_RESERVES, INVESTMENT, 0, FEE_WAD),
     ));
     await projector.complete(150n);
-    const hydrated = await reader.hydrateAll(150n);
+    const hydrated = await reader.hydrateAll({ headBlock: 156n, safeBlock: 150n });
     expect(hydrated[0]?.card.preview).toMatchObject({
       mode: "OUTCOME_PRICES",
       source: "FPMM_RECONSTRUCTED",
@@ -267,21 +267,16 @@ describe("FPMM outcome-price projection", () => {
     })).resolves.toMatchObject({ mode: "OUTCOME_PRICES", points: expect.any(Array) });
   });
 
-  it("keeps a normal confirmed quote fresh, flags unsafe lag, and ages stored quotes by policy", async () => {
+  it("uses the coherent replay boundary: {156,150} is safe and {157,150} is unsafe", async () => {
     const record = makeMarketRecord({ startsAt: "100", tradingClosesAt: "400", resolvesAt: "3700" });
     const manifest = makeCatalogManifest(record);
 
-    const laggingReader = new LiveMarketReader(
-      hydratedClient({ headNumber: 170n }),
-      manifest,
-      () => true,
-    );
-    const lagging = await laggingReader.hydrateAll(150n);
+    const reader = new LiveMarketReader(hydratedClient(), manifest, () => true);
+    const lagging = await reader.hydrateAll({ headBlock: 157n, safeBlock: 150n });
     expect(lagging[0]?.market.tradeabilityReasons).toContain("INDEXER_UNSAFE");
     expect(lagging[0]?.market.pool.stale).toBe(false);
 
-    const freshReader = new LiveMarketReader(hydratedClient(), manifest, () => true);
-    const fresh = await freshReader.hydrateAll(150n);
+    const fresh = await reader.hydrateAll({ headBlock: 156n, safeBlock: 150n });
     expect(fresh[0]?.market.tradeabilityReasons).not.toContain("INDEXER_UNSAFE");
     expect(fresh[0]?.market.pool.stale).toBe(false);
     expect(fresh[0]?.market.tradeability).toBe("TRADEABLE");
@@ -322,12 +317,8 @@ function blockClient(blockHash: () => Hex = () => testHash("e")): PublicClient {
   } as unknown as PublicClient;
 }
 
-function hydratedClient(input: {
-  headNumber?: bigint;
-} = {}): PublicClient {
-  const headNumber = input.headNumber ?? 156n;
+function hydratedClient(): PublicClient {
   return {
-    getBlockNumber: vi.fn(async () => headNumber),
     getBlock: vi.fn(async ({ blockNumber }: { blockNumber?: bigint }) => ({
       number: blockNumber ?? 0n,
       timestamp: blockNumber ?? 0n,

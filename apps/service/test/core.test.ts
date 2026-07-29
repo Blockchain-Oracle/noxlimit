@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Address, Hex } from "viem";
+import type { Address, Hex, PublicClient } from "viem";
 
 import { boundedBlockRanges, replayFromWithOverlap } from "../src/chain/block-ranges.js";
 import { LogDeduplicator } from "../src/chain/log-identity.js";
@@ -10,6 +10,7 @@ import {
   type ReplayProjector,
 } from "../src/chain/replay-engine.js";
 import { replayTargetsForManifest } from "../src/chain/replay-targets.js";
+import { ViemReplayLogSource } from "../src/chain/viem-log-source.js";
 import { redactSensitive } from "../src/observability/redaction.js";
 import { SerializedWriter } from "../src/tx/serialized-writer.js";
 import { decideWorkerAction } from "../src/worker/decision.js";
@@ -49,6 +50,22 @@ describe("service foundations", () => {
     ]);
     expect(replayFromWithOverlap(100n, 80n, 12n)).toBe(88n);
     expect(replayFromWithOverlap(85n, 80n, 12n)).toBe(80n);
+  });
+
+  it("captures one coherent Viem head/safe snapshot from one head read", async () => {
+    let headReads = 0;
+    const client = {
+      getBlockNumber: async () => {
+        headReads += 1;
+        return 156n;
+      },
+    } as unknown as PublicClient;
+
+    await expect(new ViemReplayLogSource(client).getSnapshot()).resolves.toEqual({
+      headBlock: 156n,
+      safeBlock: 150n,
+    });
+    expect(headReads).toBe(1);
   });
 
   it("deduplicates only the complete durable log identity", () => {
@@ -120,7 +137,7 @@ describe("service foundations", () => {
     let safeHash = blockHash;
     const logs: ReplayLog[] = [makeLog(10n, 0), makeLog(11n, 0)];
     const source: ReplayLogSource = {
-      getSafeHead: async () => safeHead,
+      getSnapshot: async () => ({ headBlock: safeHead + 6n, safeBlock: safeHead }),
       getBlockHash: async () => safeHash,
       getLogs: async ({ fromBlock, toBlock }) =>
         logs.filter((log) => log.blockNumber >= fromBlock && log.blockNumber <= toBlock),
@@ -138,18 +155,46 @@ describe("service foundations", () => {
     const replay = new ReplayEngine(source, projector, { chunkSize: 2n, overlap: 3n });
     const first = await replay.rebuild([{ address, deploymentBlock: 10n }]);
     expect(first.appliedLogs).toBe(2);
+    expect(first.snapshot).toEqual({ headBlock: 18n, safeBlock: 12n });
     expect(resets).toBe(1);
 
     safeHead = 13n;
     logs.push(makeLog(13n, 0));
     const incremental = await replay.poll();
     expect(incremental.appliedLogs).toBe(1);
+    expect(incremental.snapshot).toEqual({ headBlock: 19n, safeBlock: 13n });
     expect(applied).toHaveLength(3);
 
     safeHash = `0x${"44".repeat(32)}` as Hex;
     const rebuilt = await replay.poll();
     expect(rebuilt.rebuilt).toBe(true);
+    expect(rebuilt.snapshot).toEqual({ headBlock: 19n, safeBlock: 13n });
     expect(resets).toBe(2);
+  });
+
+  it("preserves one coherent source snapshot in the replay result", async () => {
+    const snapshot = { headBlock: 156n, safeBlock: 150n } as const;
+    let snapshotReads = 0;
+    const completed: bigint[] = [];
+    const source: ReplayLogSource = {
+      getSnapshot: async () => {
+        snapshotReads += 1;
+        return snapshot;
+      },
+      getBlockHash: async () => blockHash,
+      getLogs: async () => [],
+    };
+    const replay = new ReplayEngine(source, {
+      reset: () => undefined,
+      apply: () => undefined,
+      complete: (safeBlock) => completed.push(safeBlock),
+    });
+
+    const result = await replay.rebuild([{ address, deploymentBlock: 150n }]);
+
+    expect(snapshotReads).toBe(1);
+    expect(result.snapshot).toBe(snapshot);
+    expect(completed).toEqual([150n]);
   });
 
   it("replays independent targets from their own deployment blocks", async () => {
@@ -161,7 +206,7 @@ describe("service foundations", () => {
       transactionHash: `0x${"77".repeat(32)}` as Hex,
     };
     const source: ReplayLogSource = {
-      getSafeHead: async () => 12n,
+      getSnapshot: async () => ({ headBlock: 18n, safeBlock: 12n }),
       getBlockHash: async () => blockHash,
       getLogs: async ({ address: target, fromBlock, toBlock }) => [firstLog, secondLog].filter(
         (log) => log.address === target && log.blockNumber >= fromBlock && log.blockNumber <= toBlock,

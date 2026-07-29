@@ -16,8 +16,14 @@ export type ReplayTarget = Readonly<{
   deploymentBlock: bigint;
 }>;
 
+/** One head observation and the safe replay boundary derived from that same observation. */
+export type ReplaySnapshot = Readonly<{
+  headBlock: bigint;
+  safeBlock: bigint;
+}>;
+
 export interface ReplayLogSource {
-  getSafeHead(): Promise<bigint>;
+  getSnapshot(): Promise<ReplaySnapshot>;
   getBlockHash(blockNumber: bigint): Promise<Hex>;
   getLogs(input: {
     address: Address;
@@ -33,7 +39,7 @@ export interface ReplayProjector {
 }
 
 export type ReplayResult = Readonly<{
-  safeBlock: bigint;
+  snapshot: ReplaySnapshot;
   appliedLogs: number;
   rebuilt: boolean;
 }>;
@@ -63,10 +69,18 @@ export class ReplayEngine {
 
   async rebuild(targets: readonly ReplayTarget[]): Promise<ReplayResult> {
     validateTargets(targets);
+    return this.#rebuild(targets, await this.#source.getSnapshot());
+  }
+
+  async #rebuild(
+    targets: readonly ReplayTarget[],
+    snapshot: ReplaySnapshot,
+  ): Promise<ReplayResult> {
+    validateSnapshot(snapshot);
     this.#targets = [...targets];
     this.#deduplicator.reset();
     await this.#projector.reset();
-    const safeBlock = await this.#source.getSafeHead();
+    const { safeBlock } = snapshot;
     let appliedLogs = 0;
     for (const target of this.#targets) {
       if (target.deploymentBlock > safeBlock) continue;
@@ -75,7 +89,7 @@ export class ReplayEngine {
     await this.#projector.complete(safeBlock);
     this.#lastSafeBlock = safeBlock;
     this.#lastSafeHash = await this.#source.getBlockHash(safeBlock);
-    return { safeBlock, appliedLogs, rebuilt: true };
+    return { snapshot, appliedLogs, rebuilt: true };
   }
 
   async poll(): Promise<ReplayResult> {
@@ -87,8 +101,10 @@ export class ReplayEngine {
       return this.rebuild(this.#targets);
     }
 
-    const safeBlock = await this.#source.getSafeHead();
-    if (safeBlock < this.#lastSafeBlock) return this.rebuild(this.#targets);
+    const snapshot = await this.#source.getSnapshot();
+    validateSnapshot(snapshot);
+    const { safeBlock } = snapshot;
+    if (safeBlock < this.#lastSafeBlock) return this.#rebuild(this.#targets, snapshot);
     let appliedLogs = 0;
     for (const target of this.#targets) {
       const fromBlock = replayFromWithOverlap(
@@ -102,7 +118,7 @@ export class ReplayEngine {
     await this.#projector.complete(safeBlock);
     this.#lastSafeBlock = safeBlock;
     this.#lastSafeHash = await this.#source.getBlockHash(safeBlock);
-    return { safeBlock, appliedLogs, rebuilt: false };
+    return { snapshot, appliedLogs, rebuilt: false };
   }
 
   async #replayTarget(target: ReplayTarget, fromBlock: bigint, toBlock: bigint): Promise<number> {
@@ -120,6 +136,15 @@ export class ReplayEngine {
       }
     }
     return applied;
+  }
+}
+
+function validateSnapshot(snapshot: ReplaySnapshot): void {
+  if (snapshot.headBlock < 0n || snapshot.safeBlock < 0n) {
+    throw new RangeError("negative replay snapshot block");
+  }
+  if (snapshot.safeBlock > snapshot.headBlock) {
+    throw new RangeError("replay safe block exceeds head block");
   }
 }
 

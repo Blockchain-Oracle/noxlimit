@@ -23,6 +23,7 @@ import {
 import type { Address, PublicClient } from "viem";
 
 import type { OutcomeHistorySource } from "../projections/fpmm-history-projector.js";
+import type { ReplaySnapshot } from "./replay-engine.js";
 
 const REFERENCE_AMOUNT_ATOMS = 1_000_000n;
 const MAX_UINT128 = (1n << 128n) - 1n;
@@ -143,18 +144,17 @@ export class LiveMarketReader {
     for (const route of manifest.routing) this.#routes.set(route.marketId.toLowerCase(), route);
   }
 
-  async hydrateAll(safeBlock: bigint): Promise<readonly HydratedMarket[]> {
+  /** Hydrate every market against the exact head/safe pair used by its completed replay. */
+  async hydrateAll(snapshot: ReplaySnapshot): Promise<readonly HydratedMarket[]> {
     const output: HydratedMarket[] = [];
     if (this.#records.size === 0) return output;
-    const headNumber = await this.#client.getBlockNumber();
     for (const record of this.#records.values()) {
       const route = this.#routes.get(record.marketId.toLowerCase());
       if (!route?.opensAt || !route.opensAtBlock) continue;
       output.push(await this.#hydrate(
         record,
         { ...route, opensAt: route.opensAt, opensAtBlock: route.opensAtBlock },
-        safeBlock,
-        headNumber,
+        snapshot,
       ));
     }
     return output;
@@ -417,12 +417,12 @@ export class LiveMarketReader {
   async #hydrate(
     record: ImmutableMarketRecord,
     route: CatalogRoute & { opensAt: string; opensAtBlock: string },
-    safeBlock: bigint,
-    headNumber: bigint,
+    snapshot: ReplaySnapshot,
   ): Promise<HydratedMarket> {
     if (record.oracle.source !== "CHAINLINK") {
       throw new Error(`${record.marketId}: Pyth market cannot activate before the verified reader gate`);
     }
+    const { headBlock, safeBlock } = snapshot;
     const block = await this.#client.getBlock({ blockNumber: safeBlock });
     const [round, yesQuote, noQuote, yesBalance, noBalance, resolved, resolvedYes] = await Promise.all([
       this.#client.readContract({ address: record.oracle.proxy, abi: chainlinkLatestAbi, functionName: "latestRoundData", blockNumber: safeBlock }),
@@ -450,9 +450,9 @@ export class LiveMarketReader {
             : "AWAITING_RESOLUTION";
     const depth = yesBalance < noBalance ? yesBalance : noBalance;
     const oracleStale = now > updatedAt + BigInt(record.runtimePolicy.oracleMaxAgeSeconds);
-    const indexerLag = headNumber >= safeBlock ? headNumber - safeBlock : headNumber + 1n;
+    const indexerLag = headBlock >= safeBlock ? headBlock - safeBlock : headBlock + 1n;
     const indexerUnsafe =
-      headNumber < safeBlock ||
+      headBlock < safeBlock ||
       indexerLag > BigInt(record.runtimePolicy.indexerMaxLagBlocks);
     const reasons: MarketTradeabilityReason[] = [];
     if (route.activation !== "ACTIVE") reasons.push("NOT_ACTIVE");

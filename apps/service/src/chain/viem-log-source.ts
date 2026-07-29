@@ -1,6 +1,10 @@
 import type { Address, Hex, PublicClient } from "viem";
 
-import type { ReplayLog, ReplayLogSource } from "./replay-engine.js";
+import type {
+  ReplayLog,
+  ReplayLogSource,
+  ReplaySnapshot,
+} from "./replay-engine.js";
 
 export class ViemReplayLogSource implements ReplayLogSource {
   readonly #client: PublicClient;
@@ -12,9 +16,14 @@ export class ViemReplayLogSource implements ReplayLogSource {
     this.#confirmationDepth = confirmationDepth;
   }
 
-  async getSafeHead(): Promise<bigint> {
-    const head = await this.#client.getBlockNumber();
-    return head > this.#confirmationDepth ? head - this.#confirmationDepth : 0n;
+  async getSnapshot(): Promise<ReplaySnapshot> {
+    const headBlock = await this.#client.getBlockNumber();
+    return {
+      headBlock,
+      safeBlock: headBlock > this.#confirmationDepth
+        ? headBlock - this.#confirmationDepth
+        : 0n,
+    };
   }
 
   async getBlockHash(blockNumber: bigint): Promise<Hex> {
