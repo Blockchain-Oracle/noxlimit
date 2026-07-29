@@ -22,20 +22,46 @@ function Result<T>({ query, empty, children }: { query: UseQueryResult<DataResul
   return items.length ? children(items) : <Empty>{empty}</Empty>;
 }
 
+function positionSummary(position: PositionView): string {
+  const state = position.state.replaceAll("_", " ");
+  if (position.state === "REDEEMABLE") return `${state} · ${position.maximumRedemption} Test USDC redeemable`;
+  if (position.state === "SETTLED_ZERO") return `${state} · resolved payout is zero`;
+  if (position.state === "REDEEMED") return `${state} · indexed payout receipt is in Activity`;
+  return `${state} · up to ${position.maximumRedemption} Test USDC if ${position.side} wins`;
+}
+
+function activitySummary(activity: ActivityView): string {
+  const kind = activity.kind.replaceAll("_", " ");
+  if (activity.kind === "POSITION_REDEEMED") return `${kind} · ${activity.amount ?? "—"} Test USDC payout`;
+  if (activity.kind === "MARKET_RESOLVED") return `${kind} · ${activity.side ?? "Outcome"} won`;
+  if (activity.kind === "ORDER_FILLED") return `${kind} · ${activity.side ?? "Outcome"} · ${activity.amount ?? "—"} shares`;
+  if (activity.kind === "FUNDING_CLAIMED") return `${kind}${activity.amount ? ` · ${activity.amount} Test USDC` : ""}`;
+  return `${kind}${activity.side ? ` · ${activity.side}` : ""}${activity.amount ? ` · ${activity.amount}` : ""}`;
+}
+
+function activityContext(activity: ActivityView): string {
+  const references = [
+    activity.orderRef ? `order #${activity.orderRef.orderId}` : undefined,
+    activity.marketId ? `market ${activity.marketId.slice(0, 10)}…` : undefined,
+    `block ${activity.blockNumber}`,
+  ].filter(Boolean);
+  return `${new Date(activity.occurredAt).toLocaleString()} · ${references.join(" · ")}`;
+}
+
 export function OrdersCollection() {
   const { address } = useAccount();
   const query = useQuery({ queryKey: ["orders", address], queryFn: () => getOrders(address!), enabled: Boolean(address), retry: false, refetchInterval: 15_000 });
-  return <Frame eyebrow="Wallet-scoped" title="My Orders">{!address ? <Empty>Connect one wallet to load its confirmed orders.</Empty> : <Result<OrderView> query={query} empty="No confirmed private orders for this wallet.">{(items) => <div className="record-list">{items.map((order) => <Link key={`${order.ref.orderBook}:${order.ref.orderId}`} href={`/orders/${order.ref.chainId}/${order.ref.orderBook}/${order.ref.orderId}`}><span><strong>{order.side} · {order.amountIn} Test USDC</strong><small>{order.status.replaceAll("_", " ")} · created {new Date(order.createdAt).toLocaleString()}</small></span><code>#{order.ref.orderId}</code></Link>)}</div>}</Result>}</Frame>;
+  return <Frame eyebrow="Wallet-scoped" title="My Orders">{!address ? <Empty>Connect one wallet to load its confirmed orders.</Empty> : <Result<OrderView> query={query} empty="No confirmed private orders for this wallet.">{(items) => <div className="record-list">{items.map((order) => <Link key={`${order.ref.orderBook}:${order.ref.orderId}`} href={`/orders/${order.ref.chainId}/${order.ref.orderBook}/${order.ref.orderId}`}><span><strong>{order.side} · {order.amountIn} Test USDC</strong><small>{order.status.replaceAll("_", " ")} · {order.disclosureState === "PUBLISHED" ? "limit published" : "limit encrypted"} · {order.remainingEvaluations} confidential checks remaining</small><small>Created {new Date(order.createdAt).toLocaleString()}</small></span><code>#{order.ref.orderId}</code></Link>)}</div>}</Result>}</Frame>;
 }
 
 export function PositionsCollection() {
   const { address } = useAccount();
   const query = useQuery({ queryKey: ["positions", address], queryFn: () => getPositions(address!), enabled: Boolean(address), retry: false, refetchInterval: 15_000 });
-  return <Frame eyebrow="Owned outcomes" title="Positions">{!address ? <Empty>Connect one wallet to load its confirmed positions.</Empty> : <Result<PositionView> query={query} empty="No filled positions for this wallet.">{(items) => <div className="record-list">{items.map((position) => <Link key={position.positionId} href={`/positions/${position.positionId}`}><span><strong>{position.side} · {position.shares} shares</strong><small>{position.state.replaceAll("_", " ")} · maximum redemption {position.maximumRedemption}</small></span><code>{position.positionId.slice(0, 10)}…</code></Link>)}</div>}</Result>}</Frame>;
+  return <Frame eyebrow="Owned outcomes" title="Positions">{!address ? <Empty>Connect one wallet to load its confirmed positions.</Empty> : <Result<PositionView> query={query} empty="No filled positions for this wallet.">{(items) => <div className="record-list">{items.map((position) => <Link key={position.positionId} href={`/positions/${position.positionId}`}><span><strong>{position.side} · {position.shares} shares</strong><small>{positionSummary(position)}</small></span><code>{position.positionId.slice(0, 10)}…</code></Link>)}</div>}</Result>}</Frame>;
 }
 
 export function ActivityCollection() {
   const { address } = useAccount();
   const query = useQuery({ queryKey: ["activity", address], queryFn: () => getActivity({ owner: address! }), enabled: Boolean(address), retry: false, refetchInterval: 15_000 });
-  return <Frame eyebrow="Indexed evidence" title="Activity">{!address ? <Empty>Connect one wallet to load its confirmed activity.</Empty> : <Result<ActivityView> query={query} empty="No confirmed activity for this wallet.">{(items) => <div className="record-list">{items.map((activity) => <a key={activity.activityId} href={`https://sepolia.etherscan.io/tx/${activity.transactionHash}`} target="_blank" rel="noreferrer"><span><strong>{activity.kind.replaceAll("_", " ")}</strong><small>{new Date(activity.occurredAt).toLocaleString()} · block {activity.blockNumber}</small></span><code>{activity.transactionHash.slice(0, 10)}…</code></a>)}</div>}</Result>}</Frame>;
+  return <Frame eyebrow="Indexed evidence" title="Activity">{!address ? <Empty>Connect one wallet to load its confirmed activity.</Empty> : <Result<ActivityView> query={query} empty="No confirmed activity for this wallet.">{(items) => <div className="record-list">{items.map((activity) => <a key={activity.activityId} href={`https://sepolia.etherscan.io/tx/${activity.transactionHash}`} target="_blank" rel="noreferrer"><span><strong>{activitySummary(activity)}</strong><small>{activityContext(activity)}</small></span><code>{activity.transactionHash.slice(0, 10)}…</code></a>)}</div>}</Result>}</Frame>;
 }

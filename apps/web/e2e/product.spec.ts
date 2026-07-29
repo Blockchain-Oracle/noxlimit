@@ -466,6 +466,41 @@ test("objective resolution and winning-share redemption each require the exact w
   expect(writes[1]!.data?.slice(0, 10)).toBe(toFunctionSelector("redeemPositions(address,bytes32,bytes32,uint256[])"));
 });
 
+test("a redeemed position reloads its indexed payout and exact market-level receipt", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop-1440", "One durable redemption projection proof is viewport-independent.");
+  const positionId = `0x${"5".repeat(64)}`;
+  await installRpcFixture(page);
+  await installInjectedSepoliaWallet(page, []);
+  await page.route("**/v1/positions?*", async (route) => {
+    const response = await route.fetch();
+    const positions = await response.json();
+    await route.fulfill({ response, json: positions.map((position: Record<string, unknown>) => position.positionId === positionId ? { ...position, shares: "0.000000", maximumRedemption: "0.000000", state: "REDEEMED" } : position) });
+  });
+  await page.route("**/v1/activity?*", async (route) => {
+    const response = await route.fetch();
+    const activity = await response.json();
+    await route.fulfill({ response, json: [...activity, {
+      activityId: `${`0x${"9".repeat(64)}`}:1`,
+      kind: "POSITION_REDEEMED",
+      marketId: `0x${"1".repeat(64)}`,
+      actor: FIXTURE_ACCOUNT,
+      amount: "18.000000",
+      occurredAt: "2030-01-01T01:08:00.000Z",
+      blockNumber: "132",
+      transactionHash: `0x${"9".repeat(64)}`,
+      logIndex: 1,
+    }] });
+  });
+  await page.goto(`/positions/${positionId}`);
+  await connectInjectedWallet(page);
+  await expect(page.getByText("Indexed redemption payout · 18.000000 Test USDC", { exact: true })).toBeVisible();
+  const receipt = page.getByRole("link", { name: /View transaction 0x9999999999/ });
+  await expect(receipt).toHaveAttribute("href", `https://sepolia.etherscan.io/tx/0x${"9".repeat(64)}`);
+  await page.reload();
+  await expect(page.getByText("Indexed redemption payout · 18.000000 Test USDC", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Redeem winning shares" })).toHaveCount(0);
+});
+
 test("unconfirmed resolution and redemption each survive reload without a duplicate wallet write", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop-1440", "One exact-hash position recovery proof is sufficient.");
   const rpc = await installRpcFixture(page, { resolution: "READY", withholdReceipts: [TX_RESOLVE, TX_REDEEM] });

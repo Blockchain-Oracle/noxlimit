@@ -106,11 +106,17 @@ const positions = [
   }),
 ];
 
-const marketActivity = [activityViewSchema.parse({
-  activityId: `${hex("d")}:0`, kind: "ORDER_FILLED", marketId: cards[0].marketId,
-  actor: address("7"), orderRef: projectedOrder.ref, amount: "20.000000", side: "YES",
-  occurredAt: "2030-01-01T00:12:00.000Z", blockNumber: "121", transactionHash: hex("d"), logIndex: 0,
-})];
+const marketActivity = [
+  activityViewSchema.parse({
+    activityId: `${hex("d")}:0`, kind: "ORDER_FILLED", marketId: cards[0].marketId,
+    actor: address("7"), orderRef: projectedOrder.ref, amount: "20.000000", side: "YES",
+    occurredAt: "2030-01-01T00:12:00.000Z", blockNumber: "121", transactionHash: hex("d"), logIndex: 0,
+  }),
+  activityViewSchema.parse({
+    activityId: `${hex("f")}:0`, kind: "MARKET_RESOLVED", marketId: cards[0].marketId, side: "YES",
+    occurredAt: "2030-01-01T01:06:00.000Z", blockNumber: "130", transactionHash: hex("f"), logIndex: 0,
+  }),
+];
 
 const health = healthViewSchema.parse({ status: "READY", chainId: 11_155_111, catalogRevision: hex("c"), headBlock: "122", safeBlock: "120", indexerLagBlocks: "2", evaluator: { status: "READY", lastSuccessfulAt: now }, funding: { status: "READY", lastSuccessfulAt: now }, asOf: now });
 
@@ -141,7 +147,13 @@ const server = createServer((request, response) => {
   if (url.pathname === `/v1/orders/${projectedOrder.ref.chainId}/${projectedOrder.ref.orderBook}/${projectedOrder.ref.orderId}`) return json(response, 200, projectedOrder);
   if (url.pathname === `/v1/orders/${refundableOrder.ref.chainId}/${refundableOrder.ref.orderBook}/${refundableOrder.ref.orderId}`) return json(response, 200, refundableOrder);
   if (url.pathname === "/v1/positions") return json(response, 200, positions);
-  if (url.pathname === "/v1/activity") return json(response, 200, url.searchParams.get("marketId") === cards[0].marketId ? marketActivity : []);
+  if (url.pathname === "/v1/activity") {
+    const owner = url.searchParams.get("owner")?.toLowerCase();
+    const marketId = url.searchParams.get("marketId");
+    return json(response, 200, marketActivity.filter((activity) =>
+      (!owner || activity.actor?.toLowerCase() === owner) && (!marketId || activity.marketId === marketId),
+    ));
+  }
   const history = url.pathname.match(/^\/v1\/markets\/(0x[0-9a-f]+)\/history$/);
   if (history && details[history[1]]) {
     const mode = url.searchParams.get("mode") === "OUTCOME_PRICES" ? "OUTCOME_PRICES" : "UNDERLYING";

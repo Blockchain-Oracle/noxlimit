@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import type { Address, Hex } from "viem";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 import { sepolia } from "wagmi/chains";
-import { getMarketDetail, getPositions } from "@/lib/api/client";
+import { getActivity, getMarketDetail, getPositions } from "@/lib/api/client";
 import { sendAndConfirm, TerminalTransactionError, UnconfirmedTransactionError, type ReceiptProgress } from "@/lib/wallet/transaction";
 import { usePendingWrite } from "@/lib/wallet/use-pending-write";
 import { findResolutionEvidence } from "./resolution-evidence";
@@ -43,6 +43,7 @@ export function PositionDetail({ positionId }: { positionId: string }) {
   const positions = useQuery({ queryKey: ["positions", address], queryFn: () => getPositions(address!), enabled: Boolean(address), retry: false, refetchInterval: 12_000 });
   const position: PositionView | undefined = positions.data?.state === "ready" ? positions.data.data.find((item) => item.positionId === positionId) : undefined;
   const market = useQuery({ queryKey: ["market", position?.marketId], queryFn: () => getMarketDetail(position!.marketId), enabled: Boolean(position), retry: false, refetchInterval: 8_000 });
+  const marketActivity = useQuery({ queryKey: ["market-activity", position?.marketId], queryFn: () => getActivity({ marketId: position!.marketId }), enabled: Boolean(position), retry: false, refetchInterval: 12_000 });
   const resolution = useQuery({
     queryKey: ["resolution-evidence", market.data?.state === "ready" ? market.data.data.contracts.resolver : undefined],
     enabled: Boolean(publicClient && market.data?.state === "ready"),
@@ -67,7 +68,7 @@ export function PositionDetail({ positionId }: { positionId: string }) {
       else setRedemptionReceiptHash(pending.hash);
       setProgress(null);
       setError(null);
-      void Promise.all([positions.refetch(), market.refetch(), resolution.refetch()]);
+      void Promise.all([positions.refetch(), market.refetch(), marketActivity.refetch(), resolution.refetch()]);
       return;
     }
     pendingWrite.clear();
@@ -110,7 +111,7 @@ export function PositionDetail({ positionId }: { positionId: string }) {
         },
       });
       setResolutionReceiptHash(confirmation.hash);
-      await Promise.all([resolution.refetch(), market.refetch(), positions.refetch()]);
+      await Promise.all([resolution.refetch(), market.refetch(), marketActivity.refetch(), positions.refetch()]);
     } catch (reason) {
       if (reason instanceof UnconfirmedTransactionError || (broadcasted && !(reason instanceof TerminalTransactionError))) {
         setError(null);
@@ -141,7 +142,7 @@ export function PositionDetail({ positionId }: { positionId: string }) {
         }
       } });
       setRedemptionReceiptHash(confirmation.hash);
-      await positions.refetch();
+      await Promise.all([positions.refetch(), marketActivity.refetch()]);
     } catch (reason) {
       if (reason instanceof UnconfirmedTransactionError || (broadcasted && !(reason instanceof TerminalTransactionError))) {
         setError(null);
@@ -155,12 +156,18 @@ export function PositionDetail({ positionId }: { positionId: string }) {
   };
 
   const evidence = resolution.data;
+  const indexedActivity = marketActivity.data?.state === "ready" ? marketActivity.data.data : [];
+  const resolutionActivity = indexedActivity.find((activity) => activity.kind === "MARKET_RESOLVED");
+  const redemptionActivity = indexedActivity.find((activity) => activity.kind === "POSITION_REDEEMED" && activity.actor?.toLowerCase() === address.toLowerCase());
   return <section className="data-state detail-page">
     <span className="eyebrow">Owned outcome · {position.positionId}</span>
     <h1>{position.side} position</h1>
     <div className="status-banner"><strong>{position.state.replaceAll("_", " ")}</strong><span>{position.shares} shares</span></div>
     {market.data?.state === "ready" ? <div className="notice"><strong><Link href={`/markets/${market.data.data.marketId}`}>{market.data.data.question}</Link></strong><p>Strike {market.data.data.strikeUsd} USD · objective resolution {new Date(market.data.data.resolvesAt).toLocaleString()}.</p></div> : null}
     <dl className="detail-grid"><div><dt>Collateral spent</dt><dd>{position.collateralSpent}</dd></div><div><dt>Realized average</dt><dd>{position.realizedAveragePrice}</dd></div><div><dt>Maximum redemption</dt><dd>{position.maximumRedemption}</dd></div><div><dt>Fill transaction</dt><dd><a href={`https://sepolia.etherscan.io/tx/${position.fillTransactionHash}`} target="_blank" rel="noreferrer">{position.fillTransactionHash.slice(0, 12)}…</a></dd></div></dl>
+
+    {resolutionActivity ? <div className="notice indexed-lifecycle-evidence"><strong>Indexed resolution receipt · {resolutionActivity.side ?? "Outcome"} won</strong><p><a href={`https://sepolia.etherscan.io/tx/${resolutionActivity.transactionHash}`} target="_blank" rel="noreferrer">View transaction {resolutionActivity.transactionHash.slice(0, 12)}…</a> · Sepolia block {resolutionActivity.blockNumber} · {new Date(resolutionActivity.occurredAt).toLocaleString()}.</p></div> : null}
+    {position.state === "REDEEMED" && redemptionActivity ? <div className="notice indexed-lifecycle-evidence"><strong>{redemptionActivity.amount ? `Indexed redemption payout · ${redemptionActivity.amount} Test USDC` : "Indexed redemption payout · amount unavailable"}</strong><p>This is the wallet’s market-level Conditional Tokens payout for this condition; if it held multiple outcome positions, the receipt covers their combined winning collateral.</p><p><a href={`https://sepolia.etherscan.io/tx/${redemptionActivity.transactionHash}`} target="_blank" rel="noreferrer">View transaction {redemptionActivity.transactionHash.slice(0, 12)}…</a> · Sepolia block {redemptionActivity.blockNumber} · {new Date(redemptionActivity.occurredAt).toLocaleString()}.</p></div> : position.state === "REDEEMED" ? <div className="notice warning" role="status"><strong>Redemption projection is catching up</strong><p>The position is consumed onchain, but its market-level payout receipt is not yet in the current safe-block Activity projection.</p></div> : null}
 
     {pendingWrite.pending ? <div className="notice warning" role="status"><strong>{POSITION_ACTION_LABEL[pendingWrite.pending.kind]} {pendingWrite.receipt.data?.status === "success" ? "confirmed; projection catching up" : "transaction remains locked"}</strong><p>{pendingWrite.receipt.data?.status === "success" ? "The receipt is final. NoxLimit keeps this action locked until the canonical safe-block position projection advances." : "This exact transaction may still confirm."} NoxLimit is checking <a href={`https://sepolia.etherscan.io/tx/${pendingWrite.pending.hash}`} target="_blank" rel="noreferrer">{pendingWrite.pending.hash.slice(0, 12)}…</a> and will not expose another {pendingWrite.pending.kind.toLowerCase()} action.</p><button className="button secondary" type="button" disabled={pendingWrite.receipt.isFetching} onClick={() => void pendingWrite.receipt.refetch()}>{pendingWrite.receipt.isFetching ? "Checking exact receipt…" : "Check exact receipt"}</button></div> : null}
     {resolution.isPending ? <div className="notice" role="status"><strong>Checking objective resolver evidence…</strong></div> : null}
@@ -172,7 +179,7 @@ export function PositionDetail({ positionId }: { positionId: string }) {
     {position.state === "AWAITING_RESOLUTION" && !evidence ? <div className="notice"><strong>Awaiting objective resolution</strong><p>NoxLimit will not invent oracle round IDs. The browser is checking the bound resolver and public feed directly.</p></div> : null}
     {position.state === "SETTLED_ZERO" ? <div className="notice"><strong>This side did not win</strong><p>The objective resolver reported the opposite outcome, so these shares redeem for zero.</p></div> : null}
     {position.state === "REDEEMABLE" ? <button className="button primary" disabled={!pendingWrite.hydrated || Boolean(pendingWrite.pending) || redemptionReceiptHash !== null || busy !== null || market.data?.state !== "ready" || chainId !== sepolia.id} onClick={redeem}>{busy === "REDEEM" ? "Confirming redemption…" : "Redeem winning shares"}</button> : null}
-    {redemptionReceiptHash ? <div className="notice" role="status"><strong>Redemption receipt confirmed</strong><p><a href={`https://sepolia.etherscan.io/tx/${redemptionReceiptHash}`} target="_blank" rel="noreferrer">View transaction {redemptionReceiptHash.slice(0, 12)}…</a>. Final collateral movement remains tied to the indexed onchain receipt.</p></div> : null}
+    {redemptionReceiptHash && !redemptionActivity ? <div className="notice" role="status"><strong>Redemption receipt confirmed</strong><p><a href={`https://sepolia.etherscan.io/tx/${redemptionReceiptHash}`} target="_blank" rel="noreferrer">View transaction {redemptionReceiptHash.slice(0, 12)}…</a>. Final collateral movement remains tied to the indexed onchain receipt.</p></div> : null}
     {progress?.state === "REPLACED" ? <div className="notice">Tracking replacement transaction ({progress.reason}).</div> : null}
     {progress?.state === "UNCONFIRMED" && !pendingWrite.pending ? <div className="notice warning">Receipt is unconfirmed. The exact submitted hash remains the only action NoxLimit will check.</div> : null}
     {error ? <div className="notice warning" role="alert">{error}</div> : null}

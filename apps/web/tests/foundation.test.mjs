@@ -147,6 +147,12 @@ test("recovery, funding, and disconnected collections expose safe user actions",
   assert.match(balanceReadiness, /nativeBalance\.refetch\(\)/);
   assert.match(balanceReadiness, /collateralBalance\.refetch\(\)/);
   assert.match(collections, /Connect one wallet to load its confirmed orders/);
+  assert.match(collections, /indexed payout receipt is in Activity/);
+  assert.match(collections, /POSITION_REDEEMED/);
+  const position = await read("src/features/positions/position-detail.tsx");
+  assert.match(position, /getActivity\(\{ marketId: position!\.marketId \}\)/);
+  assert.match(position, /Indexed redemption payout/);
+  assert.match(position, /market-level Conditional Tokens payout/);
 });
 
 test("closed market history, chart controls, and card previews use verified service evidence", async () => {
