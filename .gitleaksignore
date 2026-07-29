@@ -2,3 +2,18 @@
 # Conditional Tokens contract address recorded in two create-only evidence files.
 .thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-close.json:generic-api-key:6
 .thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-liquidity-close.json:generic-api-key:6
+
+# Reviewed false positives in immutable catalog r5: public Conditional Tokens
+# deployment addresses/runtime hashes and the public pinned source commit.
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:50
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:97
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:111
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:159
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:205
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:219
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:267
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:313
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:327
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:375
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:421
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:435
