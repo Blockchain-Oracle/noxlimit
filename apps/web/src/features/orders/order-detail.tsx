@@ -5,6 +5,7 @@ import {
   buildExpireOrderTransaction,
   buildRefundOrderTransaction,
   noxLimitOrderBookAbi,
+  type ActivityView,
   type OrderRef,
   type OrderView,
   type UnsignedContractTransaction,
@@ -15,9 +16,10 @@ import { useEffect, useRef, useState } from "react";
 import { zeroAddress, type Address, type Hex } from "viem";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 import { sepolia } from "wagmi/chains";
-import { getMarketDetail, getOrder } from "@/lib/api/client";
+import { getActivity, getMarketDetail, getOrder } from "@/lib/api/client";
 import { sendAndConfirm, TerminalTransactionError, UnconfirmedTransactionError, type ReceiptProgress } from "@/lib/wallet/transaction";
 import { usePendingWrite } from "@/lib/wallet/use-pending-write";
+import { durableOrderActivity } from "@/features/activity/durable-evidence";
 import { confirmedOrderReceiptQueryKey, type ConfirmedOrderReceipt } from "./confirmed-order-receipt";
 
 type Action = "cancel" | "expire" | "refund";
@@ -73,6 +75,13 @@ export function OrderDetail({ refValue }: { refValue: OrderRef }) {
     retry: false,
     queryFn: () => getMarketDetail(query.data!.state === "ready" ? query.data!.data.marketId : ""),
   });
+  const indexedActivity = useQuery({
+    queryKey: ["order-activity", query.data?.state === "ready" ? query.data.data.marketId : undefined, refValue],
+    enabled: query.data?.state === "ready",
+    retry: false,
+    refetchInterval: 12_000,
+    queryFn: () => getActivity({ marketId: query.data!.state === "ready" ? query.data!.data.marketId : "" }),
+  });
   const onchain = useQuery({
     queryKey: ["order-onchain-existence", refValue],
     enabled: Boolean(publicClient && query.data?.state !== "ready"),
@@ -97,7 +106,7 @@ export function OrderDetail({ refValue }: { refValue: OrderRef }) {
       setProgress(null);
       setError(null);
       pendingWrite.clear();
-      void query.refetch();
+      void Promise.all([query.refetch(), indexedActivity.refetch()]);
       return;
     }
     pendingWrite.clear();
@@ -137,7 +146,7 @@ export function OrderDetail({ refValue }: { refValue: OrderRef }) {
       } });
       pendingWrite.clear();
       setConfirmedAction({ action, hash: confirmation.hash });
-      await query.refetch();
+      await Promise.all([query.refetch(), indexedActivity.refetch()]);
     } catch (reason) {
       if (reason instanceof UnconfirmedTransactionError || (broadcasted && !(reason instanceof TerminalTransactionError))) {
         setError(null);
@@ -148,6 +157,10 @@ export function OrderDetail({ refValue }: { refValue: OrderRef }) {
     }
     finally { setBusy(false); }
   };
+  const orderActivity = durableOrderActivity(
+    indexedActivity.data?.state === "ready" ? indexedActivity.data.data : [],
+    order.ref,
+  );
   return <section className="data-state detail-page">
     <span className="eyebrow">Composite order · Sepolia / {order.ref.orderBook} / {order.ref.orderId}</span>
     <h1>{order.side} private order</h1>
@@ -158,7 +171,10 @@ export function OrderDetail({ refValue }: { refValue: OrderRef }) {
     {order.status === "MONITORING_EXHAUSTED" ? <div className="notice warning"><strong>Private monitoring is exhausted</strong><p>Replace safely in stages: cancel this escrow first, then claim its refund as a separate confirmed transaction. Only after refund should you reopen this exact market with the same public side and amount; the private maximum is never copied.</p></div> : null}
     {order.disclosureState === "PUBLISHED" ? <div className="notice warning"><strong>Threshold disclosure is permanent</strong><p>Material: {order.publicationMaterialState.replaceAll("_", " ")}. {order.publishedMinShares ? `Published minimum shares: ${order.publishedMinShares}.` : "The public value is not yet available from the indexer."}</p></div> : null}
     <dl className="detail-grid"><div><dt>Public collateral</dt><dd>{order.amountIn} Test USDC</dd></div><div><dt>Immutable recipient</dt><dd>{order.recipient}</dd></div><div><dt>Market bundle version</dt><dd>{market.data?.state === "ready" ? market.data.data.contracts.version : "Loading verified bundle…"}</dd></div><div><dt>Checks used / remaining</dt><dd>{order.evaluationCount} used · {order.remainingEvaluations} remaining · {order.maximumEvaluations} maximum</dd></div><div><dt>Last evaluation</dt><dd>{order.lastEvaluationAt ? new Date(order.lastEvaluationAt).toLocaleString() : "No completed check yet"}</dd></div><div><dt>Next evaluation eligible</dt><dd>{order.nextEvaluationEligibleAt ? new Date(order.nextEvaluationEligibleAt).toLocaleString() : "Not currently scheduled"}</dd></div><div><dt>Expires</dt><dd>{new Date(order.expiresAt).toLocaleString()}</dd></div><div><dt>NoxLimit orders close</dt><dd>{new Date(order.tradingClosesAt).toLocaleString()}</dd></div><div><dt>Created</dt><dd>{new Date(order.createdAt).toLocaleString()}</dd></div><div><dt>Creation receipt</dt><dd><a href={`https://sepolia.etherscan.io/tx/${order.transactionHash}`} target="_blank" rel="noreferrer">{order.transactionHash.slice(0, 12)}…</a></dd></div></dl>
-    <ol className="order-timeline" aria-label="Order lifecycle evidence"><li><strong>Created onchain</strong><span>{new Date(order.createdAt).toLocaleString()}</span></li>{order.lastEvaluationAt ? <li><strong>Latest confidential check</strong><span>{new Date(order.lastEvaluationAt).toLocaleString()} · {order.remainingEvaluations} checks remain</span></li> : null}{order.disclosureState === "PUBLISHED" ? <li><strong>Publication requested</strong><span>The derived minimum-share bound is no longer private.</span></li> : null}<li><strong>Current projected state</strong><span>{order.status.replaceAll("_", " ")}</span></li></ol>
+    <ol className="order-timeline" aria-label="Order lifecycle evidence">{orderActivity.map((activity: ActivityView) => <li key={activity.activityId}><strong>{activity.kind.replaceAll("_", " ")}</strong><span>{new Date(activity.occurredAt).toLocaleString()} · block {activity.blockNumber} · log {activity.logIndex} · <a href={`https://sepolia.etherscan.io/tx/${activity.transactionHash}`} target="_blank" rel="noreferrer">transaction {activity.transactionHash.slice(0, 12)}…</a>{activity.amount ? ` · ${activity.amount}${activity.kind === "ORDER_FILLED" ? " shares" : " Test USDC"}` : ""}</span></li>)}</ol>
+    {indexedActivity.isPending ? <div className="notice" role="status">Loading indexed order history…</div> : null}
+    {indexedActivity.data?.state !== "ready" && !indexedActivity.isPending ? <div className="notice warning" role="status">Indexed event history is temporarily unavailable. The current order snapshot and direct creation receipt remain visible.</div> : null}
+    {indexedActivity.data?.state === "ready" && orderActivity.length === 0 ? <div className="notice" role="status">The safe-block indexer has not reached this order’s event history yet.</div> : null}
     {!address ? <p className="notice">Connect the owner wallet to recover or refund this order.</p> : !owner ? <p className="notice warning">Connected wallet is not the order owner. Actions are read-only.</p> : chainId !== sepolia.id ? <p className="notice warning">Switch to Ethereum Sepolia to act.</p> : null}
     {pendingWrite.pending ? <div className="notice warning" role="status"><strong>{ACTION_LABEL[pendingWrite.pending.kind]} transaction remains locked</strong><p>This exact transaction may still confirm. NoxLimit is checking <a href={`https://sepolia.etherscan.io/tx/${pendingWrite.pending.hash}`} target="_blank" rel="noreferrer">{pendingWrite.pending.hash.slice(0, 12)}…</a> and will not expose another {ACTION_LABEL[pendingWrite.pending.kind].toLowerCase()} action.</p><button className="button secondary" type="button" disabled={pendingWrite.receipt.isFetching} onClick={() => void pendingWrite.receipt.refetch()}>{pendingWrite.receipt.isFetching ? "Checking exact receipt…" : "Check exact receipt"}</button></div> : null}
     <div className="detail-actions">{actions(order).map((action) => <button key={action} className="button primary" disabled={!pendingWrite.hydrated || Boolean(pendingWrite.pending) || busy || !owner || chainId !== sepolia.id} onClick={() => submit(action)}>{busy ? "Confirming wallet transaction…" : ACTION_LABEL[action]}</button>)}</div>

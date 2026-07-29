@@ -108,9 +108,24 @@ const positions = [
 
 const marketActivity = [
   activityViewSchema.parse({
+    activityId: `${hex("7")}:0`, kind: "ORDER_CREATED", marketId: cards[0].marketId,
+    actor: address("7"), orderRef: projectedOrder.ref, amount: "10.000000", side: "YES",
+    occurredAt: "2030-01-01T00:10:00.000Z", blockNumber: "119", transactionHash: hex("7"), logIndex: 0,
+  }),
+  activityViewSchema.parse({
+    activityId: `${hex("8")}:1`, kind: "EVALUATION_REQUESTED", marketId: cards[0].marketId,
+    actor: address("7"), orderRef: projectedOrder.ref, amount: "10.000000", side: "YES",
+    occurredAt: "2030-01-01T00:11:00.000Z", blockNumber: "120", transactionHash: hex("8"), logIndex: 1,
+  }),
+  activityViewSchema.parse({
     activityId: `${hex("d")}:0`, kind: "ORDER_FILLED", marketId: cards[0].marketId,
     actor: address("7"), orderRef: projectedOrder.ref, amount: "20.000000", side: "YES",
     occurredAt: "2030-01-01T00:12:00.000Z", blockNumber: "121", transactionHash: hex("d"), logIndex: 0,
+  }),
+  activityViewSchema.parse({
+    activityId: `${hex("9")}:0`, kind: "ORDER_CREATED", marketId: cards[0].marketId,
+    actor: address("7"), orderRef: { ...projectedOrder.ref, orderBook: address("9") }, amount: "10.000000", side: "YES",
+    occurredAt: "2030-01-01T00:09:00.000Z", blockNumber: "118", transactionHash: hex("9"), logIndex: 0,
   }),
   activityViewSchema.parse({
     activityId: `${hex("f")}:0`, kind: "MARKET_RESOLVED", marketId: cards[0].marketId, side: "YES",

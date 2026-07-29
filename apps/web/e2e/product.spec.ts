@@ -221,6 +221,16 @@ test("order detail exposes durable lifecycle evidence and canonical close copy",
   await expect(page.getByText("3 remaining", { exact: false })).toBeVisible();
   await expect(page.getByText("NoxLimit orders close", { exact: true })).toBeVisible();
   await expect(page.getByRole("list", { name: "Order lifecycle evidence" })).toBeVisible();
+  const lifecycle = page.getByRole("list", { name: "Order lifecycle evidence" });
+  await expect(lifecycle.getByText("ORDER CREATED", { exact: true })).toBeVisible();
+  await expect(lifecycle.getByText("EVALUATION REQUESTED", { exact: true })).toBeVisible();
+  await expect(lifecycle.getByText("ORDER FILLED", { exact: true })).toBeVisible();
+  await expect(lifecycle.getByText("block 119", { exact: false })).toBeVisible();
+  await expect(lifecycle.getByText("block 120", { exact: false })).toBeVisible();
+  await expect(lifecycle.getByText("block 121", { exact: false })).toBeVisible();
+  await expect(lifecycle.getByText("0x9999999999", { exact: false })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("list", { name: "Order lifecycle evidence" }).getByText("ORDER FILLED", { exact: true })).toBeVisible();
   await expect(page.getByText("Will BTC/USD settle at or above 65,000?", { exact: true })).toBeVisible();
   await expect(page.getByText("Immutable recipient", { exact: true })).toBeVisible();
   await expect(page.getByText("fixture-v1", { exact: true })).toBeVisible();
