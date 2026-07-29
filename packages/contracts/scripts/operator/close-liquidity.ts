@@ -15,6 +15,7 @@ import {
   OperatorConfigurationError,
   assertLiquidityClosePreconditions,
   assertOutputReady,
+  buildLiquidityCloseTimingEvidence,
   explicitPath,
   planLiquidityClose,
   readJsonIfExists,
@@ -252,6 +253,8 @@ async function main(): Promise<void> {
     removeFunding: null,
     redeemPositions: null,
   };
+  let removeFundingReceipt: { blockNumber: bigint; blockHash: Hash } | null = null;
+  let removeFundingBlock: { number: bigint; timestamp: bigint; hash: Hash } | null = null;
   if (beforePlan.removeFunding) {
     safeFailureStage = "submit-remove-funding";
     receipts.removeFunding = await operator.writeContract({
@@ -268,6 +271,22 @@ async function main(): Promise<void> {
     if (removeReceipt.status !== "success") {
       throw new OperatorConfigurationError(`removeFunding reverted: ${receipts.removeFunding}`);
     }
+    safeFailureStage = "read-remove-funding-inclusion-block";
+    const inclusionBlock = await publicClient.getBlock({ blockNumber: removeReceipt.blockNumber });
+    if (!inclusionBlock.hash) {
+      throw new OperatorConfigurationError(
+        `removeFunding inclusion block ${removeReceipt.blockNumber} has no canonical hash`,
+      );
+    }
+    removeFundingReceipt = {
+      blockNumber: removeReceipt.blockNumber,
+      blockHash: removeReceipt.blockHash,
+    };
+    removeFundingBlock = {
+      number: inclusionBlock.number,
+      timestamp: inclusionBlock.timestamp,
+      hash: inclusionBlock.hash,
+    };
   }
   safeFailureStage = "read-post-removal-state";
   const afterRemoval = beforePlan.removeFunding ? await state() : before;
@@ -294,8 +313,22 @@ async function main(): Promise<void> {
   if (after.lpShares !== 0n) {
     throw new OperatorConfigurationError("operator still owns FPMM LP shares after close");
   }
+  if (!latestBlock.hash) {
+    throw new OperatorConfigurationError(
+      `pre-close snapshot block ${latestBlock.number} has no canonical hash`,
+    );
+  }
+  const timingEvidence = buildLiquidityCloseTimingEvidence({
+    preCloseBlock: {
+      number: latestBlock.number,
+      timestamp: latestBlock.timestamp,
+      hash: latestBlock.hash,
+    },
+    removeFundingReceipt,
+    removeFundingBlock,
+  });
   const evidence = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     kind: "NOXLIMIT_SEPOLIA_LIQUIDITY_CLOSE",
     chainId,
     operator: operatorAddress,
@@ -306,8 +339,7 @@ async function main(): Promise<void> {
     lpOwner,
     conditionId,
     tradingClosesAt: tradingClosesAt.toString(),
-    closedAtBlock: latestBlock.number.toString(),
-    closedAtTimestamp: latestBlock.timestamp.toString(),
+    ...timingEvidence,
     positions: { yesPositionId: yesPositionId.toString(), noPositionId: noPositionId.toString() },
     before: Object.fromEntries(Object.entries(before).map(([key, value]) => [key, value.toString()])),
     after: Object.fromEntries(Object.entries(after).map(([key, value]) => [key, value.toString()])),

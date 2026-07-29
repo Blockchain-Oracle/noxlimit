@@ -582,6 +582,68 @@ export function planLiquidityClose(input: LiquidityCloseState): LiquidityClosePl
   );
 }
 
+export interface LiquidityCloseBlockSnapshot {
+  readonly number: bigint;
+  readonly timestamp: bigint;
+  readonly hash: Hex;
+}
+
+export interface LiquidityCloseReceiptInclusion {
+  readonly blockNumber: bigint;
+  readonly blockHash: Hex;
+}
+
+export interface LiquidityCloseTimingEvidence {
+  readonly preCloseSnapshot: {
+    readonly blockNumber: string;
+    readonly blockHash: Hex;
+    readonly timestamp: string;
+  };
+  readonly closedAtBlock: string | null;
+  readonly closedAtTimestamp: string | null;
+}
+
+/**
+ * Separates the read-only pre-close snapshot from the block that actually included LP removal.
+ * A redemption-only pass has no new LP-close receipt and therefore must not invent a close time.
+ */
+export function buildLiquidityCloseTimingEvidence(input: {
+  readonly preCloseBlock: LiquidityCloseBlockSnapshot;
+  readonly removeFundingReceipt: LiquidityCloseReceiptInclusion | null;
+  readonly removeFundingBlock: LiquidityCloseBlockSnapshot | null;
+}): LiquidityCloseTimingEvidence {
+  const preCloseSnapshot = {
+    blockNumber: input.preCloseBlock.number.toString(),
+    blockHash: input.preCloseBlock.hash,
+    timestamp: input.preCloseBlock.timestamp.toString(),
+  };
+  if (input.removeFundingReceipt === null || input.removeFundingBlock === null) {
+    if (input.removeFundingReceipt !== null || input.removeFundingBlock !== null) {
+      throw new OperatorConfigurationError(
+        "removeFunding receipt and inclusion block must be provided together",
+      );
+    }
+    return {
+      preCloseSnapshot,
+      closedAtBlock: null,
+      closedAtTimestamp: null,
+    };
+  }
+  if (
+    input.removeFundingBlock.number !== input.removeFundingReceipt.blockNumber ||
+    input.removeFundingBlock.hash.toLowerCase() !== input.removeFundingReceipt.blockHash.toLowerCase()
+  ) {
+    throw new OperatorConfigurationError(
+      "removeFunding receipt does not match the fetched inclusion block",
+    );
+  }
+  return {
+    preCloseSnapshot,
+    closedAtBlock: input.removeFundingBlock.number.toString(),
+    closedAtTimestamp: input.removeFundingBlock.timestamp.toString(),
+  };
+}
+
 export function rethrowSanitizedOperatorFailure(error: unknown, message: string): never {
   if (error instanceof OperatorConfigurationError) throw error;
   throw new OperatorConfigurationError(message);

@@ -242,12 +242,15 @@ read model keeps immutable verification, catalog activation, objective lifecycle
 tradeability, and derived badges as separate facts. Cross-market order identity is the composite
 `(chainId, orderBook, orderId)`, because numeric `orderId` is local to one OrderBook.
 
-Catalog adoption is atomic at runtime. An operator publishes the next immutable manifest revision
-and invokes a non-public reload command. The service validates the hash chain, one-active invariant,
-all new immutable records, activation times/blocks, bindings, seeding, and successor cutover; it
-then completes the new OrderBook recovery replay before swapping one in-memory catalog pointer.
-Failure preserves the previous revision. The web consumes the service's `catalogRevision` rather
-than bundling an independently mutable copy.
+Catalog adoption is atomic at runtime. For one direct hash-linked successor, an operator publishes
+the next immutable manifest revision and invokes a non-public reload command. The service validates
+the hash chain, one-active invariant, all new immutable records, activation times/blocks, bindings,
+seeding, and successor cutover; it then completes the new OrderBook recovery replay before swapping
+one in-memory catalog pointer. Failure preserves the previous still-valid revision. When immutable
+staging revisions are deliberately skipped and must never be served, the single writer instead
+stops and restarts from the final reviewed manifest; after the predecessor's close boundary a failed
+start remains fail-closed rather than reviving the closed catalog. The web consumes the service's
+`catalogRevision` rather than bundling an independently mutable copy.
 
 The Sepolia deployment operator implements that resolver-first topology through a durable,
 plan-bound journal created before the first transaction. A fresh journal freezes the exact plan

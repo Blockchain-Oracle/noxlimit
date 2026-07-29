@@ -331,9 +331,21 @@ publish revision `8`, retiring both current revision-5 IDs and activating both c
 manifest. If either axis cannot cut over, keep revision `5` current and fail closed; do not publish
 a one-axis activation.
 
-After reviewing the new hash-linked manifest, atomically update the service's configured catalog
-pointer and send `SIGHUP`. The service verifies the candidate, builds a coherent projection, and
-keeps the old catalog active if acceptance fails.
+After reviewing the new hash-linked manifest, choose the adoption path from the service's current
+revision:
+
+- For one adjacent revision, atomically update the configured catalog pointer and send `SIGHUP`.
+  The service verifies the direct hash link, builds a coherent projection, and keeps the old
+  catalog active if acceptance fails.
+- For a deliberately skipped staging chain, such as the current revision-5 runtime adopting
+  revision 8 while revisions 6 and 7 remain immutable staging history, do **not** send `SIGHUP`.
+  Direct reload correctly rejects non-adjacent revisions, and revisions 6 and 7 must never be
+  served after their predecessor routes close. Stop the single writer, atomically repoint to the
+  reviewed revision-8 manifest, then start exactly one replacement process. Startup validates the
+  selected manifest directly. After the close boundary revision 5 is no longer a valid runtime
+  fallback, so a failed revision-8 start remains fail-closed downtime while the revision-8
+  dependency or configuration problem is corrected and retried. Never restore the closed
+  revision-5 pointer, and never run both writers concurrently.
 
 ## Objective resolution and redemption
 

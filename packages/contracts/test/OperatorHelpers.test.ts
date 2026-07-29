@@ -20,6 +20,7 @@ import {
   buildCatalogCandidate,
   buildCatalogCutoverCandidate,
   buildCatalogMultiCutoverCandidate,
+  buildLiquidityCloseTimingEvidence,
   canonicalMarketQuestion,
   collateralMintShortfall,
   canonicalJson,
@@ -1025,6 +1026,95 @@ describe("operator configuration and manifest helpers", () => {
           payoutDenominator: 0n,
         }),
       /no FPMM LP shares or outcome positions/,
+    );
+  });
+
+  it("derives LP close time from the confirmed removeFunding inclusion block", () => {
+    const timing = buildLiquidityCloseTimingEvidence({
+      preCloseBlock: {
+        number: 100n,
+        timestamp: 1_000n,
+        hash: hash("a"),
+      },
+      removeFundingReceipt: {
+        blockNumber: 105n,
+        blockHash: hash("b"),
+      },
+      removeFundingBlock: {
+        number: 105n,
+        timestamp: 1_060n,
+        hash: hash("b"),
+      },
+    });
+
+    assert.deepEqual(timing, {
+      preCloseSnapshot: {
+        blockNumber: "100",
+        blockHash: hash("a"),
+        timestamp: "1000",
+      },
+      closedAtBlock: "105",
+      closedAtTimestamp: "1060",
+    });
+    assert.notEqual(timing.closedAtBlock, timing.preCloseSnapshot.blockNumber);
+    assert.notEqual(timing.closedAtTimestamp, timing.preCloseSnapshot.timestamp);
+  });
+
+  it("does not invent an LP close time for a redemption-only evidence pass", () => {
+    const timing = buildLiquidityCloseTimingEvidence({
+      preCloseBlock: {
+        number: 200n,
+        timestamp: 2_000n,
+        hash: hash("c"),
+      },
+      removeFundingReceipt: null,
+      removeFundingBlock: null,
+    });
+
+    assert.deepEqual(timing, {
+      preCloseSnapshot: {
+        blockNumber: "200",
+        blockHash: hash("c"),
+        timestamp: "2000",
+      },
+      closedAtBlock: null,
+      closedAtTimestamp: null,
+    });
+    assert.throws(
+      () =>
+        buildLiquidityCloseTimingEvidence({
+          preCloseBlock: {
+            number: 200n,
+            timestamp: 2_000n,
+            hash: hash("c"),
+          },
+          removeFundingReceipt: {
+            blockNumber: 201n,
+            blockHash: hash("d"),
+          },
+          removeFundingBlock: null,
+        }),
+      /receipt and inclusion block must be provided together/,
+    );
+    assert.throws(
+      () =>
+        buildLiquidityCloseTimingEvidence({
+          preCloseBlock: {
+            number: 200n,
+            timestamp: 2_000n,
+            hash: hash("c"),
+          },
+          removeFundingReceipt: {
+            blockNumber: 201n,
+            blockHash: hash("d"),
+          },
+          removeFundingBlock: {
+            number: 202n,
+            timestamp: 2_024n,
+            hash: hash("e"),
+          },
+        }),
+      /receipt does not match the fetched inclusion block/,
     );
   });
 
