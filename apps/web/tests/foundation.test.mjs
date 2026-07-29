@@ -161,6 +161,22 @@ test("closed market history, chart controls, and card previews use verified serv
   assert.match(shell, /Outcome prices/);
   assert.match(shell, /View exact chart data/);
   assert.match(shell, /NoxLimit orders close/);
+  assert.match(shell, /Complete-set liquidity/);
+  assert.match(shell, /Test USDC-equivalent complete sets/);
+  assert.match(shell, /Fee-inclusive averages for/);
+  assert.match(shell, /availableAssets\.map/);
+  assert.doesNotMatch(shell, /<option>SOL\/USD<\/option>/);
+  assert.match(shell, /priceImpactBps/);
+  assert.match(shell, /quotedAtBlock/);
+});
+
+test("private order review exposes protected winning redemption and fails closed before preflight", async () => {
+  const order = await read("src/features/orders/private-order-flow.tsx");
+  assert.match(order, /Minimum protected winning redemption/);
+  assert.match(order, /a better fill can redeem more/);
+  assert.match(order, /marketReadyForReview/);
+  assert.match(order, /!marketReadyForReview/);
+  assert.match(order, /refetchInterval: stage === "REVIEW"/);
 });
 
 test("a submitted create is publicly persisted and cannot fall back to a blind resend", async () => {

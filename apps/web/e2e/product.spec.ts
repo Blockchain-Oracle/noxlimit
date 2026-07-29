@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import {
   TEST_USDC_DECIMALS,
+  atomsToDecimal,
   buildRefundOrderTransaction,
   decimalToAtoms,
   erc20Abi,
@@ -43,6 +44,14 @@ test("one responsive product tree renders validated discovery data without horiz
   await expect(page.locator('[aria-label="Market Stream"]')).toHaveCount(1);
   await expect(page.locator("#selected-market")).toHaveCount(1);
   await expect(page.getByLabel("Private order ticket")).toHaveCount(1);
+  await expect(page.getByLabel("Asset filter").locator("option", { hasText: "SOL/USD" })).toHaveCount(0);
+  const firstMarket = page.getByRole("article").first();
+  await expect(firstMarket.getByText("ORDERING OPEN", { exact: true })).toBeVisible();
+  await expect(firstMarket.getByText("Complete-set liquidity", { exact: true })).toBeVisible();
+  await expect(firstMarket.getByText("1000.000000", { exact: true })).toBeVisible();
+  if (testInfo.project.name === "desktop-1440") {
+    await expect(page.locator(".quote-ladder").getByText(/impact 25 bps vs 1.000000 Test USDC reference · block 120/).first()).toBeVisible();
+  }
   await expectNoPageOverflow(page);
   if (testInfo.project.name === "mobile-390") {
     const navigation = await page.locator(".app-nav").boundingBox();
@@ -78,6 +87,32 @@ test("deterministic filters request the fixture API and explicit Open enters ana
   const open = page.getByRole("article").filter({ hasText: "ETH/USD" }).getByRole("button", { name: "Open market" });
   await open.click();
   await expect(page.locator("#selected-market")).toBeInViewport();
+});
+
+test("a newly verified SOL catalog revision adds SOL only after the user applies that revision", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop-1440", "Catalog asset discovery is viewport-independent.");
+  await page.route("**/v1/markets?*", async (route) => {
+    const url = new URL(route.request().url());
+    const response = await route.fetch();
+    if (url.searchParams.has("asset") || url.searchParams.get("lifecycle") !== "LIVE") return route.fulfill({ response });
+    const body = await response.json();
+    const items = body.items.map((item: Record<string, unknown>, index: number) => ({ ...item, positionInFilteredStream: index + 1, filteredStreamCount: body.items.length + 1 }));
+    const sol = {
+      ...body.items[0],
+      marketId: `0x${"8".repeat(64)}`,
+      asset: "SOL/USD",
+      question: "Will SOL/USD settle at or above 200?",
+      strikeUsd: "200",
+      oraclePriceUsd: "198",
+      positionInFilteredStream: body.items.length + 1,
+      filteredStreamCount: body.items.length + 1,
+    };
+    await route.fulfill({ response, json: { ...body, catalogRevision: `0x${"9".repeat(64)}`, snapshot: "fixture-sol-snapshot", items: [...items, sol] } });
+  });
+  await page.goto("/");
+  await expect(page.getByLabel("Asset filter").locator("option", { hasText: "SOL/USD" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Refresh order" }).click();
+  await expect(page.getByLabel("Asset filter").locator("option", { hasText: "SOL/USD" })).toHaveCount(1);
 });
 
 test("resolved discovery preserves verified history after pool liquidity is drained", async ({ page }, testInfo) => {
@@ -173,6 +208,11 @@ test("a durable retired market URL renders that exact market instead of a live s
   await expect(page.getByRole("heading", { name: "Did BTC/USD settle at or above 64,000?" })).toBeVisible();
   await expect(page.locator("#selected-market")).toContainText("RESOLVED YES");
   await expect(page.locator("#selected-market")).not.toContainText("Will BTC/USD settle at or above 65,000?");
+  await expect(page.getByText("Market preflight", { exact: true })).toBeVisible();
+  await page.getByLabel(/Public amount/).fill("10");
+  await page.getByLabel(/Private maximum price/).fill("0.52");
+  await expect(page.getByRole("button", { name: "Review private order" })).toBeDisabled();
+  await expect(page.getByText(/new order review is unavailable: not active/i)).toBeVisible();
 });
 
 test("order detail exposes durable lifecycle evidence and canonical close copy", async ({ page }) => {
@@ -216,10 +256,15 @@ test("the released Gateway and wallet path creates a durable composite order wit
   await page.goto("/");
   await connectInjectedWallet(page);
   const privateSentinel = "0.517293";
+  const amountAtoms = decimalToAtoms("10", TEST_USDC_DECIMALS);
+  const maximumWad = decimalToAtoms(privateSentinel, 18);
+  const expectedMinOut = maxPriceWadToMinOut(amountAtoms, maximumWad);
   await page.getByLabel(/Public amount/).fill("10");
   await page.getByLabel(/Private maximum price/).fill(privateSentinel);
   await page.getByRole("button", { name: "Review private order" }).click();
   await expect(page.getByRole("heading", { name: "Review the protected order" })).toBeVisible();
+  await expect(page.getByText("Minimum protected winning redemption", { exact: true })).toBeVisible();
+  await expect(page.locator(".ticket-summary div").filter({ hasText: "Minimum protected winning redemption" }).locator("dd")).toContainText(`${atomsToDecimal(expectedMinOut, TEST_USDC_DECIMALS)} Test USDC`);
   await expect(page.getByText(`Owner and immutable recipient:`)).toBeVisible();
   await expect(page.locator(".review-ticket p").filter({ hasText: "Pool fee:" })).toContainText("200 bps");
   await expect(page.locator(".review-ticket p").filter({ hasText: "Monitoring budget:" })).toContainText("4 confidential checks");
@@ -230,9 +275,6 @@ test("the released Gateway and wallet path creates a durable composite order wit
   await expect(page.getByRole("heading", { name: "YES private order" })).toBeVisible();
   await expect(page.getByText("Composite order · Sepolia", { exact: false }).first()).toBeVisible();
 
-  const amountAtoms = decimalToAtoms("10", TEST_USDC_DECIMALS);
-  const maximumWad = decimalToAtoms(privateSentinel, 18);
-  const expectedMinOut = maxPriceWadToMinOut(amountAtoms, maximumWad);
   const expectedGatewayValue = toHex(expectedMinOut, { size: 32 });
   const gatewayPosts = gatewayTraffic.filter((request) => request.method === "POST");
   expect(gatewayPosts).toHaveLength(1);
@@ -277,6 +319,31 @@ test("the released Gateway and wallet path creates a durable composite order wit
   await page.reload();
   await expect(page.getByRole("heading", { name: "YES private order" })).toBeVisible();
   await expect(page.getByText("3 remaining", { exact: false })).toBeVisible();
+});
+
+test("a reviewed order fails closed if verified market state becomes unavailable before Nox", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop-1440", "One adversarial trust-read transition is viewport-independent.");
+  const marketId = `0x${"1".repeat(64)}`;
+  let unavailable = false;
+  await page.route(`**/v1/markets/${marketId}`, async (route) => {
+    if (!unavailable) return route.continue();
+    await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "TEMPORARILY_UNAVAILABLE" }) });
+  });
+  await installRpcFixture(page);
+  await installInjectedSepoliaWallet(page, []);
+  const gatewayTraffic = await installGatewayFixture(page);
+  await page.goto("/");
+  await connectInjectedWallet(page);
+  await page.getByLabel(/Public amount/).fill("10");
+  await page.getByLabel(/Private maximum price/).fill("0.52");
+  await page.getByRole("button", { name: "Review private order" }).click();
+  const send = page.getByRole("button", { name: "Send to Nox and continue" });
+  await expect(send).toBeEnabled();
+  unavailable = true;
+  await expect(page.getByText("Market preflight", { exact: true })).toBeVisible({ timeout: 7_000 });
+  await expect(send).toBeDisabled();
+  expect(gatewayTraffic.filter((request) => request.method === "POST")).toHaveLength(0);
+  expect(await walletTransactions(page)).toHaveLength(0);
 });
 
 test("an unconfirmed create survives reload, confirms late, and can never send a duplicate escrow", async ({ page }, testInfo) => {
@@ -464,7 +531,12 @@ test("mobile Trade is one full-context workspace with focus-restoring clean back
   await expect(workspace.getByRole("heading", { name: "Will BTC/USD settle at or above 65,000?" })).toBeVisible();
   await expect(workspace.getByRole("heading", { name: "Underlying price history" })).toBeVisible();
   await expect(workspace.getByRole("heading", { name: "Real pool evidence" })).toBeVisible();
+  await expect(workspace.getByText("Verified contracts", { exact: true })).toBeVisible();
+  await expect(workspace.getByText(/impact 25 bps vs 1.000000 Test USDC reference/).first()).toBeVisible();
   await expect(workspace.getByLabel("Private order ticket")).toBeVisible();
+  await expectNoPageOverflow(page);
+  const results = await new AxeBuilder({ page }).include(".trade-workspace").withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+  expect(results.violations.filter((violation) => violation.impact === "serious" || violation.impact === "critical")).toEqual([]);
   await page.getByRole("button", { name: "Back to Discover" }).click();
   await expect(workspace).toBeHidden();
   await expect(trade).toBeFocused();

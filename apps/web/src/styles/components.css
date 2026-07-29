@@ -44,8 +44,11 @@ h1, h2 { font-stretch: expanded; letter-spacing: -.025em; }
 .market-card[data-focused="true"] { outline: 1px dashed var(--rule-strong); outline-offset: -4px; }
 .market-card:focus-visible { outline: 2px solid var(--ink); outline-offset: -3px; }
 .market-card h2 { min-height: 3.7em; margin: 10px 0 14px; font-size: 1rem; line-height: 1.25; }
+.card-status-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.market-badge { padding: 3px 6px; border: 1px solid var(--rule); color: var(--ink-2); font: .58rem var(--mono); text-transform: uppercase; }
 .card-meta, .quote-pair, .panel-title, .ticket-heading { display: flex; justify-content: space-between; gap: 12px; }
 .card-meta, .provenance { color: var(--ink-3); font-family: var(--mono); font-size: .61rem; letter-spacing: .05em; text-transform: uppercase; }
+.quote-reference { margin: 6px 0 0; color: var(--ink-3); font: .58rem/1.4 var(--mono); }
 .market-facts { margin: 0 0 14px; }
 .market-facts div { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-top: 1px solid var(--rule); }
 .market-facts dt { color: var(--ink-3); font-size: .69rem; }
@@ -136,6 +139,9 @@ h1, h2 { font-stretch: expanded; letter-spacing: -.025em; }
 .panel-tabs button:last-child { border-right: 0; }
 .panel-tabs button[aria-selected="true"] { color: var(--ink); background: var(--paper-2); box-shadow: inset 0 -2px var(--ink); }
 .ladder-row { display: grid; grid-template-columns: .6fr 1fr 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--rule); font: .66rem var(--mono); }
+.ladder-row > span > small, .ticket-summary dd small, .market-facts dd small { display: block; margin-top: 3px; color: var(--ink-3); font-size: .58rem; line-height: 1.35; }
+.bundle-provenance { margin-top: 5px; color: var(--ink-3); font: .58rem var(--mono); }
+.bundle-provenance code { display: block; margin-top: 4px; overflow-wrap: anywhere; color: var(--ink-2); }
 .ladder-head { color: var(--ink-3); text-transform: uppercase; }
 .public-fills { padding: 0 16px 16px; }
 .public-fills > a { display: flex; justify-content: space-between; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--rule); text-decoration: none; }

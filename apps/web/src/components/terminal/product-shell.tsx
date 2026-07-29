@@ -1,6 +1,6 @@
 "use client";
 
-import type { ActivityView, MarketHistoryView, MarketListPage, MarketListQuery, MarketSide, MarketStreamCardView, MarketView } from "@noxlimit/protocol";
+import type { ActivityView, MarketAsset, MarketHistoryView, MarketListPage, MarketListQuery, MarketSide, MarketStreamCardView, MarketView } from "@noxlimit/protocol";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -43,17 +43,42 @@ function MarketPreviewChart({ preview }: { preview: MarketStreamCardView["previe
   return <div className="card-preview"><svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={label}><title>{label}</title><polyline className="yes-series" points={indexedPolyline(yes, low, high)} /><polyline className="no-series" points={indexedPolyline(no, low, high)} /></svg></div>;
 }
 
+function countdownLabel(closesAt: string, now: number): string {
+  const remainingSeconds = Math.max(0, Math.floor((Date.parse(closesAt) - now) / 1_000));
+  if (remainingSeconds === 0) return "Closed";
+  const days = Math.floor(remainingSeconds / 86_400);
+  const hours = Math.floor((remainingSeconds % 86_400) / 3_600);
+  const minutes = Math.floor((remainingSeconds % 3_600) / 60);
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
+
+function CloseCountdown({ closesAt }: { closesAt: string }) {
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    const update = () => setNow(Date.now());
+    update();
+    const timer = window.setInterval(update, 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  return <><strong>{now === null ? "Calculating…" : countdownLabel(closesAt, now)}</strong><small>{formatUtc(closesAt)}</small></>;
+}
+
 function MarketCard({ market, active, focused, onSelect, onTrade, onPrevious, onNext }: { market: MarketStreamCardView; active: boolean; focused: boolean; onSelect: () => void; onTrade: (side: MarketSide) => void; onPrevious?: () => void; onNext?: () => void }) {
   return (
     <article className={`market-card ${active ? "selected" : ""}`} data-market-id={market.marketId} data-complete-set-depth-atoms={market.completeSetDepthAtoms} data-focused={focused} tabIndex={-1} aria-label={`Market ${market.positionInFilteredStream} of ${market.filteredStreamCount}: ${market.question}`} aria-current={active ? "true" : undefined}>
       <div className="card-meta"><span>{market.asset} · {market.horizon}</span><span>{market.positionInFilteredStream} / {market.filteredStreamCount}</span></div>
+      <div className="card-status-row"><span className="lifecycle">{market.lifecycle.replaceAll("_", " ")}</span>{market.badges.map((badge) => <span className="market-badge" key={badge}>{badge.replaceAll("_", " ")}</span>)}</div>
       <h2>{market.question}</h2>
       <dl className="market-facts compact">
         <div><dt>Oracle / strike</dt><dd>{market.oraclePriceUsd} / {market.strikeUsd} USD</dd></div>
-        <div><dt>NoxLimit orders close</dt><dd>{formatUtc(market.tradingClosesAt)}</dd></div>
+        <div><dt>NoxLimit orders close</dt><dd><CloseCountdown closesAt={market.tradingClosesAt} /></dd></div>
+        <div><dt>Complete-set liquidity</dt><dd><strong>{market.completeSetDepth}</strong><small>Test USDC-equivalent complete sets</small></dd></div>
       </dl>
       <MarketPreviewChart preview={market.preview} />
       <div className="quote-pair"><span><OutcomeGlyph side="YES" /> YES <b>{market.yesAveragePrice}</b></span><span><OutcomeGlyph side="NO" /> NO <b>{market.noAveragePrice}</b></span></div>
+      <p className="quote-reference">Fee-inclusive averages for {market.referenceAmount} Test USDC · Test USDC/share</p>
       <p className="provenance">Builder-seeded Testnet liquidity · <a href={`https://sepolia.etherscan.io/tx/${market.liquidityProvenance.seedTransactionHash}`} target="_blank" rel="noreferrer">verify seed</a>{market.oracleStale || market.poolStale ? " · stale data" : ""}</p>
       {market.tradeability !== "TRADEABLE" ? <p className="tradeability">Unavailable: {market.tradeabilityReasons.join(", ")}</p> : null}
       <div className="card-actions"><button type="button" onClick={onSelect}>Open market</button><button type="button" disabled={market.tradeability !== "TRADEABLE"} onClick={() => onTrade("YES")}>Trade YES</button><button type="button" disabled={market.tradeability !== "TRADEABLE"} onClick={() => onTrade("NO")}>Trade NO</button></div>
@@ -160,7 +185,7 @@ function MarketAnalysis({ market }: { market: TerminalMarket }) {
 function QuoteLadder({ market }: { market: TerminalMarket }) {
   const amounts = ["1", "10", "25", "100"] as const;
   const queries = useQueries({ queries: amounts.flatMap((amount) => (["YES", "NO"] as const).map((side) => ({ queryKey: ["quote", market.marketId, side, amount], queryFn: () => getQuote({ marketId: market.marketId, side, amount }), retry: false, staleTime: 5_000, refetchInterval: 5_000, refetchIntervalInBackground: false }))) });
-  return <div className="quote-ladder"><div className="ladder-row ladder-head"><span>Size</span><span>YES avg / shares</span><span>NO avg / shares</span></div>{amounts.map((amount, index) => { const yes = queries[index * 2], no = queries[index * 2 + 1]; const y = yes.data?.state === "ready" ? yes.data.data : null; const n = no.data?.state === "ready" ? no.data.data : null; return <div className="ladder-row" key={amount}><span>{amount} USDC</span><span>{yes.isPending ? "Loading…" : y ? `${y.averagePrice} / ${y.sharesOut}${y.stale ? " stale" : ""}` : "Unavailable"}</span><span>{no.isPending ? "Loading…" : n ? `${n.averagePrice} / ${n.sharesOut}${n.stale ? " stale" : ""}` : "Unavailable"}</span></div>; })}</div>;
+  return <div className="quote-ladder"><div className="ladder-row ladder-head"><span>Size</span><span>YES fee-inclusive avg / shares</span><span>NO fee-inclusive avg / shares</span></div>{amounts.map((amount, index) => { const yes = queries[index * 2], no = queries[index * 2 + 1]; const y = yes.data?.state === "ready" ? yes.data.data : null; const n = no.data?.state === "ready" ? no.data.data : null; return <div className="ladder-row" key={amount}><span>{amount} Test USDC</span><span>{yes.isPending ? "Loading…" : y ? <>{y.averagePrice} / {y.sharesOut}{y.stale ? " stale" : ""}<small>impact {y.priceImpactBps} bps vs {market.referenceAmount} Test USDC reference · block {y.quotedAtBlock} · {formatUtc(y.quotedAt)}</small></> : "Unavailable"}</span><span>{no.isPending ? "Loading…" : n ? <>{n.averagePrice} / {n.sharesOut}{n.stale ? " stale" : ""}<small>impact {n.priceImpactBps} bps vs {market.referenceAmount} Test USDC reference · block {n.quotedAtBlock} · {formatUtc(n.quotedAt)}</small></> : "Unavailable"}</span></div>; })}</div>;
 }
 
 function PublicFills({ marketId }: { marketId: string }) {
@@ -181,7 +206,7 @@ function PublicFills({ marketId }: { marketId: string }) {
 
 function MarketLiquidityPanel({ market }: { market: TerminalMarket }) {
   const [tab, setTab] = useState<"QUOTES" | "FILLS">("QUOTES");
-  return <section className="quote-panel"><div className="panel-title"><div><span className="eyebrow">AMM liquidity</span><h2>Real pool evidence</h2></div><span>{formatUtc(market.poolQuotedAt)}</span></div><div className="panel-tabs" role="tablist" aria-label="Pool evidence"><button type="button" role="tab" aria-selected={tab === "QUOTES"} onClick={() => setTab("QUOTES")}>AMM quotes</button><button type="button" role="tab" aria-selected={tab === "FILLS"} onClick={() => setTab("FILLS")}>Recent public fills</button></div>{tab === "QUOTES" ? <QuoteLadder market={market} /> : <PublicFills marketId={market.marketId} />}</section>;
+  return <section className="quote-panel"><div className="panel-title"><div><span className="eyebrow">AMM liquidity</span><h2>Real pool evidence</h2></div><span>{formatUtc(market.poolQuotedAt)} · block {market.poolQuotedAtBlock}</span></div><div className="panel-tabs" role="tablist" aria-label="Pool evidence"><button type="button" role="tab" aria-selected={tab === "QUOTES"} onClick={() => setTab("QUOTES")}>AMM quotes</button><button type="button" role="tab" aria-selected={tab === "FILLS"} onClick={() => setTab("FILLS")}>Recent public fills</button></div>{tab === "QUOTES" ? <QuoteLadder market={market} /> : <PublicFills marketId={market.marketId} />}</section>;
 }
 
 function SelectedTerminal({ market, side, initialPublicAmount, onDirtyChange, draftResetKey }: { market: TerminalMarket; side: MarketSide; initialPublicAmount?: string; onDirtyChange: (dirty: boolean) => void; draftResetKey: number }) {
@@ -191,8 +216,10 @@ function SelectedTerminal({ market, side, initialPublicAmount, onDirtyChange, dr
       <section className="evidence-strip" aria-label="Market evidence">
         <div><span>Oracle price</span><strong>{market.oraclePriceUsd} USD</strong><small>{market.oracleSource} · {formatUtc(market.oracleObservedAt)}</small></div>
         <div><span>Strike</span><strong>{market.strikeUsd} USD</strong><small>Objective resolver threshold</small></div>
-        <div><span>Complete-set liquidity</span><strong>{market.completeSetDepth}</strong><small>Builder-seeded on Testnet · <a href={`https://sepolia.etherscan.io/tx/${market.liquidityProvenance.seedTransactionHash}`} target="_blank" rel="noreferrer">seed receipt</a></small></div>
+        <div><span>Outcome reference prices</span><strong>YES {market.yesAveragePrice} · NO {market.noAveragePrice}</strong><small>Test USDC per share for {market.referenceAmount} Test USDC</small></div>
+        <div><span>Complete-set liquidity</span><strong>{market.completeSetDepth} complete sets</strong><small>1 complete set = YES + NO and merges to 1 Test USDC · {market.feeBps === undefined ? "" : `${market.feeBps} bps pool fee · `}Builder-seeded on Testnet · <a href={`https://sepolia.etherscan.io/tx/${market.liquidityProvenance.seedTransactionHash}`} target="_blank" rel="noreferrer">seed receipt</a></small></div>
         <div><span>Objective resolution</span><strong>{formatUtc(market.resolvesAt)}</strong><small>NoxLimit orders close {formatUtc(market.tradingClosesAt)}</small></div>
+        {market.contracts ? <div><span>Verified contracts</span><strong>Bundle {market.contracts.version}</strong><small><a href={`https://sepolia.etherscan.io/address/${market.contracts.fpmm}`} target="_blank" rel="noreferrer">FPMM</a> · <a href={`https://sepolia.etherscan.io/address/${market.contracts.orderBook}`} target="_blank" rel="noreferrer">OrderBook</a> · <a href={`https://sepolia.etherscan.io/address/${market.contracts.resolver}`} target="_blank" rel="noreferrer">Resolver</a></small><details className="bundle-provenance"><summary>Condition identity</summary><code>{market.contracts.conditionId}</code></details></div> : null}
       </section>
       {market.oracleStale || market.poolStale ? <div className="notice warning" role="status"><strong>Live market data is stale</strong><p>Oracle or FPMM freshness is outside policy. New order review remains disabled until a fresh exact preflight succeeds.</p></div> : null}
       <MarketAnalysis market={market} />
@@ -228,6 +255,14 @@ const DEFAULT_FILTERS: StreamFilters = {
   sort: "CLOSING_SOON",
 };
 
+const MARKET_ASSETS = ["BTC/USD", "ETH/USD", "SOL/USD"] as const satisfies readonly MarketAsset[];
+
+function assetsIn(result: DataResult<MarketListPage>): MarketAsset[] {
+  if (result.state !== "ready") return [];
+  const present = new Set(result.data.items.map((market) => market.asset));
+  return MARKET_ASSETS.filter((asset) => present.has(asset));
+}
+
 function streamSignature(filters: StreamFilters): string {
   return `${filters.asset}|${filters.horizon}|${filters.lifecycle}|${filters.sort}`;
 }
@@ -254,12 +289,12 @@ function mergeInPlace(previous: DataResult<MarketListPage>, next: DataResult<Mar
   };
 }
 
-function FilterControls({ filters, open, onToggle, onChange }: { filters: StreamFilters; open: boolean; onToggle: () => void; onChange: (filters: StreamFilters) => void }) {
+function FilterControls({ filters, availableAssets, open, onToggle, onChange }: { filters: StreamFilters; availableAssets: readonly MarketAsset[]; open: boolean; onToggle: () => void; onChange: (filters: StreamFilters) => void }) {
   return <div className="stream-toolbar filter-toolbar">
     <div><span className="eyebrow">Discover</span><h1>Market Stream</h1></div>
     <button className="mobile-filter-toggle" type="button" aria-expanded={open} aria-controls="stream-filter-controls" onClick={onToggle}>Filter &amp; sort</button>
     <div className="stream-filter-controls" id="stream-filter-controls" data-open={open}>
-      <select aria-label="Asset filter" value={filters.asset} onChange={(event) => onChange({ ...filters, asset: event.target.value as StreamFilters["asset"] })}><option value="">All assets</option><option>BTC/USD</option><option>ETH/USD</option><option>SOL/USD</option></select>
+      <select aria-label="Asset filter" value={filters.asset} onChange={(event) => onChange({ ...filters, asset: event.target.value as StreamFilters["asset"] })}><option value="">All assets</option>{availableAssets.map((asset) => <option key={asset}>{asset}</option>)}</select>
       <select aria-label="Horizon filter" value={filters.horizon} onChange={(event) => onChange({ ...filters, horizon: event.target.value as StreamFilters["horizon"] })}><option value="">All horizons</option><option>1h</option><option>4h</option><option>24h</option></select>
       <select aria-label="Lifecycle filter" value={filters.lifecycle} onChange={(event) => onChange({ ...filters, lifecycle: event.target.value as StreamFilters["lifecycle"] })}><option value="LIVE">Live</option><option value="RESOLVING">Resolving</option><option value="RESOLVED">Resolved</option></select>
       <select aria-label="Sort markets" value={filters.sort} onChange={(event) => onChange({ ...filters, sort: event.target.value as StreamFilters["sort"] })}><option value="CLOSING_SOON">Closing soon</option><option value="RECENTLY_OPENED">Recently opened</option><option value="LIQUIDITY">Liquidity</option></select>
@@ -271,6 +306,7 @@ export function ProductShell({ result, initialMarketId, initialMarket, initialSi
   const router = useRouter();
   const online = useOnlineStatus();
   const [filters, setFilters] = useState<StreamFilters>(DEFAULT_FILTERS);
+  const [availableAssets, setAvailableAssets] = useState<MarketAsset[]>(() => assetsIn(result));
   const signature = streamSignature(filters);
   const stream = useQuery({
     queryKey: ["market-stream", filters.asset, filters.horizon, filters.lifecycle, filters.sort],
@@ -285,6 +321,10 @@ export function ProductShell({ result, initialMarketId, initialMarket, initialSi
   const [paginationError, setPaginationError] = useState<string | null>(null);
   useEffect(() => {
     if (!stream.data) return;
+    if (filters.asset === "" && stream.data.state === "ready") {
+      const isUnappliedRevision = committed.result.state === "ready" && committed.result.data.snapshot !== stream.data.data.snapshot;
+      if (!isUnappliedRevision) setAvailableAssets(assetsIn(stream.data));
+    }
     setCommitted((current) => {
       const next = stream.data!;
       if (current.signature !== signature) return { signature, result: next, loadedPages: 1 };
@@ -318,6 +358,10 @@ export function ProductShell({ result, initialMarketId, initialMarket, initialSi
       });
       if (next.state !== "ready") throw new Error(next.message);
       if (next.data.snapshot !== expectedSnapshot) throw new Error("The market snapshot changed while loading the next page. Refresh the ordering before continuing.");
+      if (filters.asset === "") {
+        const nextAssets = new Set([...availableAssets, ...assetsIn(next)]);
+        setAvailableAssets(MARKET_ASSETS.filter((asset) => nextAssets.has(asset)));
+      }
       setCommitted((current) => {
         if (current.signature !== expectedSignature || current.result.state !== "ready" || current.result.data.snapshot !== expectedSnapshot) return current;
         const known = new Set(current.result.data.items.map((market) => market.marketId));
@@ -343,6 +387,7 @@ export function ProductShell({ result, initialMarketId, initialMarket, initialSi
     }
   };
   const applyRankingRefresh = () => {
+    if (filters.asset === "" && committed.refreshCandidate) setAvailableAssets(assetsIn(committed.refreshCandidate));
     setCommitted((current) => current.refreshCandidate
       ? { signature: current.signature, result: current.refreshCandidate, loadedPages: 1 }
       : current);
@@ -588,7 +633,7 @@ export function ProductShell({ result, initialMarketId, initialMarket, initialSi
 
   return <div className={`product-grid ${workspaceOpen ? "trade-workspace-active" : ""}`}>
     <aside className="market-stream" aria-label="Market Stream" aria-busy={stream.isFetching}>
-      <FilterControls filters={filters} open={filtersOpen} onToggle={() => setFiltersOpen((value) => !value)} onChange={requestFilters} />
+      <FilterControls filters={filters} availableAssets={availableAssets} open={filtersOpen} onToggle={() => setFiltersOpen((value) => !value)} onChange={requestFilters} />
       <p className="stream-runtime-status" role="status">{!online ? "Offline · showing the last verified snapshot" : committed.refreshCandidate ? "A new deterministic ordering is ready" : stream.isFetching ? "Refreshing verified market data…" : `Snapshot current · ${items.length} market${items.length === 1 ? "" : "s"}`}{committed.refreshCandidate ? <button type="button" onClick={applyRankingRefresh}>Refresh order</button> : null}</p>
       {effectiveResult.state === "ready" ? effectiveResult.data.items.map((market, index) => <MarketCard
         key={market.marketId}

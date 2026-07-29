@@ -84,6 +84,8 @@ export function PrivateOrderFlow({ market, initialSide, initialAmount = "", onDi
     queryKey: ["market", market.marketId],
     queryFn: () => getMarketDetail(market.marketId),
     staleTime: 15_000,
+    refetchInterval: stage === "REVIEW" ? 2_000 : false,
+    refetchIntervalInBackground: false,
     retry: false,
   });
   const monitoringPolicy = useQuery({
@@ -101,6 +103,20 @@ export function PrivateOrderFlow({ market, initialSide, initialAmount = "", onDi
       return { maximumEvaluations: Number(maximumEvaluations), minimumEvaluationInterval: Number(minimumEvaluationInterval) };
     },
   });
+  const marketReadyForReview = market.tradeability === "TRADEABLE"
+    && detail.data?.state === "ready"
+    && detail.data.data.tradeability === "TRADEABLE"
+    && !detail.data.data.oracle.stale
+    && !detail.data.data.pool.stale;
+  const marketReadinessMessage = detail.isPending
+    ? "Verifying the exact market, evaluator, oracle, pool, and indexer state before review."
+    : detail.data?.state !== "ready"
+      ? detail.data?.message ?? "Verified market state is unavailable."
+      : detail.data.data.tradeability !== "TRADEABLE"
+        ? `New order review is unavailable: ${detail.data.data.tradeabilityReasons.map((reason) => reason.replaceAll("_", " ").toLowerCase()).join(", ") || detail.data.data.tradeability.toLowerCase()}.`
+        : detail.data.data.oracle.stale || detail.data.data.pool.stale
+          ? "New order review is unavailable until the oracle and pool quote are fresh."
+          : null;
   let requestedAmountAtoms: bigint | null = null;
   try { if (amount) requestedAmountAtoms = decimalToAtoms(amount, TEST_USDC_DECIMALS); } catch { /* Input validation owns the user-facing error. */ }
   const orderCollateralInsufficient = requestedAmountAtoms !== null
@@ -349,16 +365,17 @@ export function PrivateOrderFlow({ market, initialSide, initialAmount = "", onDi
       {stage === "CONFIRMED" && transactionHash ? <div className="notice"><strong>Creation receipt confirmed</strong><p>Transaction <a href={`https://sepolia.etherscan.io/tx/${transactionHash}`} target="_blank" rel="noreferrer">{transactionHash.slice(0, 12)}…</a>. Durable order identity is reconstructed from the confirmed event.</p></div> : null}
       {receiptProgress?.state === "REPLACED" ? <div className="notice" role="status"><strong>Transaction {receiptProgress.reason}</strong><p>Tracking replacement <a href={`https://sepolia.etherscan.io/tx/${receiptProgress.hash}`} target="_blank" rel="noreferrer">{receiptProgress.hash.slice(0, 12)}…</a>.</p></div> : null}
       {receiptProgress?.state === "UNCONFIRMED" ? <div className="notice warning" role="alert"><strong>Submitted transaction remains locked</strong><p>This exact transaction may still confirm. NoxLimit is checking <a href={`https://sepolia.etherscan.io/tx/${receiptProgress.hash}`} target="_blank" rel="noreferrer">{receiptProgress.hash.slice(0, 12)}…</a> and will not expose another create action.</p></div> : null}
+      {stage !== "CONFIRMED" && !marketReadyForReview && marketReadinessMessage ? <div className="notice warning" role="status"><strong>Market preflight</strong><p>{marketReadinessMessage}</p></div> : null}
       {stage !== "CONFIRMED" ? <>
         <div className="side-control" role="group" aria-label="Outcome side">{(["YES", "NO"] as const).map((value) => <button key={value} type="button" disabled={busy || stage === "REVIEW"} aria-pressed={side === value} onClick={() => { setSide(value); resetReview(); }}><OutcomeGlyph side={value} /> Buy {value}</button>)}</div>
         <label>Public amount <span>Test USDC</span><input inputMode="decimal" disabled={busy || stage === "REVIEW"} value={amount} onChange={(event) => { setAmount(event.target.value); resetReview(); }} placeholder="0.000000" /></label>
         <label className="private-field">Private maximum price <span>Test USDC / share</span><input inputMode="decimal" autoComplete="off" disabled={busy || stage === "REVIEW"} value={privateMaximum} onChange={(event) => { setPrivateMaximum(event.target.value); resetReview(); }} placeholder="Derives encrypted minimum shares" /></label>
         <p className="privacy-short">The raw maximum stays in this browser’s memory. Its locally derived minimum-share bound is encrypted for Nox while the order rests—not invisible—and neither value reaches the NoxLimit API.</p>
         <label>Order expiry<select disabled={busy || stage === "REVIEW"} value={expiryPreset} onChange={(event) => { setExpiryPreset(event.target.value); resetReview(); }}><option value="10m">10 minutes</option><option value="30m">30 minutes</option><option value="1h">1 hour</option></select></label>
-        <dl className="ticket-summary"><div><dt>Current pool quote</dt><dd>{side === "YES" ? market.yesAveragePrice : market.noAveragePrice}</dd></div><div><dt>Minimum shares</dt><dd>{review ? `${atomsToDecimal(review.minOut, TEST_USDC_DECIMALS)} ${side}` : "Calculated at review"}</dd></div><div><dt>Fresh size-aware quote</dt><dd>{review ? `${review.quote.sharesOut} ${side}` : "Required before encryption"}</dd></div></dl>
+        <dl className="ticket-summary"><div><dt>Current pool quote</dt><dd>{side === "YES" ? market.yesAveragePrice : market.noAveragePrice}</dd></div><div><dt>Minimum shares</dt><dd>{review ? `${atomsToDecimal(review.minOut, TEST_USDC_DECIMALS)} ${side}` : "Calculated at review"}</dd></div><div><dt>Minimum protected winning redemption</dt><dd>{review ? `${atomsToDecimal(review.minOut, TEST_USDC_DECIMALS)} Test USDC` : "Calculated at review"}<small>If this side wins; a better fill can redeem more.</small></dd></div><div><dt>Fresh size-aware quote</dt><dd>{review ? `${review.quote.sharesOut} ${side}` : "Required before encryption"}</dd></div></dl>
         {review ? <div className="review-ticket"><span className="eyebrow">Direct route</span><p>The raw maximum remains in browser memory. Browser → official Nox Gateway sends only its locally derived minimum-share bound for encryption. The application API receives neither value. If publication succeeds, the derived minimum-share bound becomes public before any fill.</p><p><strong>Market:</strong> {market.question}</p><p><strong>Owner and immutable recipient:</strong> <code>{address}</code></p><p><strong>Public order:</strong> {side} · {amount} Test USDC · expires {new Date(Number(review.expiresAt) * 1_000).toLocaleString()}</p><p><strong>Pool fee:</strong> {detail.data?.state === "ready" ? `${detail.data.data.pool.feeBps} bps` : "Unavailable"}</p><p><strong>Monitoring budget:</strong> {monitoringPolicy.data ? `${monitoringPolicy.data.maximumEvaluations} confidential checks, at least ${monitoringPolicy.data.minimumEvaluationInterval} seconds apart` : monitoringPolicy.isPending ? "Reading the bound OrderBook…" : "Unavailable—final submission remains disabled"}</p></div> : null}
         {error || handleError ? <div className="notice warning" role="alert"><strong>Action unavailable</strong><p>{error ?? handleError}</p></div> : null}
-        {stage === "REVIEW" ? <div className="ticket-actions"><button className="button secondary" type="button" onClick={resetReview}>Edit</button><button className="button primary" type="button" disabled={!funding.ready || orderCollateralInsufficient || !monitoringPolicy.data || !handleClient || handlePending} onClick={createOrder}>{handlePending ? "Preparing Nox Gateway…" : "Send to Nox and continue"}</button></div> : stage === "SUBMITTED_UNCONFIRMED" ? <button className="button secondary" type="button" disabled={pendingReceipt.isFetching} onClick={() => void pendingReceipt.refetch()}>{pendingReceipt.isFetching ? "Checking exact receipt…" : "Check exact receipt"}</button> : <button className="button primary" type="button" disabled={busy || !funding.ready || orderCollateralInsufficient || !amount || !privateMaximum} onClick={createReview}>{busy ? stage.toLowerCase() + "…" : "Review private order"}</button>}
+        {stage === "REVIEW" ? <div className="ticket-actions"><button className="button secondary" type="button" onClick={resetReview}>Edit</button><button className="button primary" type="button" disabled={!marketReadyForReview || !funding.ready || orderCollateralInsufficient || !monitoringPolicy.data || !handleClient || handlePending} onClick={createOrder}>{handlePending ? "Preparing Nox Gateway…" : "Send to Nox and continue"}</button></div> : stage === "SUBMITTED_UNCONFIRMED" ? <button className="button secondary" type="button" disabled={pendingReceipt.isFetching} onClick={() => void pendingReceipt.refetch()}>{pendingReceipt.isFetching ? "Checking exact receipt…" : "Check exact receipt"}</button> : <button className="button primary" type="button" disabled={busy || !marketReadyForReview || !funding.ready || orderCollateralInsufficient || !amount || !privateMaximum} title={!marketReadyForReview ? "Waiting for a verified, fresh, tradeable market preflight" : undefined} onClick={createReview}>{busy ? stage.toLowerCase() + "…" : "Review private order"}</button>}
         <p className="small">Approval and order creation are separate wallet transactions when allowance is insufficient. No success appears before a mined receipt.</p>
       </> : <button className="button secondary" type="button" onClick={resetReview}>Create another order</button>}
     </aside>

@@ -26,8 +26,12 @@ export type TerminalMarket = Readonly<{
   oracleSource: string;
   yesAveragePrice: string;
   noAveragePrice: string;
+  referenceAmount: "1.000000";
   completeSetDepth: string;
   poolQuotedAt: string;
+  poolQuotedAtBlock: string;
+  feeBps?: number;
+  contracts?: MarketView["contracts"];
   oracleStale: boolean;
   poolStale: boolean;
   liquidityProvenance: LiquidityProvenance;
@@ -51,8 +55,10 @@ export function terminalMarketFromStream(market: MarketStreamCardView): Terminal
     oracleSource: market.preview.mode === "UNDERLYING" ? market.preview.source : "Verified resolver feed",
     yesAveragePrice: market.yesAveragePrice,
     noAveragePrice: market.noAveragePrice,
+    referenceAmount: market.referenceAmount,
     completeSetDepth: market.completeSetDepth,
     poolQuotedAt: market.poolQuotedAt,
+    poolQuotedAtBlock: market.poolQuotedAtBlock,
     oracleStale: market.oracleStale,
     poolStale: market.poolStale,
     liquidityProvenance: market.liquidityProvenance,
@@ -76,8 +82,12 @@ export function terminalMarketFromDetail(market: MarketView): TerminalMarket {
     oracleSource: market.oracle.source,
     yesAveragePrice: market.pool.yesAveragePrice,
     noAveragePrice: market.pool.noAveragePrice,
+    referenceAmount: market.pool.referenceAmount,
     completeSetDepth: market.pool.completeSetDepth,
     poolQuotedAt: market.pool.quotedAt,
+    poolQuotedAtBlock: market.pool.quotedAtBlock,
+    feeBps: market.pool.feeBps,
+    contracts: market.contracts,
     oracleStale: market.oracle.stale,
     poolStale: market.pool.stale,
     liquidityProvenance: market.pool.liquidityProvenance,
