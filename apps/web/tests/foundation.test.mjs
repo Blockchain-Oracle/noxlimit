@@ -124,7 +124,7 @@ test("browser fixtures are isolated from production imports", async () => {
 
 test("runtime variables are documented without secrets", async () => {
   const env = await read(".env.example");
-  for (const key of ["NEXT_PUBLIC_NOXLIMIT_API_ORIGIN", "NEXT_PUBLIC_SEPOLIA_RPC_URL", "NEXT_PUBLIC_TEST_USDC_ADDRESS", "NEXT_PUBLIC_FUNDING_TARGET_ETH", "NEXT_PUBLIC_FUNDING_TARGET_USDC"]) assert.match(env, new RegExp(key));
+  for (const key of ["NEXT_PUBLIC_NOXLIMIT_API_ORIGIN", "NEXT_PUBLIC_SEPOLIA_RPC_URL", "NEXT_PUBLIC_TEST_USDC_ADDRESS", "NEXT_PUBLIC_TRADING_MIN_ETH", "NEXT_PUBLIC_TRADING_MIN_USDC"]) assert.match(env, new RegExp(key));
   assert.doesNotMatch(env, /PRIVATE_KEY|SECRET|PASSWORD/);
 });
 

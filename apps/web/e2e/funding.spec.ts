@@ -12,8 +12,8 @@ async function openFundingFromUnderfundedTicket(page: Page) {
   await connectInjectedWallet(page);
   const ticket = page.getByLabel("Private order ticket");
   await expect(ticket.getByRole("alert")).toContainText("Test funds required");
-  await expect(ticket).toContainText("0 ETH / target 0.01");
-  await expect(ticket).toContainText("0 USDC / target 25");
+  await expect(ticket).toContainText("0 ETH / trading minimum 0.005");
+  await expect(ticket).toContainText("0 USDC / trading minimum 0.01");
   await ticket.getByRole("link", { name: "Open test funding" }).click();
   await expect(page).toHaveURL("/funding");
   await expect(page.getByRole("heading", { name: "One wallet. No faucet hunt." })).toBeVisible();

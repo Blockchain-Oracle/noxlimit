@@ -39,17 +39,17 @@ type SnapshotInput = {
   isConnected: boolean;
   chainId: number;
   collateralAddressConfigured: boolean;
-  nativeTarget: string | undefined;
-  collateralTarget: string | undefined;
-  nativeTargetAtoms: bigint | null;
-  collateralTargetAtoms: bigint | null;
+  nativeMinimum: string | undefined;
+  collateralMinimum: string | undefined;
+  nativeMinimumAtoms: bigint | null;
+  collateralMinimumAtoms: bigint | null;
   nativeBalance: bigint | undefined;
   collateralBalance: bigint | undefined;
   checking: boolean;
   failed: boolean;
 };
 
-function targetAtoms(value: string | undefined, decimals: number) {
+function minimumAtoms(value: string | undefined, decimals: number) {
   try {
     return value ? decimalToAtoms(value, decimals) : null;
   } catch {
@@ -58,22 +58,22 @@ function targetAtoms(value: string | undefined, decimals: number) {
 }
 
 function fundingBalanceSnapshot(input: SnapshotInput): FundingBalanceSnapshot {
-  const nativeReady = input.nativeTargetAtoms !== null
+  const nativeReady = input.nativeMinimumAtoms !== null
     && input.nativeBalance !== undefined
-    && input.nativeBalance >= input.nativeTargetAtoms;
-  const collateralReady = input.collateralTargetAtoms !== null
+    && input.nativeBalance >= input.nativeMinimumAtoms;
+  const collateralReady = input.collateralMinimumAtoms !== null
     && input.collateralBalance !== undefined
-    && input.collateralBalance >= input.collateralTargetAtoms;
+    && input.collateralBalance >= input.collateralMinimumAtoms;
   const balancesMeasured = input.nativeBalance !== undefined
     && input.collateralBalance !== undefined
-    && input.nativeTargetAtoms !== null
-    && input.collateralTargetAtoms !== null;
+    && input.nativeMinimumAtoms !== null
+    && input.collateralMinimumAtoms !== null;
   const items = [
     {
       key: "NATIVE" as const,
       label: "Sepolia ETH",
       copy: input.nativeBalance !== undefined
-        ? `${formatEther(input.nativeBalance)} ETH${input.nativeTarget ? ` / target ${input.nativeTarget}` : " / target not configured"}`
+        ? `${formatEther(input.nativeBalance)} ETH${input.nativeMinimum ? ` / trading minimum ${input.nativeMinimum}` : " / minimum not configured"}`
         : input.checking ? "Measuring onchain balance…" : "Balance unavailable",
       ready: nativeReady,
     },
@@ -81,7 +81,7 @@ function fundingBalanceSnapshot(input: SnapshotInput): FundingBalanceSnapshot {
       key: "COLLATERAL" as const,
       label: "Test USDC",
       copy: input.collateralBalance !== undefined
-        ? `${formatUnits(input.collateralBalance, TEST_USDC_DECIMALS)} USDC${input.collateralTarget ? ` / target ${input.collateralTarget}` : " / target not configured"}`
+        ? `${formatUnits(input.collateralBalance, TEST_USDC_DECIMALS)} USDC${input.collateralMinimum ? ` / trading minimum ${input.collateralMinimum}` : " / minimum not configured"}`
         : input.collateralAddressConfigured
           ? input.checking ? "Measuring onchain balance…" : "Balance unavailable"
           : "Token address not configured",
@@ -99,8 +99,8 @@ function fundingBalanceSnapshot(input: SnapshotInput): FundingBalanceSnapshot {
   if (input.chainId !== sepolia.id) {
     return { status: "WRONG_NETWORK", ready: false, balancesMeasured, fundingNeeded: false, message: "Switch the connected wallet to Ethereum Sepolia before reviewing an order.", items, ...measured };
   }
-  if (!walletRuntimeConfigured || !input.collateralAddressConfigured || input.nativeTargetAtoms === null || input.collateralTargetAtoms === null) {
-    return { status: "CONFIGURATION_MISSING", ready: false, balancesMeasured, fundingNeeded: false, message: "This deployment cannot verify its Test ETH and Test USDC targets. Trading remains disabled until test-funding configuration is available.", items, ...measured };
+  if (!walletRuntimeConfigured || !input.collateralAddressConfigured || input.nativeMinimumAtoms === null || input.collateralMinimumAtoms === null) {
+    return { status: "CONFIGURATION_MISSING", ready: false, balancesMeasured, fundingNeeded: false, message: "This deployment cannot verify its Test ETH and Test USDC trading minimums. Trading remains disabled until test-funding configuration is available.", items, ...measured };
   }
   if (input.failed) {
     return { status: "UNAVAILABLE", ready: false, balancesMeasured, fundingNeeded: false, message: "The current onchain balances could not be verified. Retry from the test-funding page before trading.", items, ...measured };
@@ -111,7 +111,7 @@ function fundingBalanceSnapshot(input: SnapshotInput): FundingBalanceSnapshot {
   if (!nativeReady || !collateralReady) {
     const missing = [!nativeReady ? "Sepolia ETH" : null, !collateralReady ? "Test USDC" : null].filter(Boolean).join(" and ");
     const verb = !nativeReady && !collateralReady ? "are" : "is";
-    return { status: "INSUFFICIENT", ready: false, balancesMeasured, fundingNeeded: true, message: `${missing} ${verb} below this deployment’s configured test-funding target. Request an explicit bounded top-up before reviewing the order.`, items, ...measured };
+    return { status: "INSUFFICIENT", ready: false, balancesMeasured, fundingNeeded: true, message: `${missing} ${verb} below this deployment’s configured trading minimum. Request an explicit bounded top-up before reviewing the order.`, items, ...measured };
   }
   return { status: "READY", ready: true, balancesMeasured, fundingNeeded: false, message: "Sepolia gas and Test USDC are ready for the normal wallet-signed order flow.", items, ...measured };
 }
@@ -121,10 +121,12 @@ export function useFundingBalanceReadiness() {
   const chainId = useChainId();
   const collateralAddressValue = process.env.NEXT_PUBLIC_TEST_USDC_ADDRESS?.trim();
   const collateralAddress = collateralAddressValue && isAddress(collateralAddressValue) ? collateralAddressValue : undefined;
-  const nativeTarget = process.env.NEXT_PUBLIC_FUNDING_TARGET_ETH?.trim();
-  const collateralTarget = process.env.NEXT_PUBLIC_FUNDING_TARGET_USDC?.trim();
-  const nativeTargetAtoms = targetAtoms(nativeTarget, 18);
-  const collateralTargetAtoms = targetAtoms(collateralTarget, TEST_USDC_DECIMALS);
+  // These are readiness floors, not the treasury's larger top-up targets. Spending one normal
+  // order must not immediately relabel a correctly funded wallet as underfunded.
+  const nativeMinimum = process.env.NEXT_PUBLIC_TRADING_MIN_ETH?.trim();
+  const collateralMinimum = process.env.NEXT_PUBLIC_TRADING_MIN_USDC?.trim();
+  const nativeMinimumAtoms = minimumAtoms(nativeMinimum, 18);
+  const collateralMinimumAtoms = minimumAtoms(collateralMinimum, TEST_USDC_DECIMALS);
   const nativeBalance = useBalance({
     address,
     chainId: sepolia.id,
@@ -149,15 +151,15 @@ export function useFundingBalanceReadiness() {
     isConnected,
     chainId,
     collateralAddressConfigured: Boolean(collateralAddress),
-    nativeTarget,
-    collateralTarget,
-    nativeTargetAtoms,
-    collateralTargetAtoms,
+    nativeMinimum,
+    collateralMinimum,
+    nativeMinimumAtoms,
+    collateralMinimumAtoms,
     nativeBalance: input.native,
     collateralBalance: input.collateral,
     checking: input.checking,
     failed: input.failed,
-  }), [address, chainId, collateralAddress, collateralTarget, collateralTargetAtoms, isConnected, nativeTarget, nativeTargetAtoms]);
+  }), [address, chainId, collateralAddress, collateralMinimum, collateralMinimumAtoms, isConnected, nativeMinimum, nativeMinimumAtoms]);
 
   const snapshot = snapshotFor({
     native: nativeBalance.data?.value,
