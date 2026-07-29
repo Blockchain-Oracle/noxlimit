@@ -3,7 +3,9 @@
 Status: **PARTIAL/DEGRADED — one complete BTC user order → Nox → FPMM → objective resolution →
 winning-user redemption path and builder-LP redemption are verified. ETH is terminally rejected by
 its immutable one-hour observation-delay policy; no ETH write, payout, or winner exists. Public
-hosting remains pending.**
+hosting remains pending. Corrected 14,400-second BTC/ETH successors are deployed, validated, seeded,
+and staged `SUCCESSOR` in revisions `6`/`7`, but revision `5` remains the active routing until one
+atomic revision-`8` cutover at the shared close/start boundary.**
 
 This file is an operational verification log, not a new architecture or decision authority.
 Current product authority remains `.thoughts/decisions/CURRENT.md` and the canonical architecture.
@@ -22,6 +24,30 @@ The later paired cutover at commit `c073643` publishes current runtime revision 
 `0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`.
 It marks both original bundles below `RETIRED` and both verified successors `ACTIVE`. Those active
 successors also use the now-known-risky immutable 3,600-second observation bound.
+
+Commit `d2dbc39` records corrected successors deployed and staged without changing current routing:
+
+- catalog revision `6` at
+  `packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json`, hash
+  `0x1adb2085979fe9f9f94d5fad6793de7d808888e32cf5fa259d92a25b34b7693b`, stages corrected BTC
+  market `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2` as
+  `SUCCESSOR`;
+- catalog revision `7` at
+  `packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json`, hash
+  `0xe20fc416f695552619d5701ece6b4dd05ad934890387807551237b5fb424dcca`, carries BTC forward and
+  stages corrected ETH market
+  `0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a` as `SUCCESSOR`;
+- both corrected markets bind `maximumObservationDelaySeconds = 14400`, and independent validation
+  records 50,000,000 YES atoms, 50,000,000 NO atoms, and 50,000,000 LP shares for each;
+- both current revision-5 routes close, and both corrected successors start, at
+  `2026-07-29T13:50:00Z`. Revisions `6` and `7` are staging manifests only. A future revision `8`
+  must retire both revision-5 IDs and activate both corrected IDs atomically after the boundary.
+
+The synchronized inputs and deployment receipts are:
+
+- [corrected successor strike plan](../evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json);
+- [corrected BTC deployment evidence](../evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json);
+- [corrected ETH deployment evidence](../evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json).
 
 Shared product contracts:
 
@@ -106,6 +132,8 @@ The implementation now enforces `maximumObservationDelaySeconds >= 14,400` for a
 Sepolia BTC/ETH deployments. This liveness floor preserves the same unique first-observation pair;
 the separate runtime quote-freshness policy remains 3,600 seconds. Existing resolver identities,
 including both active revision-5 successors, cannot be edited in place.
+The corrected BTC/ETH successor deployments exercise this rule with distinct immutable identities;
+their staged status does not make them current before the atomic revision-8 cutover.
 
 ## Fail-closed recovery record
 
@@ -144,8 +172,10 @@ Changing only the transport did not change the journal plan hash.
 1. Preserve the completed BTC proof and terminal ETH rejection; do not poll or write the retired
    ETH resolver, infer an ETH winner, or substitute a later round.
 2. Treat revision `5` as current routing with a disclosed liveness risk on both active successors.
-   Any release replacement must be a new resolver-first deployment with at least 14,400 seconds,
-   immutable verification, and a hash-linked successor cutover.
+   Keep the corrected 14,400-second replacements staged in revisions `6`/`7`; at/after
+   `2026-07-29T13:50:00Z`, publish and adopt one hash-linked revision `8` that retires and activates
+   both axes atomically. Do not activate one corrected market independently or serve either staging
+   revision as current.
 3. Provision exactly one durable public service replica and the public web deployment; require
    overall, evaluator, funding, and catalog health `READY` at the published URLs.
 4. Run the final submission-commit root/browser gates and publish only evidence-backed repository,

@@ -38,6 +38,20 @@ revision-5 successors also carry the known 3,600-second liveness risk. Public fr
 the video, X post, and submission form/contact fields are pending. Local container build/smoke
 evidence is not public hosting.
 
+Corrected replacements are now deployed, validated, and seeded with 50,000,000 YES and 50,000,000
+NO atoms each. BTC market
+`0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2` is staged
+`SUCCESSOR` in catalog revision `6`; ETH market
+`0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a` is added as
+`SUCCESSOR` in revision `7`; commit `d2dbc39` records both staging revisions. Both use a
+14,400-second observation bound. Their synchronized source is the
+[corrected strike plan](.thoughts/evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json),
+with [BTC](.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json)
+and [ETH](.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json)
+deployment evidence. Both current revision-5 routes close and both corrected successors start at
+`2026-07-29T13:50:00Z`. Revisions `6`/`7` are staging manifests only: revision `5` remains current
+until one atomic revision `8` retires both risky active IDs and activates both corrected IDs.
+
 The bounded operator uses a plan-bound, cross-process-locked deployment journal with frozen
 ordered steps and funding, `INTENT → SUBMITTED → CONFIRMED`, attempt-bound explicit `ADOPT`/`RETRY`
 recovery, secret rejection, and hash-verified create-only outputs. It also enforces exact canonical
@@ -46,9 +60,9 @@ BTC/ETH deployments enforce a 14,400-second minimum observation-delay bound whil
 same unique first-observation adjacency proof; runtime oracle quote freshness remains independently
 3,600 seconds. Preserve the completed BTC evidence and terminal ETH rejection. Do not poll or write
 the retired ETH resolver again, and do not substitute a later round. Treat the active revision-5
-successors as current routing with disclosed liveness risk and keep the public release gated until
-that risk is replaced or explicitly retired. Any replacement must use the existing resolver-first,
-create-only successor workflow and the new floor.
+successors as current routing with disclosed liveness risk. Keep the corrected successors staged
+until the shared boundary, then publish/adopt exactly one hash-linked revision `8` for the paired
+cutover. Do not activate one asset independently or serve revision `6`/`7` as current.
 
 ## Working Rules
 
@@ -203,6 +217,9 @@ silently guessing from memory.
   complete BTC browser-to-user/LP-redemption vertical. ETH is a terminal immutable-policy rejection,
   not pending settlement or a second winner. Durable public hosting and submission assets remain
   unverified, and the active revision-5 successors retain a disclosed one-hour liveness risk.
+  Corrected 14,400-second replacements are verified/seeded and staged in revisions `6`/`7`, not
+  active; the next authorized catalog mutation is the atomic revision-8 cutover after the shared
+  `2026-07-29T13:50:00Z` boundary.
 - Do not create a second NoxLimit architecture. Update the canonical architecture when executable
   evidence requires a change.
 - Do not inherit the independent audit's claim that every failed evaluation needs an explicit

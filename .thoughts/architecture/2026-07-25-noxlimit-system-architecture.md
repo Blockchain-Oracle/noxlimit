@@ -1,13 +1,15 @@
 # NoxLimit System Architecture
 
-**Date:** 2026-07-25; revised 2026-07-29 through Phase 6 settlement-policy reconciliation
+**Date:** 2026-07-25; revised 2026-07-29 through Phase 6 corrected-successor staging
 **Authority:** Canonical architecture for the selected hackathon direction and bounded critical-path
 verification  
 **Maturity:** User-approved; bounded Gate C critical path verified (`GO`); polished contracts,
 protocol, catalog, service, web, and bounded operator hardening verified; live BTC/ETH deployment,
 three browser-off fills, predecessor LP close, and paired successor activation committed; one full
 BTC browser-resolution/user-redemption/LP-redemption vertical verified; ETH terminally rejected by
-its immutable one-hour observation bound; public hosting and submission assets pending
+its immutable one-hour observation bound; corrected 14,400-second BTC/ETH successors deployed,
+verified, seeded, and staged for an atomic revision-8 cutover; public hosting and submission assets
+pending
 **Spike substrate:** Unmodified Gnosis Conditional Tokens + Fixed Product Market Maker on Ethereum
 Sepolia
 
@@ -71,6 +73,16 @@ The product deployment has advanced beyond local readiness on branch
   payout remain unset, so ETH user and LP positions remain unredeemable;
 - both active revision-5 successors are still the current catalog routes and inherit the same known
   3,600-second settlement-liveness risk;
+- corrected BTC market
+  `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2`
+  is deployed, immutable-validated, seeded with 50,000,000 YES / 50,000,000 NO atoms, and staged
+  `SUCCESSOR` in catalog revision `6`; corrected ETH market
+  `0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a`
+  has the same verified seed and is added as `SUCCESSOR` in revision `7`;
+- both corrected resolvers use the enforced 14,400-second bound and start at the shared revision-5
+  close / successor-cutover boundary `2026-07-29T13:50:00Z`. Revisions `6` and `7` are staging
+  manifests only: revision `5` remains live until revision `8` retires both risky active IDs and
+  activates both corrected IDs in one atomic cutover;
 - the exercised service reported `READY`; this is runtime evidence, not a public-hosting claim;
 - fresh root `pnpm check` passes contracts `77`, protocol `14`, catalog `6`, service `65`, and web
   `61` tests (`223` total), including compile, type-check, test, and build; subsequent service/web
@@ -81,6 +93,11 @@ This establishes one complete BTC product vertical, not a paired BTC/ETH complet
 [`../evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-redemption.json`](../evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-redemption.json),
 and
 [`../evidence/2026-07-29-sepolia-eth-usd-4h-resolution-policy-rejection.json`](../evidence/2026-07-29-sepolia-eth-usd-4h-resolution-policy-rejection.json).
+The corrected deployment state is anchored by
+[`../evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json`](../evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json),
+[`../evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json`](../evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json),
+and
+[`../evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json`](../evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json).
 No later ETH round may be substituted and no rejected observation may be presented as a winner.
 Public frontend/service URLs, video, X post, and form/contact fields remain unverified.
 
@@ -312,6 +329,10 @@ and two missed roughly-hourly reports while the adjacency proof still identifies
 chronological observation. The public quote-freshness policy remains separately 3,600 seconds; it
 must not be widened merely because the settlement-liveness bound is wider. Existing deployed
 resolvers cannot be repaired in place because the bound participates in immutable market identity.
+The corrected BTC/ETH deployments demonstrate this replacement rule: each is a distinct
+resolver-first market identity with a 14,400-second bound, verified 50,000,000-atom complete-set
+seed, and `SUCCESSOR` routing. Their shared `startsAt = 2026-07-29T13:50:00Z` matches the close of
+both current revision-5 routes, allowing only a synchronized post-close activation revision.
 
 SOL/USD uses a Pyth historical-price adapter only after a dedicated live test proves the exact
 update-verification, publish-time window, fee, decimals/exponent normalization, and one-shot
@@ -637,6 +658,10 @@ live Ethereum Sepolia:
 - future official Sepolia BTC/ETH deployments now fail configuration below a 14,400-second
   observation-delay minimum; the active revision-5 successors predate that guard and retain their
   known 3,600-second risk;
+- corrected BTC/ETH successors now pass that floor, immutable binding validation, and real
+  50,000,000 YES / 50,000,000 NO seeding. Revisions `6` and `7` stage them as `SUCCESSOR`; revision
+  `5` remains the runtime route until the synchronized revision-`8` cutover at/after
+  `2026-07-29T13:50:00Z`;
 - reproducible service and web container builds plus local smoke checks pass; this remains local
   release evidence, not a public-hosting claim;
 - the six local `Complement` HTML files are the durable design source; their sample data is not
@@ -651,8 +676,9 @@ remains valid evidence and is not reclassified as the final product bundle.
 - preserve the complete BTC proof and the ETH terminal rejection; do not poll, resolve, or invent a
   payout for the retired ETH condition and do not substitute a later favorable round;
 - treat both active revision-5 successors as current routing with an explicitly disclosed
-  3,600-second liveness risk; future/replacement bundles must use the enforced 14,400-second minimum
-  and the same resolver-first immutable verification/cutover workflow;
+  3,600-second liveness risk; keep the verified corrected successors staged in revisions `6`/`7`
+  until the shared close, then publish one revision `8` that retires and activates both axes
+  atomically. Do not activate one asset independently or serve a staging manifest as current;
 - keep SOL absent until its separate Pyth live gate passes;
 - provision and verify durable public web/service hosting, then publish final deployment evidence,
   limitations, privacy boundary, video, X post, and organizer form/contact fields.
@@ -855,7 +881,8 @@ and terminal cleanup on Ethereum Sepolia. The owner/deployer funded finalizer ga
 creation. The Phase 6 product evidence now adds bounded user funding, serialized browser-off worker
 writes, three real fills, predecessor LP close, verified successor cutover, one complete BTC
 browser/user/LP redemption vertical, and one honest terminal ETH policy rejection. Durable public
-hosting and replacement of the revision-5 one-hour successor risk remain live-release work.
+hosting and the atomic revision-8 activation of the already-staged corrected successors remain
+live-release work.
 
 The DeepBook research establishes the product/terminal/API patterns and the boundary between its
 real CLOB mechanics and NoxLimit's FPMM mechanics. The post-gate reconciliation records the
@@ -870,10 +897,13 @@ explicitly authorized Codex to build the polished product. The product now has o
 vertical and one terminal ETH policy-rejection trace. Preserve both outcomes: do not keep polling or
 write the retired ETH resolver, do not infer an ETH winner, and do not substitute a later round.
 Revision `5` remains the current catalog routing, but both active successors retain the disclosed
-3,600-second liveness risk. Any release replacement must be deployed resolver-first with the new
-14,400-second minimum, immutable verification, and a new hash-linked cutover revision. Local
-container builds and smoke checks pass; public hosting, video, X, and organizer form/contact fields
-remain pending release work. Work continues from the current implementation and accepted product-
-surface contract rather than restarting discovery, repeating Gate C, or creating a competing
-design. Executable evidence may refine this architecture; it may not silently replace the product,
-privacy boundary, or hackathon risk standard.
+3,600-second liveness risk. Their corrected replacements are already deployed resolver-first,
+immutable-verified, seeded, and staged `SUCCESSOR` in revisions `6`/`7`, with the enforced
+14,400-second bound and a shared `2026-07-29T13:50:00Z` close/start boundary. Keep revision `5`
+active until that boundary, then publish and adopt one hash-linked revision `8` that retires both
+current IDs and activates both corrected IDs atomically; do not cut over a single axis or call a
+staging revision active. Local container builds and smoke checks pass; public hosting, video, X,
+and organizer form/contact fields remain pending release work. Work continues from the current
+implementation and accepted product-surface contract rather than restarting discovery, repeating
+Gate C, or creating a competing design. Executable evidence may refine this architecture; it may
+not silently replace the product, privacy boundary, or hackathon risk standard.

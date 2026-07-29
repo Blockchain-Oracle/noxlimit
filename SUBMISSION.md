@@ -4,7 +4,10 @@ Status: **DRAFT — do not submit yet.** The product, live deployments, three fr
 predecessor LP close, paired successor activation, and one complete BTC browser-resolution/user-
 redemption/LP-redemption vertical have evidence. ETH is a terminal no-write policy rejection, not a
 second winner: its first post-deadline observation was 24 seconds outside the immutable one-hour
-bound. Public hosting, video, X post, and organizer form/contact fields remain explicitly pending.
+bound. Corrected 14,400-second BTC/ETH successors are deployed, validated, seeded, and staged in
+catalog revisions `6`/`7`; revision `5` remains active until one atomic revision-`8` cutover at the
+shared `2026-07-29T13:50:00Z` boundary. Public hosting, video, X post, and organizer form/contact
+fields remain explicitly pending.
 
 ## Submission copy
 
@@ -125,6 +128,17 @@ research material and is not part of the submission source release. See `LICENSE
 - [x] Future official Sepolia BTC/ETH deployments enforce a 14,400-second minimum observation-
   delay bound while preserving unique first-observation adjacency. Both active revision-5
   successors predate this guard and retain a disclosed one-hour liveness risk.
+- [x] Corrected BTC market
+  `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2`
+  and corrected ETH market
+  `0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a`
+  are distinct resolver-first deployments with the 14,400-second bound, immutable validation, and
+  50,000,000 YES / 50,000,000 NO seed balances. The
+  [corrected strike plan](./.thoughts/evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json),
+  [BTC deployment evidence](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json),
+  and
+  [ETH deployment evidence](./.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json)
+  support revisions `6`/`7`, where both remain `SUCCESSOR` pending the paired cutover.
 - [x] Service and web container builds plus local smoke checks pass. This is not public hosting.
 - [x] Fresh 2026-07-29 12:08Z `pnpm check` passes contracts `77`, protocol `14`, catalog `6`,
   service `65`, and web `61` (`223` package tests total), including compile/type-check/test/build.
@@ -133,10 +147,11 @@ research material and is not part of the submission source release. See `LICENSE
 
 ### Pending before submission
 
-- [ ] **PENDING — release handling for both active revision-5 successors' disclosed 3,600-second
-  liveness risk.** Any replacement must use the existing resolver-first workflow, the enforced
-  14,400-second minimum, immutable verification, and a new hash-linked catalog cutover. Do not edit
-  revision `5` in place.
+- [ ] **PENDING — atomic revision-8 release cutover for both active revision-5 successors' disclosed
+  3,600-second liveness risk.** Keep the corrected replacements staged in revisions `6`/`7` until
+  both current routes close at `2026-07-29T13:50:00Z`; then publish and runtime-adopt one hash-linked
+  revision `8` that retires both current IDs and activates both corrected IDs. Do not edit revision
+  `5` in place, cut over one axis alone, or present a staging revision as active.
 - [ ] **PENDING — public hosted frontend URL:** `[HOSTED_FRONTEND_URL]`.
 - [ ] **PENDING — public hosted service health URL:** `[HOSTED_SERVICE_URL]/v1/health`.
 - [ ] **PENDING — final public repository/default-branch URL:** `[PUBLIC_REPOSITORY_URL]`.
@@ -203,7 +218,8 @@ Show the architecture line:
 
 Close with: “NoxLimit adds a private resting order primitive to an unchanged public protocol. The
 BTC market, assets, liquidity, trade, oracle settlement, and redemption are real on Ethereum
-Sepolia; the ETH liveness failure is disclosed and future deployments enforce a four-hour floor.”
+Sepolia; the ETH liveness failure is disclosed, and corrected four-hour successors are verified
+and awaiting one paired catalog cutover.”
 Display repository, hosted app, and `@iEx_ec`.
 
 ## X post draft

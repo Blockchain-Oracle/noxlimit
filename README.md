@@ -23,8 +23,19 @@ redemption, and builder-LP redemption. The retired ETH predecessor cannot resolv
 post-deadline Chainlink observation arrived after 3,624 seconds, 24 seconds beyond the immutable
 3,600-second bound. The accountless selector rejected before any write, no ETH winner/payout exists,
 and its user/LP positions remain unredeemable. Both active successors carry the same known one-hour
-liveness risk. The exercised service reported `READY`; that local/live runtime is not a public
-hosting claim.
+liveness risk. Corrected 14,400-second replacements are deployed, immutable-validated, and seeded
+with 50,000,000 YES / 50,000,000 NO atoms each: BTC market
+`0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2` is staged
+`SUCCESSOR` in catalog revision `6`, and ETH market
+`0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a` is added as
+`SUCCESSOR` in revision `7`; commit `d2dbc39` records both staging revisions. See the
+[corrected strike plan](./.thoughts/evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json),
+[BTC deployment evidence](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json),
+and
+[ETH deployment evidence](./.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json).
+Both current revision-5 routes close and both corrected successors start at
+`2026-07-29T13:50:00Z`; revision `5` remains current until one atomic revision `8` cutover. The
+exercised service reported `READY`; that local/live runtime is not a public hosting claim.
 
 The fresh 2026-07-29 12:08Z root `pnpm check` passes contracts `77`, protocol `14`, catalog `6`,
 service `65`, and web `61` tests (`223` total), including compile, type-check, test, and build. The
@@ -195,10 +206,11 @@ the user advanced its checkpoint on 2026-07-28. Deployment, funding, real browse
 predecessor LP close, paired successor activation, and one complete BTC browser/user/LP redemption
 vertical are now committed. ETH is a terminal policy rejection, not `WAITING`: do not keep polling
 or write its retired resolver, infer a winner, or substitute a later round. Revision `5` remains
-current routing, but both active successors have the disclosed one-hour risk; any release
-replacement must use the enforced four-hour floor and the existing resolver-first cutover. Public
-hosting and submission assets remain pending. The user controls pacing; historical project
-clocks and submission dates are not implementation authority.
+current routing, but both active successors have the disclosed one-hour risk. Their corrected
+four-hour replacements are already verified/seeded and staged in revisions `6`/`7`; keep both
+staged until the shared close, then publish and runtime-adopt one revision `8` that retires and
+activates both axes atomically. Public hosting and submission assets remain pending. The user
+controls pacing; historical project clocks and submission dates are not implementation authority.
 
 ## Read order for an agent
 

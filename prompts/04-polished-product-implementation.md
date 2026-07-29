@@ -15,10 +15,15 @@
 > `spike/**`. BTC now completes the real browser resolution, winning-user redemption, and builder-LP
 > redemption path. ETH is terminally rejected: its unique first post-deadline observation arrived
 > 24 seconds outside the immutable 3,600-second bound, the selector made no write, and no ETH winner
-> exists. Both active revision-5 successors retain the same known liveness risk. Future official
-> Sepolia BTC/ETH deployment config enforces a 14,400-second minimum without weakening first-
-> observation adjacency; quote freshness remains separately 3,600 seconds. Local service/web
-> container build/smoke passes, but public hosting, video, X, and form/contact fields remain pending.**
+> exists. Both active revision-5 successors retain the same known liveness risk. Corrected BTC
+> `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2`
+> and ETH `0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a`
+> successors are now resolver-first deployed, immutable-validated, seeded with 50,000,000 YES /
+> 50,000,000 NO atoms, and staged `SUCCESSOR` in revisions `6`/`7`. Both use 14,400 seconds and
+> share the revision-5 close / corrected-successor start boundary `2026-07-29T13:50:00Z`;
+> quote freshness remains separately 3,600 seconds. Revision `5` stays current until one atomic
+> revision-`8` cutover. Local service/web container build/smoke passes, but public hosting, video,
+> X, and form/contact fields remain pending.**
 
 You are implementing the selected iExec WTF Hackathon product in this repository. This is not a
 new discovery, selection, or architecture exercise. Start by following `AGENTS.md` and the mandatory
@@ -247,11 +252,17 @@ The complete acceptance path spans real funding/onboarding, order creation, brow
 evaluation, atomic FPMM fill, position display, objective resolution, and redemption. BTC now covers
 that entire path. ETH is terminally unavailable for this condition: do not poll or call the retired
 resolver again, substitute a later round, or claim the rejected price as a winner. Revision `5`
-remains the current routing, but both active successors carry the disclosed one-hour liveness risk;
-any release replacement must use the existing resolver-first cutover with the enforced four-hour
-minimum. Run the clean unit, property, adversarial, integration, recovery, browser, and root checks
-again at the submission commit. Public hosting remains unverified despite passing local container
-build/check/smoke.
+remains the current routing, but both active successors carry the disclosed one-hour liveness risk.
+The
+[corrected strike plan](../.thoughts/evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json),
+[BTC deployment evidence](../.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json),
+and
+[ETH deployment evidence](../.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json)
+prove the four-hour replacements are ready but staged only. Keep revisions `6`/`7` non-current;
+at/after the shared close, publish and runtime-adopt one revision `8` that retires and activates
+both axes atomically. Run the clean unit, property, adversarial, integration, recovery, browser,
+and root checks again at the submission commit. Public hosting remains unverified despite passing
+local container build/check/smoke.
 
 Browser assertions must prove card Trade actions cause no Gateway/wallet request before explicit
 review, design fixtures never ship as live responses, scroll changes focus without changing the

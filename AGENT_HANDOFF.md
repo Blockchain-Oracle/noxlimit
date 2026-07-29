@@ -22,7 +22,15 @@ redemption, and builder-LP redemption. The retired ETH predecessor is terminally
 its immutable 3,600-second observation-delay policy: the exact first post-deadline observation
 arrived at `+3,624s`, 24 seconds late, and the selector rejected before any write. No ETH payout or
 winner exists, and its user/LP positions remain unredeemable. Both active revision-5 successors
-carry the same known one-hour liveness risk. Public hosting/submission assets remain pending.** Do
+carry the same known one-hour liveness risk. Corrected 14,400-second replacements are now deployed,
+validated, and 50,000,000 YES / 50,000,000 NO seeded: BTC market
+`0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2` is staged
+`SUCCESSOR` in revision `6`, and ETH market
+`0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a` is added as
+`SUCCESSOR` in revision `7`; commit `d2dbc39` records both staging revisions. Revision `5` remains
+current until one atomic revision `8` cutover at the shared `2026-07-29T13:50:00Z` close/start
+boundary. Public hosting/submission assets remain
+pending.** Do
 not reopen product
 discovery or inherit QuietRound, SLA Lock, Proofline, AgentDispute, or another historical idea unless the
 user explicitly reopens selection or executable evidence kills a load-bearing NoxLimit assumption.
@@ -67,8 +75,14 @@ resolution/redemption vertical, and one terminal ETH policy rejection. Preserve 
 do not keep polling or write the retired ETH resolver, infer an ETH winner, or substitute a later
 round. New official Sepolia BTC/ETH deployments enforce a 14,400-second observation-delay minimum
 while retaining the unique first-observation rule; runtime quote freshness remains independently
-3,600 seconds. The active revision-5 successors predate that guard and retain disclosed risk.
-Public hosting and submission assets remain the next external proof boundary.
+3,600 seconds. The active revision-5 successors predate that guard and retain disclosed risk. The
+[corrected strike plan](./.thoughts/evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json),
+[BTC deployment evidence](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json),
+and
+[ETH deployment evidence](./.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json)
+prove the replacements are ready but only staged in revisions `6`/`7`. Keep revision `5` active
+until the shared boundary, then cut both axes over atomically in revision `8`. Public hosting and
+submission assets remain the next external proof boundary.
 
 An independent or future discovery pass should produce a cited evidence and candidate report with:
 
@@ -106,7 +120,8 @@ per order plus a confidential maximum-price buy limit against a real onchain out
 live Gate C verified; technical critical-path maturity `GO`; polished layers and bounded operator
 hardening complete; Phase 6 deployed/funded through three browser-off fills, LP close, and atomic
 revision-5 successor cutover; BTC browser/user/LP redemption complete; ETH terminally rejected by
-its immutable one-hour bound; public hosting still pending.**
+its immutable one-hour bound; corrected 14,400-second successors staged for atomic revision-8
+cutover; public hosting still pending.**
 
 - Conditional execution is a shipping workflow, and public onchain order flow has structural
   pre-trade exposure. Direct evidence that prediction traders specifically value hiding only this
@@ -164,8 +179,11 @@ and builder LP both redeemed real Test USDC. ETH did not: the exact adjacent pai
 post-deadline observation was 24 seconds beyond the immutable 3,600-second bound. The accountless
 selector stopped before a write, leaving the resolver, payout, and ETH positions unset/unredeemable.
 Do not substitute a later round or present the rejected price as a winner. The active successors use
-the same risky bound; replace/retire them through a new verified catalog revision before relying on
-them for release settlement.
+the same risky bound. Their corrected replacements are already resolver-first deployed, verified,
+seeded, and staged `SUCCESSOR` in revisions `6`/`7`; do not serve either staging manifest as
+current. At/after `2026-07-29T13:50:00Z`, publish and runtime-adopt one revision `8` that retires
+both active IDs and activates both corrected IDs atomically before relying on them for release
+settlement.
 
 The detailed post-spike route is recorded in [`CURRENT.md`](./.thoughts/decisions/CURRENT.md).
 Historical Gate C clock values remain in its dated evidence only and are not current planning

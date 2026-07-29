@@ -21,8 +21,16 @@ deployment, three browser-off fills, paired revision-5 activation, and one full 
 redemption vertical. ETH is a terminal no-write policy rejection: its unique first post-deadline
 observation exceeded the immutable 3,600-second bound by 24 seconds. New official Sepolia BTC/ETH
 deployments enforce a 14,400-second minimum; both active revision-5 successors predate it and retain
-disclosed risk. Local container build/smoke passes, but public hosting and submission assets remain
-pending. Prompt 4 is the active route; do not restart discovery.
+disclosed risk. Corrected BTC/ETH replacements are verified, 50,000,000/50,000,000 seeded, and
+staged `SUCCESSOR` in revisions `6`/`7`; the
+[corrected strike plan](../.thoughts/evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json),
+[BTC evidence](../.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json),
+and
+[ETH evidence](../.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json)
+fix the shared `2026-07-29T13:50:00Z` close/start boundary. Revision `5` remains current until one
+atomic revision `8` cutover; neither staging revision is active. Local container build/smoke passes,
+but public hosting and submission assets remain pending. Prompt 4 is the active route; do not
+restart discovery.
 
 1. [Run docs-first product discovery](./00-docs-first-product-discovery.md)
 2. [Independently audit NoxLimit and the full corpus](./01-independent-noxlimit-audit.md)

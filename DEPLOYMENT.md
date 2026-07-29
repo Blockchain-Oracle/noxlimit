@@ -7,6 +7,14 @@ testnet software and must not be used with production-value assets.
 The commands below describe the implemented product. Current public release URLs and the manifest
 chosen for the final hosted release belong in `SUBMISSION.md` once verified.
 
+Current routing is catalog revision `5`. Corrected BTC
+`0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2` and ETH
+`0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a`
+successors are already deployed, validated, 50,000,000 YES / 50,000,000 NO seeded, and staged as
+`SUCCESSOR` in revisions `6`/`7`. Their shared start, and both revision-5 routes' close, is
+`2026-07-29T13:50:00Z`. Do not configure a hosted service to use either staging manifest. The next
+catalog action is one atomic revision `8` cutover after the boundary.
+
 ## Prerequisites
 
 - Node.js `22.22.3` through `nvm` (also recorded in `.nvmrc` and `package.json`);
@@ -228,6 +236,17 @@ NOXLIMIT_OPERATOR_CONFIRM=ACTIVATE_SEPOLIA_SUCCESSORS \
   pnpm --filter @noxlimit/contracts operator:activate-successors
 ```
 
+For the current BTC/ETH rotation, staging is complete. Use the
+[corrected strike plan](./.thoughts/evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json),
+[BTC deployment evidence](./.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json),
+and
+[ETH deployment evidence](./.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json)
+as the fixed inputs. Revisions `6` and `7` are immutable staging history, not runtime targets. Only
+after the safe block reaches the shared `2026-07-29T13:50:00Z` close may the activation command
+publish revision `8`, retiring both current revision-5 IDs and activating both corrected IDs in one
+manifest. If either axis cannot cut over, keep revision `5` current and fail closed; do not publish
+a one-axis activation.
+
 After reviewing the new hash-linked manifest, atomically update the service's configured catalog
 pointer and send `SIGHUP`. The service verifies the candidate, builds a coherent projection, and
 keeps the old catalog active if acceptance fails.
@@ -304,6 +323,7 @@ A hosted release is ready only when all of the following are true:
 - a fresh order fills against the real FPMM after browser closure;
 - objective resolution and real redemption have durable transaction evidence;
 - every relied-on active bundle has a settlement-liveness parameter accepted for the release;
-  revision-5 BTC/ETH successors currently carry a disclosed 3,600-second risk, so replace/retire
-  them or explicitly keep the release gated;
+  revision-5 BTC/ETH successors currently carry a disclosed 3,600-second risk, while their verified
+  14,400-second replacements remain staged in revisions `6`/`7`. Keep the release gated until one
+  revision `8` retires and activates both axes atomically;
 - no mock market, sample balance, secret, or prototype fixture is loaded in production.

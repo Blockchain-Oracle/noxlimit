@@ -20,8 +20,17 @@
   3,600-second observation-delay policy because the exact first post-deadline observation arrived
   3,624 seconds after `resolvesAt`, 24 seconds too late. The accountless selector rejected before
   any write, the ETH resolver/payout remain unset, and ETH user/LP positions remain unredeemable.
-  Both active revision-5 successors carry the same known 3,600-second liveness risk. Public hosting
-  and submission assets remain pending.
+  Both active revision-5 successors carry the same known 3,600-second liveness risk. Corrected
+  replacements are now deployed, immutable-validated, and builder-seeded with 50,000,000 YES and
+  50,000,000 NO atoms each: BTC market
+  `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2`
+  is staged `SUCCESSOR` in revision `6`, and ETH market
+  `0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a`
+  is added as `SUCCESSOR` in revision `7`. Both use a 14,400-second observation bound and share the
+  revision-5 close / corrected-successor start boundary `2026-07-29T13:50:00Z`. Revision `5`
+  remains the current `ACTIVE` routing until one atomic revision-`8` cutover retires both risky
+  routes and activates both corrected successors together. Public hosting and submission assets
+  remain pending.
 - **Canonical architecture:**
   [`../architecture/2026-07-25-noxlimit-system-architecture.md`](../architecture/2026-07-25-noxlimit-system-architecture.md)
 - **Audit and authority policy:**
@@ -62,6 +71,26 @@
   catalog hash `0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`,
   committed by paired cutover `c073643`. It routes original BTC/ETH market IDs `RETIRED` and both
   verified successor IDs `ACTIVE` atomically.
+- **Phase 6 corrected successors staged, not active:** commit `d2dbc39` records revision `6` at
+  [`../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json`](../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-btc-corrected-successor.json)
+  stages corrected BTC market
+  `0x37a7b5826c9ba1209470b98cd38a38f4e3e6cb448c353333138bfced7fbaf0a2` as `SUCCESSOR`;
+  revision `7` at
+  [`../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json`](../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-successors.json)
+  carries BTC forward and adds corrected ETH market
+  `0xa5219adaa2c86c0419cc7d9b05188784192ee023a7c3c27bab3f0cc8eaf8fc8a`
+  as `SUCCESSOR`. Their catalog hashes are
+  `0x1adb2085979fe9f9f94d5fad6793de7d808888e32cf5fa259d92a25b34b7693b`
+  and `0xe20fc416f695552619d5701ece6b4dd05ad934890387807551237b5fb424dcca`.
+  The corrected strike/timing plan is
+  [`../evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json`](../evidence/2026-07-29-sepolia-corrected-successor-strike-plan.json),
+  and the independently verified deployment/seed records are
+  [`../evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json`](../evidence/2026-07-29-sepolia-btc-usd-4h-corrected-successor-deployment.json)
+  and
+  [`../evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json`](../evidence/2026-07-29-sepolia-eth-usd-4h-corrected-successor-deployment.json).
+  Revision `5` stays live until a single post-boundary revision `8` retires both current routes and
+  activates both corrected IDs atomically; revisions `6` and `7` must not be served as active
+  catalogs.
 - **Phase 6 committed execution evidence:**
   [`../evidence/2026-07-29-phase6-btc-no-order.json`](../evidence/2026-07-29-phase6-btc-no-order.json),
   [`../evidence/2026-07-29-phase6-btc-yes-order.json`](../evidence/2026-07-29-phase6-btc-yes-order.json),
@@ -156,18 +185,21 @@
   Market configuration also enforces the exact declared 1h/4h/24h duration and canonical question;
   reused operator-owned Test USDC is minted only by the computed seed/treasury shortfall. New
   official Sepolia BTC/ETH deployments now require
-  `maximumObservationDelaySeconds >= 14,400`; this future-deployment liveness floor does not weaken
-  the unique first-observation/adjacent-predecessor proof. Runtime quote freshness remains a
-  separate 3,600-second policy.
+  `maximumObservationDelaySeconds >= 14,400`; the staged corrected BTC/ETH successors exercise that
+  floor without weakening the unique first-observation/adjacent-predecessor proof. Runtime quote
+  freshness remains a separate 3,600-second policy.
 - **Next workflow:** Preserve the completed BTC proof and the terminal ETH rejection. Do not keep
   polling the retired ETH resolver, submit an ETH resolution transaction, infer a winner from the
   rejected observation, or substitute a later round. Treat the two active revision-5 successors as
-  current routing with a disclosed 3,600-second liveness risk; before relying on either axis for the
-  public release, deploy and rotate through the existing resolver-first workflow with the enforced
-  14,400-second minimum and verify its immutable bindings. Local service/web container builds and
-  smoke checks pass, but public frontend/service URLs, video, X post, repository/form/contact fields,
-  and the final submission run remain pending. Preserve `spike/**`; do not derive a competing plan,
-  restart discovery, or repeat Prompt 3.
+  current routing with a disclosed 3,600-second liveness risk. The corrected 14,400-second BTC/ETH
+  successors are already deployed, verified, seeded, and staged in revisions `6`/`7`; do not
+  activate either axis alone or serve either staging manifest as current. At the shared
+  `2026-07-29T13:50:00Z` close/start boundary, publish one hash-linked revision `8` that retires both
+  revision-5 active IDs and activates both corrected IDs atomically, then adopt it through the
+  verified runtime reload. Local service/web container builds and smoke checks pass, but public
+  frontend/service URLs, video, X post, repository/form/contact fields, and the final submission run
+  remain pending. Preserve `spike/**`; do not derive a competing plan, restart discovery, or repeat
+  Prompt 3.
 - **Prompt 4:** [`../../prompts/04-polished-product-implementation.md`](../../prompts/04-polished-product-implementation.md)
   is authorized and active as the implementation handoff.
 - **Prompt 5:** [`../../prompts/05-designer-agent-handoff.md`](../../prompts/05-designer-agent-handoff.md)
