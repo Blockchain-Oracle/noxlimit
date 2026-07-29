@@ -66,3 +66,24 @@ packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-
 packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:375
 packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:421
 packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json:generic-api-key:435
+
+# Reviewed false positives in activated catalog r8: public Conditional Tokens deployment
+# addresses/runtime hashes and the public pinned source commit.
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:50
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:97
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:111
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:159
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:205
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:219
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:267
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:313
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:327
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:375
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:421
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:435
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:483
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:529
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:543
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:591
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:637
+packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-corrected-rotated.json:generic-api-key:651
