@@ -12,38 +12,47 @@ import { dirname, resolve } from "node:path";
 
 import { chromium, expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import {
+  activityViewSchema,
   healthViewSchema,
   marketViewSchema,
   noxLimitOrderBookAbi,
   orderViewSchema,
-  positionViewSchema,
   type OrderRef,
 } from "@noxlimit/protocol";
 import {
   createPublicClient,
   getAddress,
   http,
+  parseEventLogs,
   type Address,
   type Hex,
+  type PublicClient,
 } from "viem";
 import { sepolia } from "viem/chains";
 
 import { createLiveSepoliaWallet, type RecordedWalletWrite } from "./live-wallet";
-import { readLiveSepoliaSettings, type LiveFundingMode, type LiveSepoliaSettings } from "./live-settings";
+import {
+  LIVE_CONFIRMATION,
+  readLiveSepoliaSettings,
+  type LiveFundingMode,
+  type LiveSepoliaSettings,
+} from "./live-settings";
 
 const GATEWAY_ORIGIN = "https://gateway-testnets.noxprotocol.dev";
 const live = readLiveSepoliaSettings();
-// The browser process must not inherit either secret. Parsed copies remain only in this Node worker
-// until the private maximum is deliberately entered into the product's in-memory form.
-if (live.enabled) {
-  delete process.env.LIVE_SEPOLIA_PRIVATE_KEY;
-  delete process.env.LIVE_SEPOLIA_PRIVATE_MAXIMUM;
-}
-test.skip(!live.enabled, live.enabled ? undefined : live.reason);
+const liveWriteRequested = process.env.LIVE_SEPOLIA_CONFIRM === LIVE_CONFIRMATION;
+test.skip(!liveWriteRequested, live.enabled ? undefined : live.reason);
 
 test("funds one wallet, creates one private order, closes, and reopens after a worker fill", async () => {
-  if (!live.enabled) return;
+  if (!live.enabled) throw new Error(live.reason);
   const settings = live.settings;
+  // Playwright first imports this file in its discovery process and later imports it again in the
+  // worker. Deleting these values at module scope strips them before the worker can validate the
+  // explicit opt-in and silently turns a requested live proof into a skip. Delete them only in the
+  // worker, immediately before Chromium can inherit its environment. Parsed copies remain in this
+  // Node worker until the private maximum is deliberately entered into the in-memory form.
+  delete process.env.LIVE_SEPOLIA_PRIVATE_KEY;
+  delete process.env.LIVE_SEPOLIA_PRIVATE_MAXIMUM;
   await assertEvidenceTargetFresh(settings);
   const publicClient = createPublicClient({ chain: sepolia, transport: http(settings.rpcUrl) });
   const [health, market] = await Promise.all([
@@ -101,7 +110,14 @@ test("funds one wallet, creates one private order, closes, and reopens after a w
     throw new Error("The required live funding or order receipt was not captured.");
   }
   const filledOrder = await waitForFilledOrder(settings, ref);
-  const fillHash = await findFillHash(settings, wallet.address, filledOrder.marketId, settings.side);
+  const fillHash = await findFillHash(
+    settings,
+    publicClient,
+    wallet.address,
+    filledOrder.marketId,
+    settings.side,
+    ref,
+  );
 
   const freshBrowser = await launchLiveBrowser();
   let freshContext: BrowserContext | undefined;
@@ -201,10 +217,10 @@ async function createPrivateOrder(page: Page, settings: LiveSepoliaSettings, ord
 }
 
 async function waitForFilledOrder(settings: LiveSepoliaSettings, ref: OrderRef) {
-  let latest: Awaited<ReturnType<typeof readOrder>> | undefined;
+  let latest: NonNullable<Awaited<ReturnType<typeof readOrder>>> | undefined;
   await expect.poll(async () => {
     latest = await readOrder(settings, ref);
-    return latest.status;
+    return latest?.status ?? "NOT_INDEXED";
   }, {
     message: "The hosted worker did not project this browser-created order as FILLED within the bounded live window.",
     timeout: settings.fillTimeoutMs,
@@ -215,14 +231,55 @@ async function waitForFilledOrder(settings: LiveSepoliaSettings, ref: OrderRef) 
 }
 
 function readOrder(settings: LiveSepoliaSettings, ref: OrderRef) {
-  return readApi(settings, `/v1/orders/${ref.chainId}/${ref.orderBook}/${ref.orderId}`, orderViewSchema);
+  return readOptionalApi(
+    settings,
+    `/v1/orders/${ref.chainId}/${ref.orderBook}/${ref.orderId}`,
+    orderViewSchema,
+  );
 }
 
-async function findFillHash(settings: LiveSepoliaSettings, owner: Address, marketId: Hex, side: "YES" | "NO"): Promise<Hex> {
-  const positions = await readApi(settings, `/v1/positions?owner=${owner}`, positionViewSchema.array());
-  const position = positions.find((entry) => entry.marketId === marketId && entry.side === side);
-  if (!position) throw new Error("The filled order has no matching durable position projection.");
-  return position.fillTransactionHash;
+async function findFillHash(
+  settings: LiveSepoliaSettings,
+  publicClient: PublicClient,
+  owner: Address,
+  marketId: Hex,
+  side: "YES" | "NO",
+  ref: OrderRef,
+): Promise<Hex> {
+  const activities = await readApi(
+    settings,
+    `/v1/activity?owner=${owner}&marketId=${marketId}`,
+    activityViewSchema.array(),
+  );
+  const fills = activities.filter((entry) =>
+    entry.kind === "ORDER_FILLED" &&
+    entry.side === side &&
+    entry.orderRef?.chainId === ref.chainId &&
+    entry.orderRef.orderBook.toLowerCase() === ref.orderBook.toLowerCase() &&
+    entry.orderRef.orderId === ref.orderId
+  );
+  if (fills.length !== 1) {
+    throw new Error("The exact composite order reference does not have one durable fill activity.");
+  }
+  const fill = fills[0]!;
+  const receipt = await publicClient.getTransactionReceipt({ hash: fill.transactionHash });
+  if (receipt.status !== "success") {
+    throw new Error("The exact order fill transaction did not succeed onchain.");
+  }
+  const matchingLogs = parseEventLogs({
+    abi: noxLimitOrderBookAbi,
+    eventName: "Filled",
+    logs: receipt.logs,
+    strict: true,
+  }).filter((log) =>
+    getAddress(log.address) === getAddress(ref.orderBook) &&
+    log.args.orderId === BigInt(ref.orderId) &&
+    log.logIndex === fill.logIndex
+  );
+  if (matchingLogs.length !== 1) {
+    throw new Error("The projected fill is not bound to the exact OrderBook event and order ID.");
+  }
+  return fill.transactionHash;
 }
 
 async function readApi<T>(
@@ -232,6 +289,22 @@ async function readApi<T>(
 ): Promise<T> {
   const response = await fetch(`${settings.apiOrigin}${path}`, { headers: { accept: "application/json" } });
   if (!response.ok) throw new Error(`The live API returned HTTP ${response.status} for a required read.`);
+  try { return schema.parse(await response.json()); }
+  catch { throw new Error("The live API returned data outside the canonical protocol schema."); }
+}
+
+async function readOptionalApi<T>(
+  settings: LiveSepoliaSettings,
+  path: string,
+  schema: { parse(value: unknown): T },
+): Promise<T | undefined> {
+  const response = await fetch(`${settings.apiOrigin}${path}`, {
+    headers: { accept: "application/json" },
+  });
+  if (response.status === 404) return undefined;
+  if (!response.ok) {
+    throw new Error(`The live API returned HTTP ${response.status} for a required read.`);
+  }
   try { return schema.parse(await response.json()); }
   catch { throw new Error("The live API returned data outside the canonical protocol schema."); }
 }

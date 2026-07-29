@@ -13,9 +13,11 @@
     "operator:plan": "hardhat run scripts/operator/plan-bundle.ts",
     "operator:validate": "hardhat run scripts/operator/validate-bundle.ts --network sepolia",
     "operator:deploy": "hardhat run scripts/operator/deploy-bundle.ts --network sepoliaOperator",
+    "operator:select-resolution-rounds": "hardhat run scripts/operator/select-resolution-rounds.ts --network sepolia",
     "operator:resolve": "hardhat run scripts/operator/resolve-market.ts --network sepoliaOperator",
     "operator:close-liquidity": "hardhat run scripts/operator/close-liquidity.ts --network sepoliaOperator",
     "operator:activate-successor": "hardhat run scripts/operator/activate-successor.ts --network sepolia",
+    "operator:activate-successors": "hardhat run scripts/operator/activate-successors.ts --network sepolia",
     "test": "node scripts/strict-test.mjs",
     "test:raw": "hardhat test",
     "typecheck": "tsc --build --pretty false"

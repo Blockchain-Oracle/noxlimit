@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "NOXLIMIT_LIVE_EVIDENCE_RECOVERY",
+  "recordedAt": "2026-07-29T06:38:58.000Z",
+  "sourceArtifact": {
+    "path": ".thoughts/evidence/2026-07-29-phase6-btc-no-order.json",
+    "sha256": "17cd28416b0f3928ecf8b8b600570ba5c0e2b4d0636f08ea37c023b6b1312ebc",
+    "captureMode": "MANUAL_PUBLIC_RECOVERY",
+    "reason": "The first guarded browser run created this real order, then stopped when the safe-block-lagged order endpoint temporarily returned HTTP 404. No order was resent. The public artifact was reconstructed only after read-only onchain, API, and fresh-browser verification."
+  },
+  "normalization": {
+    "recordedAt": "2026-07-29T06:12:02.000Z",
+    "changes": [
+      "Normalize the source timestamp to the writer's millisecond ISO-8601 form.",
+      "Retain every public order field, destination, transaction hash, network count, and check unchanged."
+    ]
+  },
+  "publicOrder": {
+    "ref": {
+      "chainId": 11155111,
+      "orderBook": "0x44d663aA3b613E98eBAD962e8C9BCffE8Acf4DfC",
+      "orderId": "1"
+    },
+    "marketId": "0xb0380849b49402e9bfb22d89f9c4e7bd3fb9e096af12812aec047deebdc4d682",
+    "side": "NO",
+    "amount": "1"
+  },
+  "verification": {
+    "createReceipt": {
+      "transactionHash": "0x50098bcfe771fa99adb93d8ae37b5a54067450ce8697072411bca18c9321bbda",
+      "status": "SUCCESS",
+      "blockNumber": "11373728",
+      "blockHash": "0xff12fe284983edf486cfc1cee76b97ce15b0921e4a6044d9df0a85470e7f0517",
+      "orderCreatedLogIndex": 864
+    },
+    "fillReceipt": {
+      "transactionHash": "0x954da9020865c0dfc7667e55ed0dee47e9d96d6c971132b1607e229d1c3503a6",
+      "status": "SUCCESS",
+      "blockNumber": "11373733",
+      "blockHash": "0x97c8de555e485c70f99541621f01131aa6ced4ab1e8e2434b349df327031ab02",
+      "filledLogIndex": 898,
+      "filledOrderId": "1",
+      "outcomeShares": "1.941161"
+    },
+    "apiProjection": {
+      "status": "FILLED",
+      "disclosureState": "PUBLISHED",
+      "evaluationCount": 1
+    },
+    "freshBrowser": {
+      "path": "/orders/11155111/0x44d663aA3b613E98eBAD962e8C9BCffE8Acf4DfC/1",
+      "observedStatus": "FILLED",
+      "confirmedPositionsLinkVisible": true
+    }
+  },
+  "privacy": {
+    "containsPrivateKey": false,
+    "containsPrivateMaximum": false,
+    "containsCandidateOrProofMaterial": false
+  }
+}

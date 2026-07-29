@@ -18,6 +18,7 @@ import {
   assertResolverIdentity,
   buildCatalogCandidate,
   buildCatalogCutoverCandidate,
+  buildCatalogMultiCutoverCandidate,
   canonicalMarketQuestion,
   collateralMintShortfall,
   canonicalJson,
@@ -29,6 +30,7 @@ import {
   operatorPlan,
   parseBundleConfig,
   stableIdentityOf,
+  withExclusiveOperatorLock,
 } from "../scripts/operator/lib.js";
 
 function env(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
@@ -95,6 +97,45 @@ function recordFor(
   config: ReturnType<typeof parseBundleConfig>,
   suffix: string,
 ): Record<string, unknown> {
+  const layout = {
+    a: {
+      condition: "b",
+      settlementAdapter: "6",
+      resolver: "8",
+      fpmm: "a",
+      orderBook: "c",
+      yesPositionId: "1",
+      noPositionId: "2",
+    },
+    d: {
+      condition: "c",
+      settlementAdapter: "7",
+      resolver: "9",
+      fpmm: "b",
+      orderBook: "d",
+      yesPositionId: "3",
+      noPositionId: "2",
+    },
+    e: {
+      condition: "d",
+      settlementAdapter: "e",
+      resolver: "1",
+      fpmm: "3",
+      orderBook: "5",
+      yesPositionId: "4",
+      noPositionId: "6",
+    },
+    f: {
+      condition: "e",
+      settlementAdapter: "f",
+      resolver: "2",
+      fpmm: "4",
+      orderBook: "6",
+      yesPositionId: "5",
+      noPositionId: "7",
+    },
+  }[suffix];
+  if (!layout) throw new Error(`unsupported test record suffix ${suffix}`);
   const collateral = config.existingCollateral as Address;
   const identity = stableIdentityOf(config, collateral);
   const seedTransactionHash = hash(suffix);
@@ -102,7 +143,7 @@ function recordFor(
     schemaVersion: 1,
     marketId: deriveIdentityId("market", identity),
     questionId: deriveIdentityId("question", identity),
-    conditionId: hash(suffix === "a" ? "b" : "c"),
+    conditionId: hash(layout.condition),
     version: config.version,
     identity,
     question: config.question,
@@ -114,19 +155,22 @@ function recordFor(
     },
     oracle: {
       source: "CHAINLINK",
-      settlementAdapter: address(suffix === "a" ? "6" : "7"),
+      settlementAdapter: address(layout.settlementAdapter),
       proxy: config.chainlinkProxy,
       assetId: identity.oracle.assetId,
-      feedDescription: "BTC / USD",
+      feedDescription: OFFICIAL_SEPOLIA_CHAINLINK_FEEDS[config.asset].description,
       feedDecimals: 8,
     },
     contracts: {
       conditionalTokens: config.conditionalTokens,
-      resolver: address(suffix === "a" ? "8" : "9"),
-      fpmm: address(suffix === "a" ? "a" : "b"),
-      orderBook: address(suffix === "a" ? "c" : "d"),
+      resolver: address(layout.resolver),
+      fpmm: address(layout.fpmm),
+      orderBook: address(layout.orderBook),
     },
-    positions: { yesPositionId: suffix === "a" ? "1" : "3", noPositionId: "2" },
+    positions: {
+      yesPositionId: layout.yesPositionId,
+      noPositionId: layout.noPositionId,
+    },
     times: {
       startsAt: config.startsAt.toString(),
       tradingClosesAt: config.tradingClosesAt.toString(),
@@ -179,6 +223,117 @@ function recordFor(
         orderBook: hash("9"),
       },
     },
+  };
+}
+
+async function stagedTwoAxisCutover(options: { successorStartsAt?: bigint } = {}) {
+  const authority = await loadCatalogAuthority();
+  const now = 1_900_000_000n;
+  const predecessorStartsAt = 1_924_992_000n;
+  const predecessorTradingClosesAt = 1_924_995_420n;
+  const predecessorResolvesAt = 1_924_995_600n;
+  const successorStartsAt = options.successorStartsAt ?? 1_924_995_300n;
+  const successorResolvesAt = successorStartsAt + HORIZON_SECONDS["1h"];
+  const successorTradingClosesAt = successorResolvesAt - 180n;
+
+  function marketConfig(
+    asset: "BTC/USD" | "ETH/USD",
+    strikePriceWad: bigint,
+    startsAt: bigint,
+    tradingClosesAt: bigint,
+    resolvesAt: bigint,
+  ) {
+    return parseBundleConfig(
+      env({
+        NOXLIMIT_ASSET: asset,
+        NOXLIMIT_CHAINLINK_PROXY: OFFICIAL_SEPOLIA_CHAINLINK_FEEDS[asset].proxy,
+        NOXLIMIT_STRIKE_PRICE_WAD: strikePriceWad.toString(),
+        NOXLIMIT_STARTS_AT: startsAt.toString(),
+        NOXLIMIT_TRADING_CLOSES_AT: tradingClosesAt.toString(),
+        NOXLIMIT_RESOLVES_AT: resolvesAt.toString(),
+        NOXLIMIT_QUESTION: canonicalMarketQuestion(asset, strikePriceWad, resolvesAt),
+      }),
+      now,
+    );
+  }
+
+  const btcPredecessor = marketConfig(
+    "BTC/USD",
+    65_000n * 10n ** 18n,
+    predecessorStartsAt,
+    predecessorTradingClosesAt,
+    predecessorResolvesAt,
+  );
+  const ethPredecessor = marketConfig(
+    "ETH/USD",
+    2_000n * 10n ** 18n,
+    predecessorStartsAt,
+    predecessorTradingClosesAt,
+    predecessorResolvesAt,
+  );
+  const btcSuccessor = marketConfig(
+    "BTC/USD",
+    66_000n * 10n ** 18n,
+    successorStartsAt,
+    successorTradingClosesAt,
+    successorResolvesAt,
+  );
+  const ethSuccessor = marketConfig(
+    "ETH/USD",
+    2_100n * 10n ** 18n,
+    successorStartsAt,
+    successorTradingClosesAt,
+    successorResolvesAt,
+  );
+
+  const bootstrap = await loadCatalogHistory(btcPredecessor.catalogHistoryPaths, authority);
+  const first = buildCatalogCandidate(
+    bootstrap,
+    recordFor(btcPredecessor, "a"),
+    "2030-12-31T12:00:00.000Z",
+    1_000n,
+    authority,
+  );
+  const second = buildCatalogCandidate(
+    [...bootstrap, first],
+    recordFor(ethPredecessor, "e"),
+    "2030-12-31T12:10:00.000Z",
+    1_100n,
+    authority,
+  );
+  const third = buildCatalogCandidate(
+    [...bootstrap, first, second],
+    recordFor(btcSuccessor, "d"),
+    "2030-12-31T12:20:00.000Z",
+    1_200n,
+    authority,
+  );
+  const fourth = buildCatalogCandidate(
+    [...bootstrap, first, second, third],
+    recordFor(ethSuccessor, "f"),
+    "2030-12-31T12:30:00.000Z",
+    1_300n,
+    authority,
+  );
+  const history = [...bootstrap, first, second, third, fourth];
+  return {
+    authority,
+    history,
+    effectiveAt: new Date(Number(predecessorTradingClosesAt) * 1_000).toISOString(),
+    effectiveBlock: 1_400n,
+    predecessorTradingClosesAt,
+    successorStartsAt,
+    successorTradingClosesAt,
+    pairs: [
+      {
+        predecessorMarketId: first.routing.at(-1)?.marketId as Hex,
+        successorMarketId: third.routing.at(-1)?.marketId as Hex,
+      },
+      {
+        predecessorMarketId: second.routing.at(-1)?.marketId as Hex,
+        successorMarketId: fourth.routing.at(-1)?.marketId as Hex,
+      },
+    ] as const,
   };
 }
 
@@ -475,6 +630,224 @@ describe("operator configuration and manifest helpers", () => {
     );
   });
 
+  it("cuts over two simultaneously closed axes in one validated catalog revision", async () => {
+    const fixture = await stagedTwoAxisCutover();
+    const previous = fixture.history.at(-1);
+    assert.ok(previous);
+    const oldOpenIdentities = new Map(
+      previous.routing
+        .filter((route) => route.activation === "ACTIVE")
+        .map((route) => [route.marketId, [route.opensAt, route.opensAtBlock]] as const),
+    );
+
+    const candidate = buildCatalogMultiCutoverCandidate(
+      fixture.history,
+      fixture.pairs,
+      fixture.effectiveAt,
+      fixture.effectiveBlock,
+      fixture.authority,
+    );
+    assert.equal(candidate.revision, "5");
+    assert.equal(candidate.previousRevisionHash, previous.catalogRevision);
+    assert.equal(
+      fixture.authority.validateCatalogChain([...fixture.history, candidate]).length,
+      6,
+    );
+
+    for (const pair of fixture.pairs) {
+      const predecessor = candidate.routing.find(
+        (route) => route.marketId === pair.predecessorMarketId,
+      );
+      const successor = candidate.routing.find(
+        (route) => route.marketId === pair.successorMarketId,
+      );
+      assert.equal(predecessor?.activation, "RETIRED");
+      assert.deepEqual(
+        [predecessor?.opensAt, predecessor?.opensAtBlock],
+        oldOpenIdentities.get(pair.predecessorMarketId),
+      );
+      assert.equal(successor?.activation, "ACTIVE");
+      assert.equal(successor?.opensAt, fixture.effectiveAt);
+      assert.equal(successor?.opensAtBlock, fixture.effectiveBlock.toString());
+    }
+  });
+
+  it("rejects an empty or one-pair cutover when another ACTIVE axis closed simultaneously", async () => {
+    const fixture = await stagedTwoAxisCutover();
+    assert.throws(
+      () =>
+        buildCatalogMultiCutoverCandidate(
+          fixture.history,
+          [],
+          fixture.effectiveAt,
+          fixture.effectiveBlock,
+          fixture.authority,
+        ),
+      /at least one pair/,
+    );
+    assert.throws(
+      () =>
+        buildCatalogMultiCutoverCandidate(
+          fixture.history,
+          [fixture.pairs[0]],
+          fixture.effectiveAt,
+          fixture.effectiveBlock,
+          fixture.authority,
+        ),
+      /every ACTIVE route closed at cutover must be replaced atomically/,
+    );
+  });
+
+  it("rejects duplicate cutover market IDs or axes before any route mutation", async () => {
+    const fixture = await stagedTwoAxisCutover();
+    assert.throws(
+      () =>
+        buildCatalogMultiCutoverCandidate(
+          fixture.history,
+          [fixture.pairs[0], fixture.pairs[0]],
+          fixture.effectiveAt,
+          fixture.effectiveBlock,
+          fixture.authority,
+        ),
+      /market IDs must be globally unique/,
+    );
+    assert.throws(
+      () =>
+        buildCatalogMultiCutoverCandidate(
+          fixture.history,
+          [
+            fixture.pairs[0],
+            {
+              predecessorMarketId: fixture.pairs[1].predecessorMarketId,
+              successorMarketId: fixture.pairs[0].successorMarketId,
+            },
+          ],
+          fixture.effectiveAt,
+          fixture.effectiveBlock,
+          fixture.authority,
+        ),
+      /market IDs must be globally unique/,
+    );
+
+    const current = fixture.history.at(-1);
+    assert.ok(current);
+    const secondPairIds = new Set([
+      fixture.pairs[1].predecessorMarketId.toLowerCase(),
+      fixture.pairs[1].successorMarketId.toLowerCase(),
+    ]);
+    const duplicateAxisCurrent = {
+      ...current,
+      markets: current.markets.map((record) => {
+        if (!secondPairIds.has(String(record.marketId).toLowerCase())) return record;
+        return {
+          ...record,
+          identity: {
+            ...(record.identity as Record<string, unknown>),
+            asset: "BTC/USD",
+          },
+        };
+      }),
+    };
+    assert.throws(
+      () =>
+        buildCatalogMultiCutoverCandidate(
+          [...fixture.history.slice(0, -1), duplicateAxisCurrent],
+          fixture.pairs,
+          fixture.effectiveAt,
+          fixture.effectiveBlock,
+          fixture.authority,
+        ),
+      /duplicate axis BTC\/USD:1h/,
+    );
+  });
+
+  it("rejects a successor that has not started or has already closed at the shared cutover", async () => {
+    const premature = await stagedTwoAxisCutover({ successorStartsAt: 1_924_995_480n });
+    assert.throws(
+      () =>
+        buildCatalogMultiCutoverCandidate(
+          premature.history,
+          premature.pairs,
+          premature.effectiveAt,
+          premature.effectiveBlock,
+          premature.authority,
+        ),
+      /successor has not started at cutover/,
+    );
+
+    const late = await stagedTwoAxisCutover();
+    const lateEffectiveAt = new Date(
+      Number(late.successorTradingClosesAt) * 1_000,
+    ).toISOString();
+    assert.throws(
+      () =>
+        buildCatalogMultiCutoverCandidate(
+          late.history,
+          late.pairs,
+          lateEffectiveAt,
+          late.effectiveBlock,
+          late.authority,
+        ),
+      /successor is already closed at cutover/,
+    );
+  });
+
+  it("rejects successor seed or immutable-verification provenance that is not positive and verified", async () => {
+    const fixture = await stagedTwoAxisCutover();
+    const current = fixture.history.at(-1);
+    assert.ok(current);
+    const targetId = fixture.pairs[0].successorMarketId.toLowerCase();
+    const tampered = {
+      ...current,
+      markets: current.markets.map((record) => {
+        if (String(record.marketId).toLowerCase() !== targetId) return record;
+        return {
+          ...record,
+          pool: {
+            ...(record.pool as Record<string, unknown>),
+            completeSetsSeededAtoms: "0",
+          },
+        };
+      }),
+    };
+    assert.throws(
+      () =>
+        buildCatalogMultiCutoverCandidate(
+          [...fixture.history.slice(0, -1), tampered],
+          fixture.pairs,
+          fixture.effectiveAt,
+          fixture.effectiveBlock,
+          fixture.authority,
+        ),
+      /seeded complete sets must be a positive decimal integer/,
+    );
+
+    const unverified = {
+      ...current,
+      markets: current.markets.map((record) => {
+        if (String(record.marketId).toLowerCase() !== targetId) return record;
+        return {
+          ...record,
+          verification: {
+            ...(record.verification as Record<string, unknown>),
+            status: "SELF_REPORTED",
+          },
+        };
+      }),
+    };
+    assert.throws(
+      () =>
+        buildCatalogMultiCutoverCandidate(
+          [...fixture.history.slice(0, -1), unverified],
+          fixture.pairs,
+          fixture.effectiveAt,
+          fixture.effectiveBlock,
+          fixture.authority,
+        ),
+      /immutable verification is not VERIFIED/,
+    );
+  });
+
   it("fails liquidity close unless the signer owns positive LP after the onchain close", () => {
     const lpOwner = address("a");
     assert.doesNotThrow(() =>
@@ -566,6 +939,40 @@ describe("operator configuration and manifest helpers", () => {
       await mkdir(directoryOutput);
       await assert.rejects(assertOutputReady(directoryOutput), /refusing to overwrite/);
     } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("serializes revision-scoped operator actions and releases the exact lock", async () => {
+    const root = await mkdtemp(join(tmpdir(), "noxlimit-operator-lock-"));
+    const lockPath = join(root, "catalog-parent.lock");
+    let releaseFirst!: () => void;
+    const holdFirst = new Promise<void>((resolveFirst) => {
+      releaseFirst = resolveFirst;
+    });
+    let enteredFirst!: () => void;
+    const firstEntered = new Promise<void>((resolveEntered) => {
+      enteredFirst = resolveEntered;
+    });
+    try {
+      const first = withExclusiveOperatorLock(lockPath, async () => {
+        enteredFirst();
+        await holdFirst;
+        return "first";
+      });
+      await firstEntered;
+      await assert.rejects(
+        withExclusiveOperatorLock(lockPath, async () => "second"),
+        /locked by another process/,
+      );
+      releaseFirst();
+      assert.equal(await first, "first");
+      assert.equal(
+        await withExclusiveOperatorLock(lockPath, async () => "reused"),
+        "reused",
+      );
+    } finally {
+      releaseFirst?.();
       await rm(root, { recursive: true, force: true });
     }
   });

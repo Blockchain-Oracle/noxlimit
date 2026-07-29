@@ -80,13 +80,39 @@ private keys, RPC URLs, signatures, ciphertext/proof material, and other secret-
 Final evidence and catalog payloads are staged and hash-checked before create-only publication, so
 restarting after one output was written verifies and completes the exact remaining output.
 
-Resolution is one-shot onchain and idempotent in the operator. The supplied proxy rounds must be
-the selected first observation at or after resolution and its phase-aware adjacent predecessor:
+Resolution is one-shot onchain and idempotent in the operator. First run the catalog-bound,
+read-only selector. It takes a coherent safe-block snapshot, walks adjacent proxy rounds backward
+from `latestRoundData`, verifies same-phase or prior-phase-terminal adjacency, and prints the exact
+public IDs as `resolveEnvironment`. It fails closed before an observation is ready, when the first
+one is too late, or if observation/phase/scan-bound evidence is invalid:
+
+```bash
+pnpm --filter @noxlimit/contracts operator:select-resolution-rounds
+```
+
+Copy its three `resolveEnvironment` values into the current shell. The write operator then
+re-verifies the supplied pair through the resolver simulation before sending the one-shot action:
 
 ```bash
 NOXLIMIT_OPERATOR_CONFIRM=RESOLVE_SEPOLIA_MARKET \
-  pnpm --filter @noxlimit/contracts operator:resolve
+pnpm --filter @noxlimit/contracts operator:resolve
 ```
+
+When several ACTIVE axes share one trading close, stage every replacement as `SUCCESSOR` before
+that close and cut all of them over in one revision. The accountless operator pins one safe block,
+verifies every predecessor and successor binding, resolver/feed policy, runtime hash, LP owner, and
+positive pool balance, rechecks the block hash, then creates one hash-linked catalog file without a
+chain write:
+
+```bash
+NOXLIMIT_OPERATOR_CONFIRM=ACTIVATE_SEPOLIA_SUCCESSORS \
+pnpm --filter @noxlimit/contracts operator:activate-successors
+```
+
+`NOXLIMIT_CUTOVER_PAIRS_JSON` is a nonempty array of `{predecessorMarketId,
+successorMarketId}` objects. Omitting any other ACTIVE route already closed at the shared snapshot
+fails closed; single-axis `operator:activate-successor` remains available when no synchronized
+close exists.
 
 Liquidity close verifies the FPMM/CTF/collateral/condition binding, removes only the operator's LP
 shares, and redeems held outcome positions when the condition is resolved. Repeating the same

@@ -3,6 +3,13 @@ import { parseAbi } from "viem";
 export const chainlinkFeedAbi = parseAbi([
   "function decimals() view returns (uint8)",
   "function description() view returns (string)",
+  "function getRoundData(uint80) view returns (uint80,int256,uint256,uint256,uint80)",
+  "function latestRoundData() view returns (uint80,int256,uint256,uint256,uint80)",
+  "function phaseAggregators(uint16) view returns (address)",
+]);
+
+export const chainlinkAggregatorAbi = parseAbi([
+  "function latestRoundData() view returns (uint80,int256,uint256,uint256,uint80)",
 ]);
 
 export const collateralAbi = parseAbi([

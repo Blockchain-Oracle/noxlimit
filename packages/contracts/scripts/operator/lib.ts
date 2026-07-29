@@ -1,5 +1,5 @@
 import { constants as fsConstants } from "node:fs";
-import { access, open, readFile, stat } from "node:fs/promises";
+import { access, open, readFile, rm, stat } from "node:fs/promises";
 import { dirname, isAbsolute, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -784,6 +784,11 @@ export interface CatalogRouteLike {
   readonly opensAtBlock?: string;
 }
 
+export interface CatalogCutoverPair {
+  readonly predecessorMarketId: Hex;
+  readonly successorMarketId: Hex;
+}
+
 async function workspaceRoot(): Promise<string> {
   let current = dirname(fileURLToPath(import.meta.url));
   for (;;) {
@@ -1061,6 +1066,233 @@ export function buildCatalogCutoverCandidate(
   return candidate;
 }
 
+/**
+ * Build one hash-linked catalog revision that cuts over every supplied axis at the same block.
+ *
+ * This is deliberately separate from the single-axis helper above. The single-axis workflow is
+ * still useful when only one axis closes, while this helper fails closed when another ACTIVE axis
+ * has also reached its close at the shared effective time.
+ */
+export function buildCatalogMultiCutoverCandidate(
+  history: readonly CatalogManifestLike[],
+  pairs: readonly CatalogCutoverPair[],
+  effectiveAt: string,
+  effectiveBlock: bigint,
+  authority: CatalogAuthority,
+): CatalogManifestLike {
+  const previous = history.at(-1);
+  if (!previous) throw new OperatorConfigurationError("catalog history cannot be empty");
+  if (previous.chainId !== ETHEREUM_SEPOLIA_CHAIN_ID) {
+    throw new OperatorConfigurationError("catalog history is not Ethereum Sepolia");
+  }
+  if (pairs.length === 0) {
+    throw new OperatorConfigurationError("multi-axis cutover requires at least one pair");
+  }
+  if (effectiveBlock <= 0n) {
+    throw new OperatorConfigurationError("cutover effectiveBlock must be positive");
+  }
+  const effectiveMilliseconds = Date.parse(effectiveAt);
+  if (!Number.isFinite(effectiveMilliseconds)) {
+    throw new OperatorConfigurationError("cutover effectiveAt must be a valid ISO timestamp");
+  }
+  const effectiveSeconds = BigInt(Math.floor(effectiveMilliseconds / 1_000));
+
+  const predecessorIds = new Set<string>();
+  const successorIds = new Set<string>();
+  const allIds = new Set<string>();
+  const axes = new Set<string>();
+  const normalizedPairs: Array<{
+    readonly predecessorId: string;
+    readonly successorId: string;
+  }> = [];
+
+  for (const pair of pairs) {
+    const predecessorId = pair.predecessorMarketId.toLowerCase();
+    const successorId = pair.successorMarketId.toLowerCase();
+    if (
+      !/^0x[0-9a-f]{64}$/.test(predecessorId) ||
+      !/^0x[0-9a-f]{64}$/.test(successorId)
+    ) {
+      throw new OperatorConfigurationError("cutover pair market IDs must be bytes32 values");
+    }
+    if (predecessorId === successorId) {
+      throw new OperatorConfigurationError("predecessor and successor must be different markets");
+    }
+    if (
+      predecessorIds.has(predecessorId) ||
+      successorIds.has(successorId) ||
+      allIds.has(predecessorId) ||
+      allIds.has(successorId)
+    ) {
+      throw new OperatorConfigurationError("multi-axis cutover market IDs must be globally unique");
+    }
+    predecessorIds.add(predecessorId);
+    successorIds.add(successorId);
+    allIds.add(predecessorId);
+    allIds.add(successorId);
+
+    const predecessor = marketById(previous, pair.predecessorMarketId);
+    const successor = marketById(previous, pair.successorMarketId);
+    const predecessorRoute = routeById(previous, pair.predecessorMarketId);
+    const successorRoute = routeById(previous, pair.successorMarketId);
+    if (predecessorRoute.activation !== "ACTIVE") {
+      throw new OperatorConfigurationError(
+        `${pair.predecessorMarketId}: cutover predecessor is not the current ACTIVE market`,
+      );
+    }
+    if (successorRoute.activation !== "SUCCESSOR") {
+      throw new OperatorConfigurationError(
+        `${pair.successorMarketId}: cutover replacement was not staged as SUCCESSOR`,
+      );
+    }
+
+    const predecessorAxis = recordIdentity(predecessor);
+    const successorAxis = recordIdentity(successor);
+    if (
+      predecessorAxis.asset !== successorAxis.asset ||
+      predecessorAxis.horizon !== successorAxis.horizon
+    ) {
+      throw new OperatorConfigurationError(
+        `${pair.predecessorMarketId}: predecessor and successor must share one asset/horizon axis`,
+      );
+    }
+    const axis = `${predecessorAxis.asset}:${predecessorAxis.horizon}`;
+    if (axes.has(axis)) {
+      throw new OperatorConfigurationError(`multi-axis cutover contains duplicate axis ${axis}`);
+    }
+    axes.add(axis);
+
+    const predecessorTimes = recordObject(predecessor, "times");
+    const predecessorClose = positiveRecordBigInt(
+      predecessorTimes,
+      "tradingClosesAt",
+      `${axis} predecessor trading close`,
+    );
+    if (predecessorClose > effectiveSeconds) {
+      throw new OperatorConfigurationError(`${axis}: predecessor is still ordering-open at cutover`);
+    }
+
+    const successorTimes = recordObject(successor, "times");
+    const successorStartsAt = positiveRecordBigInt(
+      successorTimes,
+      "startsAt",
+      `${axis} successor startsAt`,
+    );
+    const successorTradingClose = positiveRecordBigInt(
+      successorTimes,
+      "tradingClosesAt",
+      `${axis} successor trading close`,
+    );
+    if (successorStartsAt > effectiveSeconds) {
+      throw new OperatorConfigurationError(`${axis}: successor has not started at cutover`);
+    }
+    if (successorTradingClose <= effectiveSeconds) {
+      throw new OperatorConfigurationError(`${axis}: successor is already closed at cutover`);
+    }
+
+    const successorPool = recordObject(successor, "pool");
+    if (successorPool.builderSeededLiquidity !== true) {
+      throw new OperatorConfigurationError(`${axis}: successor lacks builder-seeded liquidity provenance`);
+    }
+    positiveRecordBigInt(
+      successorPool,
+      "completeSetsSeededAtoms",
+      `${axis} successor seeded complete sets`,
+    );
+    if (
+      positiveRecordBigInt(
+        successorPool,
+        "seededAtBlock",
+        `${axis} successor seeded block`,
+      ) > effectiveBlock
+    ) {
+      throw new OperatorConfigurationError(`${axis}: successor cutover predates its seed evidence`);
+    }
+    const verification = recordObject(successor, "verification");
+    if (verification.status !== "VERIFIED") {
+      throw new OperatorConfigurationError(`${axis}: successor immutable verification is not VERIFIED`);
+    }
+    if (
+      positiveRecordBigInt(
+        verification,
+        "verifiedAtBlock",
+        `${axis} successor verification block`,
+      ) > effectiveBlock
+    ) {
+      throw new OperatorConfigurationError(`${axis}: successor cutover predates immutable verification`);
+    }
+
+    normalizedPairs.push({
+      predecessorId,
+      successorId,
+    });
+  }
+
+  const previousRoutes = new Map(
+    previous.routing.map((route) => [route.marketId.toLowerCase(), route] as const),
+  );
+  for (const record of previous.markets) {
+    const marketId = record.marketId;
+    if (typeof marketId !== "string") {
+      throw new OperatorConfigurationError("catalog market lacks a valid marketId");
+    }
+    if (previousRoutes.get(marketId.toLowerCase())?.activation !== "ACTIVE") continue;
+    const close = positiveRecordBigInt(
+      recordObject(record, "times"),
+      "tradingClosesAt",
+      `${marketId} ACTIVE trading close`,
+    );
+    if (close <= effectiveSeconds && !predecessorIds.has(marketId.toLowerCase())) {
+      throw new OperatorConfigurationError(
+        `${marketId}: every ACTIVE route closed at cutover must be replaced atomically`,
+      );
+    }
+  }
+
+  const pairByPredecessor = new Map(
+    normalizedPairs.map((pair) => [pair.predecessorId, pair] as const),
+  );
+  const pairBySuccessor = new Map(
+    normalizedPairs.map((pair) => [pair.successorId, pair] as const),
+  );
+  const routing = previous.routing.map((route): CatalogRouteLike => {
+    const routeId = route.marketId.toLowerCase();
+    if (pairByPredecessor.has(routeId)) {
+      if (!route.opensAt || !route.opensAtBlock) {
+        throw new OperatorConfigurationError(
+          `${route.marketId}: ACTIVE predecessor lacks its first activation identity`,
+        );
+      }
+      return { ...route, activation: "RETIRED" };
+    }
+    if (pairBySuccessor.has(routeId)) {
+      return {
+        marketId: route.marketId,
+        activation: "ACTIVE",
+        opensAt: effectiveAt,
+        opensAtBlock: effectiveBlock.toString(),
+      };
+    }
+    return route;
+  });
+  const payload = {
+    schemaVersion: 1 as const,
+    chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
+    revision: (BigInt(previous.revision) + 1n).toString(),
+    previousRevisionHash: previous.catalogRevision,
+    effectiveAt,
+    effectiveBlock: effectiveBlock.toString(),
+    markets: previous.markets,
+    routing,
+  };
+  const candidate = authority.validateCatalogManifest({
+    ...payload,
+    catalogRevision: authority.hashCatalogManifest(payload),
+  });
+  authority.validateCatalogChain([...history, candidate]);
+  return candidate;
+}
+
 function fileSystemError(error: unknown): NodeJS.ErrnoException | undefined {
   return error instanceof Error && "code" in error ? (error as NodeJS.ErrnoException) : undefined;
 }
@@ -1121,13 +1353,56 @@ export async function writeJsonExclusive(path: string, value: unknown): Promise<
   }
 }
 
+/**
+ * Serialize a bounded operator action across processes without putting credentials in the lock.
+ * The caller chooses a revision-scoped path shared by every process competing for the same
+ * authority. A stale lock is never removed automatically because doing so could create two
+ * simultaneous writers; the error names the exact path for deliberate operator recovery.
+ */
+export async function withExclusiveOperatorLock<T>(
+  path: string,
+  operation: () => Promise<T>,
+): Promise<T> {
+  let handle;
+  try {
+    handle = await open(path, "wx", 0o600);
+  } catch (error) {
+    const fileError = fileSystemError(error);
+    const reason = fileError?.code ? ` (${fileError.code})` : "";
+    if (fileError?.code === "EEXIST") {
+      throw new OperatorConfigurationError(
+        `operator action is locked by another process at ${path}; verify no matching operator is active before removing that exact stale lock`,
+      );
+    }
+    throw new OperatorConfigurationError(`cannot acquire operator lock ${path}${reason}`);
+  }
+  try {
+    await handle.writeFile(
+      `${JSON.stringify({ schemaVersion: 1, pid: process.pid, createdAt: new Date().toISOString() })}\n`,
+      "utf8",
+    );
+    await handle.sync();
+    return await operation();
+  } finally {
+    await handle.close();
+    try {
+      await rm(path);
+    } catch (error) {
+      const fileError = fileSystemError(error);
+      const reason = fileError?.code ? ` (${fileError.code})` : "";
+      throw new OperatorConfigurationError(`cannot release operator lock ${path}${reason}`);
+    }
+  }
+}
+
 export function requireExplicitWrite(
   env: NodeJS.ProcessEnv,
   expected:
     | "DEPLOY_SEPOLIA_BUNDLE"
     | "RESOLVE_SEPOLIA_MARKET"
     | "CLOSE_SEPOLIA_LIQUIDITY"
-    | "ACTIVATE_SEPOLIA_SUCCESSOR",
+    | "ACTIVATE_SEPOLIA_SUCCESSOR"
+    | "ACTIVATE_SEPOLIA_SUCCESSORS",
 ): void {
   if (env.NOXLIMIT_OPERATOR_CONFIRM !== expected) {
     throw new OperatorConfigurationError(
