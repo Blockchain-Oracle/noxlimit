@@ -5,16 +5,23 @@
   2026-07-28.** Gates A and B pass locally, and Gate C completed the real Nox privacy trace plus one
   Nox-authorized FPMM fill on Ethereum Sepolia. Product selection is closed unless the user reopens
   it or new executable evidence invalidates a load-bearing assumption. Prompt 4 is now the active
-  implementation contract. The polished workspace now contains the hardened contracts, shared
-  protocol, deterministic catalog, restart-safe service, and responsive web product. The
-  final 2026-07-29 local verification snapshot records contracts `62`, protocol `14`, catalog `6`,
-  service `63`, and web `30` passing tests (`175` total); Playwright records `42` passing journeys,
-  `18` intentional project/viewport skips, and zero failures. The root compile/type-check/test/build
-  gates pass, and the current 1440px/390px responsive baselines are green. Phases 0–5 and bounded operator hardening are
-  locally complete. These are local/product-readiness results, not a fresh live product deployment:
-  the read-only Sepolia service smoke correctly reports an empty catalog and degraded
-  write-dependent health, and the fresh BTC/ETH create-to-redeem proof still needs external
-  Sepolia gas funding plus live credentials/processes.
+  implementation contract. The polished workspace contains the hardened contracts, shared
+  protocol, deterministic catalog, restart-safe service, and responsive web product. The fresh
+  2026-07-29 12:08Z root `pnpm check` records contracts `77`, protocol `14`, catalog `6`, service
+  `65`, and web `61` passing tests (`223` total), with compile/type-check/test/build green. The
+  fresh dedicated Playwright snapshot records `45` passing journeys, `21` intentional project/
+  viewport skips, and zero failures; it must be rerun at the submission commit. Phases 0–5 and
+  bounded operator hardening are complete. Phase 6 is live and in progress: branch
+  `codex/noxlimit-polished-product` contains the paired revision-5 cutover at commit `c073643`, the
+  original BTC/ETH bundles are retired, both revision-5 successors are active, both predecessor LP
+  removals and three real browser-off order/fill flows are committed, and the exercised service was
+  `READY`. Phase 6 settlement is now partial/degraded: BTC completed real browser resolution,
+  winning-user redemption, and builder-LP redemption; ETH cannot resolve under its immutable
+  3,600-second observation-delay policy because the exact first post-deadline observation arrived
+  3,624 seconds after `resolvesAt`, 24 seconds too late. The accountless selector rejected before
+  any write, the ETH resolver/payout remain unset, and ETH user/LP positions remain unredeemable.
+  Both active revision-5 successors carry the same known 3,600-second liveness risk. Public hosting
+  and submission assets remain pending.
 - **Canonical architecture:**
   [`../architecture/2026-07-25-noxlimit-system-architecture.md`](../architecture/2026-07-25-noxlimit-system-architecture.md)
 - **Audit and authority policy:**
@@ -50,6 +57,25 @@
 - **Prompt 3 executable evidence and verdict:**
   [`../verification/2026-07-28-noxlimit-critical-path.md`](../verification/2026-07-28-noxlimit-critical-path.md)
 - **Public live trace:** [`../../spike/nox/evidence/sepolia-gate-c.json`](../../spike/nox/evidence/sepolia-gate-c.json)
+- **Phase 6 runtime catalog:** revision `5` at
+  [`../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json`](../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json),
+  catalog hash `0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`,
+  committed by paired cutover `c073643`. It routes original BTC/ETH market IDs `RETIRED` and both
+  verified successor IDs `ACTIVE` atomically.
+- **Phase 6 committed execution evidence:**
+  [`../evidence/2026-07-29-phase6-btc-no-order.json`](../evidence/2026-07-29-phase6-btc-no-order.json),
+  [`../evidence/2026-07-29-phase6-btc-yes-order.json`](../evidence/2026-07-29-phase6-btc-yes-order.json),
+  and [`../evidence/2026-07-29-phase6-eth-yes-order.json`](../evidence/2026-07-29-phase6-eth-yes-order.json)
+  record direct-Gateway creation, browser closure, and real FPMM fills on the original bundles.
+  [`../evidence/2026-07-29-phase6-btc-resolution-redemption.json`](../evidence/2026-07-29-phase6-btc-resolution-redemption.json)
+  proves the retired BTC predecessor's browser resolution and winning-user redemption, and
+  [`../evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-redemption.json`](../evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-redemption.json)
+  proves builder-LP redemption in transaction
+  `0x706c0c6f38518a8cd536eb4b177939a642434979153f5ee9c62f105f186c3f0c`, receipt block
+  `11375232`. The ETH limitation is captured separately in
+  [`../evidence/2026-07-29-sepolia-eth-usd-4h-resolution-policy-rejection.json`](../evidence/2026-07-29-sepolia-eth-usd-4h-resolution-policy-rejection.json):
+  the unique first observation was 24 seconds outside the immutable bound, no resolution write was
+  attempted, and no ETH winner exists.
 - **Spike substrate:** pinned, unmodified Gnosis Conditional Tokens + FPMM. This is selected for
   the disposable verification slice, not asserted as an irreversible production-stack decision.
 - **Survivors:** One selected direction; one locally and live-verified disposable adapter; one real
@@ -128,12 +154,20 @@
   for a bare intent. It rejects secret-bearing payloads, stages and verifies final payloads before
   create-only publication, and safely resumes submitted, confirmed, or partially published work.
   Market configuration also enforces the exact declared 1h/4h/24h duration and canonical question;
-  reused operator-owned Test USDC is minted only by the computed seed/treasury shortfall.
-- **Next workflow:** Execute Phase 6 without reopening architecture: safely fund the operator, then
-  deploy one BTC/USD 4h bundle and one ETH/USD 4h bundle (or resume them through the plan-bound
-  deployment journal), activate the verified non-empty catalog, provision the hosted worker and
-  funding path, and record the complete browser → Nox → FPMM → objective resolution → redemption
-  trace. Preserve `spike/**`; do not derive a competing plan, restart discovery, or repeat Prompt 3.
+  reused operator-owned Test USDC is minted only by the computed seed/treasury shortfall. New
+  official Sepolia BTC/ETH deployments now require
+  `maximumObservationDelaySeconds >= 14,400`; this future-deployment liveness floor does not weaken
+  the unique first-observation/adjacent-predecessor proof. Runtime quote freshness remains a
+  separate 3,600-second policy.
+- **Next workflow:** Preserve the completed BTC proof and the terminal ETH rejection. Do not keep
+  polling the retired ETH resolver, submit an ETH resolution transaction, infer a winner from the
+  rejected observation, or substitute a later round. Treat the two active revision-5 successors as
+  current routing with a disclosed 3,600-second liveness risk; before relying on either axis for the
+  public release, deploy and rotate through the existing resolver-first workflow with the enforced
+  14,400-second minimum and verify its immutable bindings. Local service/web container builds and
+  smoke checks pass, but public frontend/service URLs, video, X post, repository/form/contact fields,
+  and the final submission run remain pending. Preserve `spike/**`; do not derive a competing plan,
+  restart discovery, or repeat Prompt 3.
 - **Prompt 4:** [`../../prompts/04-polished-product-implementation.md`](../../prompts/04-polished-product-implementation.md)
   is authorized and active as the implementation handoff.
 - **Prompt 5:** [`../../prompts/05-designer-agent-handoff.md`](../../prompts/05-designer-agent-handoff.md)
@@ -223,12 +257,14 @@ minimum-output-protected buy`
 The research found feature-supply and product-investment signals for advanced prediction-market
 orders, but no direct proof of privacy-specific demand. The released viewer/private-decrypt path,
 real FPMM deployment, asynchronous orchestration, escrow/custody, and measured evaluation leakage
-pass locally, and their combined live path now passes on a real builder-seeded Sepolia pool.
-Fresh-user funding, product UX, objective resolution, and redemption now have local product
-implementations and automated coverage. Their fresh integrated Ethereum Sepolia proof—including a
-real activated BTC/ETH catalog, funded worker/treasury, objective resolution, and redemption—has
-not yet been recorded. No official Nox production mainnet exists, but that is not a hackathon
-blocker because Ethereum Sepolia is the required chain.
+pass locally, and their combined live path passes on real builder-seeded Sepolia pools. Fresh-user
+funding and product UX now also have committed integrated evidence: three orders filled browser-off,
+the original pools closed, and verified successors activated in one catalog revision. The retired
+BTC predecessor additionally completes objective resolution plus real winning-user and builder-LP
+redemption. The retired ETH predecessor is a recorded terminal policy rejection, not a second
+successful vertical: its first post-deadline observation was 24 seconds outside the immutable
+one-hour bound, so no write or winner exists. No official Nox production mainnet exists, but that is
+not a hackathon blocker because Ethereum Sepolia is the required chain.
 
 `KEEP AND VERIFY` is the historical 2026-07-24 maturity label. The current status is
 `GO`: local and live executable evidence exists. The polished implementation is user-authorized

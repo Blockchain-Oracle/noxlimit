@@ -1,7 +1,9 @@
 # NoxLimit Phase 6 live rollout
 
-Status: **IN PROGRESS — two market bundles are live and independently validated; the fresh user
-order → Nox → FPMM → resolution → redemption proof is not complete yet.**
+Status: **PARTIAL/DEGRADED — one complete BTC user order → Nox → FPMM → objective resolution →
+winning-user redemption path and builder-LP redemption are verified. ETH is terminally rejected by
+its immutable one-hour observation-delay policy; no ETH write, payout, or winner exists. Public
+hosting remains pending.**
 
 This file is an operational verification log, not a new architecture or decision authority.
 Current product authority remains `.thoughts/decisions/CURRENT.md` and the canonical architecture.
@@ -14,6 +16,12 @@ Ethereum Sepolia catalog revision `2` is published at
 It hash-links revision `1`
 (`0xed59599a3b777571a97733c24e793b3264f2f47cede79629640e3fc6d660c258`)
 and the bootstrap catalog.
+
+The later paired cutover at commit `c073643` publishes current runtime revision `5` at
+`packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json`, hash
+`0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`.
+It marks both original bundles below `RETIRED` and both verified successors `ACTIVE`. Those active
+successors also use the now-known-risky immutable 3,600-second observation bound.
 
 Shared product contracts:
 
@@ -51,6 +59,54 @@ Canonical machine-readable deployment evidence is in:
 Both deployment journals reached `COMPLETE`. The journals are ignored operational state and are
 not committed.
 
+## Browser-off fills, cutover, and settlement outcome
+
+Three create-only artifacts prove direct-Gateway creation, browser closure, real browser-off Nox-
+authorized FPMM fills, and fresh-browser reconstruction on the original bundles:
+
+- `.thoughts/evidence/2026-07-29-phase6-btc-no-order.json`
+- `.thoughts/evidence/2026-07-29-phase6-btc-yes-order.json`
+- `.thoughts/evidence/2026-07-29-phase6-eth-yes-order.json`
+
+Both builder LP positions were removed after NoxLimit close before settlement. Revision `5` then
+retired both original routes and activated both successors atomically.
+
+BTC completed the real settlement path:
+
+- browser resolution and winning-user redemption:
+  `.thoughts/evidence/2026-07-29-phase6-btc-resolution-redemption.json`;
+- first post-deadline round `18446744073709584255` at `1785321636`, with adjacent predecessor
+  `18446744073709584254` at `1785317952`;
+- resolution transaction
+  `0x339f8b71459255373925cd8b566887e2f346dd8be4cf93ed2b9efbb646ebd673`;
+- user redemption transaction
+  `0x8cec8d8147018d5f0cc68c83feed5e8f7fbb185724d71a61802303c5076bfa93`;
+- builder-LP redemption:
+  `.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-redemption.json`, transaction
+  `0x706c0c6f38518a8cd536eb4b177939a642434979153f5ee9c62f105f186c3f0c`,
+  receipt block `11375232`.
+
+ETH cannot complete settlement under the deployed resolver policy:
+
+- evidence:
+  `.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-resolution-policy-rejection.json`;
+- `resolvesAt = 1785319200`, immutable maximum delay `3,600`, latest accepted timestamp
+  `1785322800`;
+- adjacent predecessor round `18446744073709586443` at `1785319188`;
+- unique first post-deadline round `18446744073709586444` at `1785322824`, a delay of 3,624 seconds
+  and an excess of 24 seconds;
+- the accountless selector exited before the write operator; no resolution transaction was
+  attempted, resolver settlement fields remain zero, the payout denominator remains zero, and ETH
+  user/LP positions remain unredeemable.
+
+A later observation cannot repair the immutable condition because it would be even later and would
+violate the first-observation adjacency rule. No ETH winner is recorded or inferred.
+
+The implementation now enforces `maximumObservationDelaySeconds >= 14,400` for all future official
+Sepolia BTC/ETH deployments. This liveness floor preserves the same unique first-observation pair;
+the separate runtime quote-freshness policy remains 3,600 seconds. Existing resolver identities,
+including both active revision-5 successors, cannot be edited in place.
+
 ## Fail-closed recovery record
 
 BTC OrderBook deployment transaction
@@ -80,15 +136,17 @@ Changing only the transport did not change the journal plan hash.
   bounded fix now carries one `{ headBlock, safeBlock }` snapshot through replay, hydration, and
   successful health reporting. The real max-lag policy remains 6; 65 service tests, service
   type-check, and service production build pass.
+- Reproducible service and web container builds plus local smoke checks pass. This is local release
+  evidence only; no public frontend or service URL is verified.
 
-## Next required proof
+## Next required work
 
-1. Start exactly one service replica after the safe-block timestamp passes market start; require
-   overall, evaluator, and funding health all `READY`.
-2. Run the explicit signed user funding flow, then a real browser private order on each asset.
-3. Close the browser and prove the hosted worker evaluates through Nox, publishes, and fills the
-   unchanged FPMM atomically.
-4. Close builder LP positions after NoxLimit close, resolve from the first valid post-deadline
-   Chainlink observation plus adjacent predecessor, and redeem real user/LP positions.
-5. Reconcile final evidence and status across the decision, plan, architecture, README, and
-   handoff. Until then, Phase 6 is not marked complete.
+1. Preserve the completed BTC proof and terminal ETH rejection; do not poll or write the retired
+   ETH resolver, infer an ETH winner, or substitute a later round.
+2. Treat revision `5` as current routing with a disclosed liveness risk on both active successors.
+   Any release replacement must be a new resolver-first deployment with at least 14,400 seconds,
+   immutable verification, and a hash-linked successor cutover.
+3. Provision exactly one durable public service replica and the public web deployment; require
+   overall, evaluator, funding, and catalog health `READY` at the published URLs.
+4. Run the final submission-commit root/browser gates and publish only evidence-backed repository,
+   hosting, video, X, and organizer form/contact values.

@@ -52,6 +52,10 @@ creating an unusable treasury per market.
 The declared market horizon is exact: `resolvesAt - startsAt` must be precisely the configured
 `1h`, `4h`, or `24h` duration, and `NOXLIMIT_QUESTION` must equal the canonical
 asset/strike/resolution-UTC question printed by the plan. A prose-equivalent question is rejected.
+New official Sepolia BTC/USD and ETH/USD bundles also require
+`NOXLIMIT_MAXIMUM_OBSERVATION_DELAY_SECONDS >= 14400`. This four-hour deployment minimum is distinct
+from the 3,600-second runtime quote-freshness policy and does not weaken the unique adjacent first-
+observation rule. Historical 3,600-second bundles remain readable but cannot be repaired in place.
 
 ## Resuming an interrupted deployment
 
@@ -89,6 +93,12 @@ one is too late, or if observation/phase/scan-bound evidence is invalid:
 ```bash
 pnpm --filter @noxlimit/contracts operator:select-resolution-rounds
 ```
+
+`first ... exceeds maximum delay` is terminal for that immutable resolver. Do not keep polling for a
+later pair, copy different round IDs, infer a winner, or run `operator:resolve`. The retired ETH/USD
+4h predecessor recorded exactly this result at `+3,624s`, 24 seconds outside its 3,600-second bound;
+no account or write was used and the payout remains unset. By contrast, the retired BTC predecessor
+passed selection and now has durable browser/user/LP redemption evidence.
 
 Copy its three `resolveEnvironment` values into the current shell. The write operator then
 re-verifies the supplied pair through the resolver simulation before sending the one-shot action:
@@ -140,7 +150,10 @@ NOXLIMIT_OPERATOR_CONFIRM=CLOSE_SEPOLIA_LIQUIDITY \
   source commits, safe strike/times/policies, and enough NLTUSDC/Test ETH for seed and treasury
   minimums. The plan uses no invented fallback for any of them.
 
-The next live run is one BTC/USD 4h and one ETH/USD 4h bundle. Safely fund the operator first, then
-deploy or resume both journals, activate the verified catalog, provision the hosted worker/funding
-path, and record the complete browser → Nox → FPMM → objective resolution → redemption evidence.
-That fresh Phase 6 proof has not yet occurred.
+The current catalog is revision `5`: both original routes are retired and both successors are
+active. BTC has one complete browser → Nox → FPMM → objective resolution → user/LP redemption proof.
+ETH is a terminal no-write policy rejection, not a winner or a pending resolution. Both active
+successors predate the four-hour guard and retain a known 3,600-second liveness risk. Any release
+replacement must use a new resolver-first deployment, immutable verification, and hash-linked
+successor cutover; never edit revision `5` in place. Local container build/smoke passes, while public
+hosting remains pending.

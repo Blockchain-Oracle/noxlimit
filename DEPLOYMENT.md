@@ -130,6 +130,43 @@ pnpm --filter @noxlimit/service start
 pnpm --filter @noxlimit/web start
 ```
 
+## Reproducible containers
+
+`Dockerfile.service` and `Dockerfile.web` build from the monorepo root with the locked Node and
+pnpm versions. The service image is an always-on single-writer process. The web image is a Next.js
+SSR process; it is not a static export. Public browser variables are deliberately Docker build
+arguments because Next.js inlines `NEXT_PUBLIC_*` values during `next build`.
+
+Both images have completed local build/check/smoke verification. That proves reproducibility and
+local startup only; no public service or frontend URL is currently verified.
+
+Build the service without placing runtime credentials in an image layer:
+
+```bash
+docker build -f Dockerfile.service -t noxlimit-service .
+```
+
+Build the web only after the canonical HTTPS service origin and browser-safe RPC are known:
+
+```bash
+docker build -f Dockerfile.web -t noxlimit-web \
+  --build-arg NEXT_PUBLIC_NOXLIMIT_API_ORIGIN=https://api.example.invalid \
+  --build-arg NEXT_PUBLIC_SEPOLIA_RPC_URL=https://sepolia.example.invalid \
+  --build-arg NEXT_PUBLIC_TEST_USDC_ADDRESS=0x0000000000000000000000000000000000000000 \
+  --build-arg NEXT_PUBLIC_TRADING_MIN_ETH=0.001 \
+  --build-arg NEXT_PUBLIC_TRADING_MIN_USDC=5 .
+```
+
+The example values are placeholders, not a deployable release. Use the exact collateral from the
+activated catalog and the measured readiness floors. Inject `SEPOLIA_RPC_URL`,
+`WORKER_PRIVATE_KEY`, and other service-only values at runtime through a secret manager.
+
+Hosting configuration must enforce one service replica, disable autoscaling and scale-to-zero,
+use stop-before-start deployment, and allow graceful termination. A normal overlapping rolling
+deploy would create two independent queues using one signer and is therefore unsupported in v1.
+If no durable absolute reload pointer is mounted, rotate the catalog by rebuilding/redeploying the
+service with `CATALOG_MANIFEST_PATH` set to the new committed immutable manifest.
+
 Recommended hosting boundaries:
 
 - expose the web application and service through HTTPS;
@@ -176,6 +213,13 @@ seeds the unchanged FPMM, and publishes evidence/catalog output create-only. Nev
 journal to force progress. A bare intent requires the attempt-bound `ADOPT` or `RETRY` procedure in
 `OPERATOR.md` after independent chain inspection.
 
+For every new official Sepolia BTC/USD or ETH/USD bundle,
+`NOXLIMIT_MAXIMUM_OBSERVATION_DELAY_SECONDS` must be at least `14400`. The operator rejects a lower
+value before a write. This is a settlement-liveness floor; it does not change the unique first-
+observation/adjacent-predecessor proof. `NOXLIMIT_ORACLE_MAX_AGE_SECONDS=3600` remains the separate
+runtime quote-freshness policy. Do not edit an already-deployed market or historical catalog record
+to retrofit the new value; deploy resolver-first and publish a new successor/cutover revision.
+
 Stage every synchronized successor before the predecessor close. After the safe block reaches the
 close, activate all affected axes atomically:
 
@@ -196,6 +240,13 @@ timestamp and its adjacent predecessor. Select the pair read-only:
 ```bash
 pnpm --filter @noxlimit/contracts operator:select-resolution-rounds
 ```
+
+If the selector reports that the unique first observation exceeds the resolver's immutable delay,
+the result is terminal for that deployed condition. Do not run the write command. Do not keep
+polling as if another pair could qualify, infer a winner, or substitute a later round. The retired ETH/USD 4h
+predecessor demonstrates this failure: its first observation arrived at `+3624s`, 24 seconds beyond
+its 3,600-second bound, so the resolver and payout remain unset. The retired BTC predecessor passed
+the same rule and has durable browser/user/LP redemption evidence.
 
 Copy only the printed round IDs into the resolution environment, then run the one-shot action:
 
@@ -252,4 +303,7 @@ A hosted release is ready only when all of the following are true:
 - private input goes directly to the official Nox Gateway rather than through NoxLimit servers;
 - a fresh order fills against the real FPMM after browser closure;
 - objective resolution and real redemption have durable transaction evidence;
+- every relied-on active bundle has a settlement-liveness parameter accepted for the release;
+  revision-5 BTC/ETH successors currently carry a disclosed 3,600-second risk, so replace/retire
+  them or explicitly keep the release gated;
 - no mock market, sample balance, secret, or prototype fixture is loaded in production.

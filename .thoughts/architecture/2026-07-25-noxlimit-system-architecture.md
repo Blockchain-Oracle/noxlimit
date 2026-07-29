@@ -1,12 +1,13 @@
 # NoxLimit System Architecture
 
-**Date:** 2026-07-25; revised 2026-07-29 after local polished-product implementation
+**Date:** 2026-07-25; revised 2026-07-29 through Phase 6 settlement-policy reconciliation
 **Authority:** Canonical architecture for the selected hackathon direction and bounded critical-path
 verification  
 **Maturity:** User-approved; bounded Gate C critical path verified (`GO`); polished contracts,
-protocol, catalog, service, web, and bounded operator hardening implemented and verified locally;
-fresh BTC/ETH product deployment and complete live create-to-redeem proof pending external Sepolia
-gas funding plus live credentials/processes
+protocol, catalog, service, web, and bounded operator hardening verified; live BTC/ETH deployment,
+three browser-off fills, predecessor LP close, and paired successor activation committed; one full
+BTC browser-resolution/user-redemption/LP-redemption vertical verified; ETH terminally rejected by
+its immutable one-hour observation bound; public hosting and submission assets pending
 **Spike substrate:** Unmodified Gnosis Conditional Tokens + Fixed Product Market Maker on Ethereum
 Sepolia
 
@@ -46,6 +47,42 @@ The independent `DROP` audit is historical evidence, not current workflow author
 authority order is defined in
 [`../decisions/AUDIT-GATES.md`](../decisions/AUDIT-GATES.md) and
 [`../decisions/CURRENT.md`](../decisions/CURRENT.md).
+
+## Phase 6 Live Product Status — 2026-07-29 settlement reconciliation
+
+The product deployment has advanced beyond local readiness on branch
+`codex/noxlimit-polished-product`:
+
+- paired cutover commit `c073643` publishes runtime catalog revision `5` at
+  [`../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json`](../../packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json),
+  catalog hash `0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`;
+- the original BTC/USD and ETH/USD 4h bundles are `RETIRED` and their two verified successors are
+  `ACTIVE` in the same immutable revision;
+- three committed predecessor-market traces cover real direct-Gateway order creation, browser
+  closure, automatic Nox-authorized FPMM fill, and fresh-browser reconstruction;
+- the retired BTC predecessor subsequently resolved from its exact adjacent first-observation pair;
+  the real browser wallet redeemed the winning YES position, and the builder redeemed its retained
+  LP outcome position in transaction
+  `0x706c0c6f38518a8cd536eb4b177939a642434979153f5ee9c62f105f186c3f0c`
+  at receipt block `11375232`;
+- the retired ETH predecessor is terminally unresolvable under its immutable 3,600-second bound:
+  the exact first post-deadline observation arrived at `+3,624s`, 24 seconds too late. The selector
+  rejected accountlessly before any write; resolver settlement fields and the Conditional Tokens
+  payout remain unset, so ETH user and LP positions remain unredeemable;
+- both active revision-5 successors are still the current catalog routes and inherit the same known
+  3,600-second settlement-liveness risk;
+- the exercised service reported `READY`; this is runtime evidence, not a public-hosting claim;
+- fresh root `pnpm check` passes contracts `77`, protocol `14`, catalog `6`, service `65`, and web
+  `61` tests (`223` total), including compile, type-check, test, and build; subsequent service/web
+  container builds and local smoke checks pass, but no public deployment is verified.
+
+This establishes one complete BTC product vertical, not a paired BTC/ETH completion. Evidence is
+[`../evidence/2026-07-29-phase6-btc-resolution-redemption.json`](../evidence/2026-07-29-phase6-btc-resolution-redemption.json),
+[`../evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-redemption.json`](../evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-redemption.json),
+and
+[`../evidence/2026-07-29-sepolia-eth-usd-4h-resolution-policy-rejection.json`](../evidence/2026-07-29-sepolia-eth-usd-4h-resolution-policy-rejection.json).
+No later ETH round may be substituted and no rejected observation may be presented as a winner.
+Public frontend/service URLs, video, X post, and form/contact fields remain unverified.
 
 ## Product Boundary
 
@@ -264,6 +301,17 @@ verified adjacent predecessor has `updatedAt < resolvesAt`, and the pair is adja
 proxy's phase-aware round scheme. Merely accepting any valid later round is caller-cherry-pickable
 and forbidden. If adjacency across a phase transition cannot be verified, settlement must stop
 rather than guess.
+
+The delay bound is a separate liveness policy, not a license to select a later observation. Live
+Sepolia evidence showed that BTC/USD and ETH/USD proxy observations commonly arrive slightly more
+than one hour apart: the retired ETH predecessor's unique first observation arrived after 3,624
+seconds and permanently exceeded its immutable 3,600-second bound. For every future official
+Sepolia BTC/USD or ETH/USD deployment, the operator therefore enforces
+`maximumObservationDelaySeconds >= 14,400`. The four-hour minimum tolerates ordinary cadence jitter
+and two missed roughly-hourly reports while the adjacency proof still identifies exactly one
+chronological observation. The public quote-freshness policy remains separately 3,600 seconds; it
+must not be widened merely because the settlement-liveness bound is wider. Existing deployed
+resolvers cannot be repaired in place because the bound participates in immutable market identity.
 
 SOL/USD uses a Pyth historical-price adapter only after a dedicated live test proves the exact
 update-verification, publish-time window, fee, decimals/exponent normalization, and one-shot
@@ -563,41 +611,51 @@ live Ethereum Sepolia:
 - real outcome shares reach the immutable recipient;
 - no mock quote, share, proof, or execution is used in the bounded Gate C trace.
 
-### Locally implemented and verified in the polished workspace — 2026-07-29
+### Polished workspace and live Phase 6 evidence — 2026-07-29
 
 - the hardened market-bound OrderBook, objective Chainlink resolver, six-decimal collateral, and
-  bounded funding treasury are implemented; the post-hardening contract suite passes `62` tests;
+  bounded funding treasury are implemented; the current contract suite passes `77` tests;
 - the shared protocol and catalog packages pass `14` and `6` tests respectively, including
   JSON-safe types, independent disclosure provenance, deterministic catalog validation, and
   unsigned transaction builders;
-- the Fastify service passes `63` tests covering chain projections, restart/recovery, worker,
-  funding, read APIs, phase-aware history, and atomic verified catalog adoption from the startup/
-  SIGHUP pointer; a read-only Sepolia smoke is truthfully degraded with an empty catalog;
-- the responsive Next application passes `30` web tests. Playwright records `42` passing journeys,
-  `18` intentional project/viewport skips, and zero failures, including direct Gateway privacy,
-  funding, and reload-safe exact-hash transaction locks. Root compile/type-check/test/build and the
-  current 1440px/390px responsive baselines are green;
+- the Fastify service passes `65` tests covering chain projections, restart/recovery, worker,
+  funding, read APIs, phase-aware history, and atomic verified catalog adoption; the exercised
+  Phase 6 service reported `READY`, and revision `5` is the current runtime catalog;
+- the responsive Next application passes `61` web tests. The fresh dedicated Playwright snapshot
+  records `45` passing journeys, `21` intentional project/viewport skips, and zero failures,
+  including direct Gateway privacy, funding, and reload-safe exact-hash transaction locks; rerun it
+  at the submission commit;
 - the bounded operator path passes its journal, exact-horizon/question, external binding,
   shared-collateral shortfall, and create-only output regression coverage;
+- the operator used that path to publish verified BTC/ETH bundles, three browser-off real fills,
+  two predecessor LP-close artifacts, and atomic paired successor activation at `c073643`;
+- the retired BTC predecessor then completed objective browser resolution, winning-user redemption,
+  and builder-LP redemption with durable receipts and exact position/collateral deltas;
+- the retired ETH predecessor produced a durable terminal policy-rejection artifact: the unique
+  first observation was 24 seconds late, no write occurred, no payout vector exists, and the ETH
+  positions remain unredeemable;
+- future official Sepolia BTC/ETH deployments now fail configuration below a 14,400-second
+  observation-delay minimum; the active revision-5 successors predate that guard and retain their
+  known 3,600-second risk;
+- reproducible service and web container builds plus local smoke checks pass; this remains local
+  release evidence, not a public-hosting claim;
 - the six local `Complement` HTML files are the durable design source; their sample data is not
   loaded as live product state.
 
-These results establish local product implementation, not a fresh deployment. The historical
-Prompt 3 Gate C trace remains valid evidence and is not reclassified as the final product bundle.
+These results establish one full BTC create-to-redeem journey and an honest ETH liveness failure,
+not a paired successful journey or a public hosted release. The historical Prompt 3 Gate C trace
+remains valid evidence and is not reclassified as the final product bundle.
 
 ### Still required for the live product and submission gate
 
-- fund the operator safely, then deploy or resume through the journal one current BTC/USD 4h and
-  one ETH/USD 4h resolver-first bundle, verify every immutable binding, and publish a non-empty
-  activated catalog revision;
-- provision the hosted worker/finalizer, RPC, funding treasury, and deployment credentials without
-  weakening the one-wallet self-serve path;
-- run a fresh browser confidential-input → order → browser-off evaluation → publication → atomic
-  fill → position → objective resolution → redemption trace with production-intended cadence and
-  check-budget guards;
-- add BTC/ETH breadth only through the verified successor workflow; keep SOL absent until its
-  separate Pyth live gate passes;
-- publish deployment evidence, limitations, privacy boundary, and submission assets.
+- preserve the complete BTC proof and the ETH terminal rejection; do not poll, resolve, or invent a
+  payout for the retired ETH condition and do not substitute a later favorable round;
+- treat both active revision-5 successors as current routing with an explicitly disclosed
+  3,600-second liveness risk; future/replacement bundles must use the enforced 14,400-second minimum
+  and the same resolver-first immutable verification/cutover workflow;
+- keep SOL absent until its separate Pyth live gate passes;
+- provision and verify durable public web/service hosting, then publish final deployment evidence,
+  limitations, privacy boundary, video, X post, and organizer form/contact fields.
 
 ### Important after the hackathon, not a pre-build veto
 
@@ -794,8 +852,10 @@ minimum-output check. The released Nox source and local stack establish the nece
 viewer role, and combined adapter behavior. The live Prompt 3 evidence adds the bounded recovered
 orchestration, success-only publication, independent proof rescue, real FPMM action, asset deltas,
 and terminal cleanup on Ethereum Sepolia. The owner/deployer funded finalizer gas after order
-creation. The polished workspace now implements bounded funding and serialized worker writes with
-restart coverage, but durable hosted provisioning and treasury balance remain live-release work.
+creation. The Phase 6 product evidence now adds bounded user funding, serialized browser-off worker
+writes, three real fills, predecessor LP close, verified successor cutover, one complete BTC
+browser/user/LP redemption vertical, and one honest terminal ETH policy rejection. Durable public
+hosting and replacement of the revision-5 one-hour successor risk remain live-release work.
 
 The DeepBook research establishes the product/terminal/API patterns and the boundary between its
 real CLOB mechanics and NoxLimit's FPMM mechanics. The post-gate reconciliation records the
@@ -806,13 +866,14 @@ not retroactively change the successful bounded Gate C evidence.
 ## Next Authorized Action
 
 The user approved this architecture, accepted the passed bounded Gate C critical path, and
-explicitly authorized Codex to build the polished product. The local product layers now exist and
-their post-hardening verification snapshot is recorded above. The next action is Phase 6: safely
-fund the operator, deploy one BTC/USD 4h and one ETH/USD 4h bundle (or resume through their bound
-journals), activate the verified catalog, provision the hosted worker/funding path, and record the
-complete live browser → Nox → FPMM → objective resolution → redemption journey. That action is
-pending external Sepolia gas funding plus live credentials/processes; it has not yet occurred. Work
-continues from the current implementation and accepted product-surface contract rather than
-restarting discovery, repeating Gate C, or creating a competing design. Executable evidence may
-refine this architecture; it may not silently replace the product, privacy boundary, or hackathon
-risk standard.
+explicitly authorized Codex to build the polished product. The product now has one complete BTC
+vertical and one terminal ETH policy-rejection trace. Preserve both outcomes: do not keep polling or
+write the retired ETH resolver, do not infer an ETH winner, and do not substitute a later round.
+Revision `5` remains the current catalog routing, but both active successors retain the disclosed
+3,600-second liveness risk. Any release replacement must be deployed resolver-first with the new
+14,400-second minimum, immutable verification, and a new hash-linked cutover revision. Local
+container builds and smoke checks pass; public hosting, video, X, and organizer form/contact fields
+remain pending release work. Work continues from the current implementation and accepted product-
+surface contract rather than restarting discovery, repeating Gate C, or creating a competing
+design. Executable evidence may refine this architecture; it may not silently replace the product,
+privacy boundary, or hackathon risk standard.

@@ -7,14 +7,23 @@ Use this repository to verify and then build the selected iExec WTF Hackathon di
 Prompt 3 spike is `GO`: all local paths pass, and live Gate C completed the Nox privacy trace plus
 one real Sepolia FPMM fill. The user explicitly authorized Codex to plan and build the polished
 product on 2026-07-28; Prompt 4 is active. The root pnpm workspace and polished contracts,
-protocol, catalog, service, and web are
-implemented locally. The final 2026-07-29 local snapshot records contracts `62`, protocol `14`,
-catalog `6`, service `63`, and web `30` passing (`175` package tests total); Playwright records `42`
-passing, `18` intentional project/viewport skips, and zero failures.
-Root compile/type-check/test/build and current responsive 1440px/390px baselines are green. Phases
-0–5 and bounded operator hardening are locally complete. The read-only Sepolia
-service smoke correctly reports a degraded empty catalog; `spike/**` remains unchanged. The fresh
-live BTC/ETH proof still needs external Sepolia gas funding plus live credentials/processes.** Do not reopen product
+protocol, catalog, service, and web are implemented. The fresh 2026-07-29 12:08Z `pnpm check`
+records contracts `77`, protocol `14`, catalog `6`, service `65`, and web `61` passing (`223`
+package tests total), with compile/type-check/test/build green. The fresh dedicated Playwright
+snapshot records `45` passing, `21` intentional project/viewport skips, and zero failures; rerun it
+at the submission commit. Phases 0–5 and bounded operator hardening are complete. On branch
+`codex/noxlimit-polished-product`, paired cutover commit `c073643` publishes runtime catalog
+revision `5` at `packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json`, hash
+`0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`. The original BTC/ETH
+bundles are retired, both successors are active, predecessor LP-close evidence and three real
+browser-off order/fill flows are committed, and the exercised service was `READY`; `spike/**`
+remains unchanged. The retired BTC predecessor then completed real browser resolution, winning-user
+redemption, and builder-LP redemption. The retired ETH predecessor is terminally unresolvable under
+its immutable 3,600-second observation-delay policy: the exact first post-deadline observation
+arrived at `+3,624s`, 24 seconds late, and the selector rejected before any write. No ETH payout or
+winner exists, and its user/LP positions remain unredeemable. Both active revision-5 successors
+carry the same known one-hour liveness risk. Public hosting/submission assets remain pending.** Do
+not reopen product
 discovery or inherit QuietRound, SLA Lock, Proofline, AgentDispute, or another historical idea unless the
 user explicitly reopens selection or executable evidence kills a load-bearing NoxLimit assumption.
 The user controls pacing: historical submission dates, spike clocks, and reviewer estimates do not
@@ -51,11 +60,15 @@ Prompt 2 is waived by the user's selection. The architecture checkpoint and Prom
 and accepted post-gate Opus corrections are now part of the canonical architecture. Product
 stories, the product surface map, and the designer handoff are accepted implementation inputs. The
 six local HTML files under `.thoughts/design/html/` are the completed durable `Complement` design
-source; their sample data is not deployment evidence. The next workflow action is Phase 6 of
-`prompts/04-polished-product-implementation.md`: safely fund the operator, deploy one BTC/USD 4h
-and one ETH/USD 4h bundle (resuming through the journal when needed), activate the verified
-catalog, provision the hosted worker/funding path, and record the full browser → Nox → FPMM →
-objective resolution → redemption path without modifying or rerunning `spike/**`.
+source; their sample data is not deployment evidence. Phase 6 of
+`prompts/04-polished-product-implementation.md` is active through deployed/funded BTC/ETH bundles,
+three real browser-off fills, predecessor LP close, paired successor activation, one complete BTC
+resolution/redemption vertical, and one terminal ETH policy rejection. Preserve those split facts:
+do not keep polling or write the retired ETH resolver, infer an ETH winner, or substitute a later
+round. New official Sepolia BTC/ETH deployments enforce a 14,400-second observation-delay minimum
+while retaining the unique first-observation rule; runtime quote freshness remains independently
+3,600 seconds. The active revision-5 successors predate that guard and retain disclosed risk.
+Public hosting and submission assets remain the next external proof boundary.
 
 An independent or future discovery pass should produce a cited evidence and candidate report with:
 
@@ -89,10 +102,11 @@ Generic native prediction markets remain excluded because DarkOdds already built
 Research identified a narrower product-shaped hypothesis, **NoxLimit**: a public amount immutable
 per order plus a confidential maximum-price buy limit against a real onchain outcome-share AMM.
 
-**Current outcome (2026-07-29): selected, architecture approved, local Gates A/B verified, live
-Gate C verified; technical critical-path maturity `GO`; polished layers and bounded operator
-hardening complete locally; fresh product deployment pending external Sepolia funding and live
-credentials/processes.**
+**Current outcome (2026-07-29): selected, architecture approved, local Gates A/B verified,
+live Gate C verified; technical critical-path maturity `GO`; polished layers and bounded operator
+hardening complete; Phase 6 deployed/funded through three browser-off fills, LP close, and atomic
+revision-5 successor cutover; BTC browser/user/LP redemption complete; ETH terminally rejected by
+its immutable one-hour bound; public hosting still pending.**
 
 - Conditional execution is a shipping workflow, and public onchain order flow has structural
   pre-trade exposure. Direct evidence that prediction traders specifically value hiding only this
@@ -142,6 +156,16 @@ is rejected, final evidence/catalog payloads are staged and hash-checked before 
 publication, and partial output publication is safely recoverable. Market configuration must use
 the exact declared 1h/4h/24h duration and canonical UTC question. A reused Test USDC contract must
 be operator-issued, and only the computed pool/treasury collateral shortfall is minted.
+
+That protocol has now produced committed live product evidence. The original BTC/ETH markets carry
+three filled orders and are retired after committed LP removal; their successor bundles are active
+in revision `5`. BTC subsequently resolved from the exact first chronological pair; the winning user
+and builder LP both redeemed real Test USDC. ETH did not: the exact adjacent pair proved the first
+post-deadline observation was 24 seconds beyond the immutable 3,600-second bound. The accountless
+selector stopped before a write, leaving the resolver, payout, and ETH positions unset/unredeemable.
+Do not substitute a later round or present the rejected price as a winner. The active successors use
+the same risky bound; replace/retire them through a new verified catalog revision before relying on
+them for release settlement.
 
 The detailed post-spike route is recorded in [`CURRENT.md`](./.thoughts/decisions/CURRENT.md).
 Historical Gate C clock values remain in its dated evidence only and are not current planning

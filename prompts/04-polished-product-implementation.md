@@ -2,16 +2,23 @@
 
 > **ACTIVE — the user explicitly authorized the polished build on 2026-07-28.**
 
-> **IMPLEMENTATION CHECKPOINT — Phases 0–5 and bounded operator hardening are complete locally.
-> The final 2026-07-29 local snapshot records contracts `62`, protocol `14`, catalog `6`, service
-> `63`, and web `30` passing (`175` package tests total); Playwright records `42` passing, `18`
-> intentional project/viewport skips, and zero failures. Root compile/type-check/test/build and the
-> current 1440px/390px responsive baselines are
-> green. The service's read-only Sepolia smoke correctly reports a degraded empty catalog. Do not
-> recreate these layers or modify `spike/**`. Execute Phase 6 only after safely funding the
-> operator: deploy or resume one BTC/USD 4h and one ETH/USD 4h bundle through their journals,
-> activate the catalog, provision the hosted worker/funding path, and record the complete live
-> create-to-redeem trace. External Sepolia gas and live credentials/processes remain pending.**
+> **IMPLEMENTATION CHECKPOINT — Phases 0–5 and bounded operator hardening are complete. Phase 6 is
+> committed through BTC/ETH deployment/funding, three browser-off real order/fill flows,
+> predecessor LP close, and atomic paired successor activation at commit `c073643`. Runtime catalog
+> revision `5` is
+> `packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json`, hash
+> `0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`; original routes are
+> `RETIRED`, successors are `ACTIVE`, and the exercised service was `READY`. Fresh 2026-07-29
+> 12:08Z `pnpm check` passes contracts `77`, protocol `14`, catalog `6`, service `65`, and web `61`
+> (`223` total), including compile/type-check/test/build. The dedicated Playwright suite passes
+> `45` journeys with `21` intentional skips and zero failures. Do not recreate these layers or modify
+> `spike/**`. BTC now completes the real browser resolution, winning-user redemption, and builder-LP
+> redemption path. ETH is terminally rejected: its unique first post-deadline observation arrived
+> 24 seconds outside the immutable 3,600-second bound, the selector made no write, and no ETH winner
+> exists. Both active revision-5 successors retain the same known liveness risk. Future official
+> Sepolia BTC/ETH deployment config enforces a 14,400-second minimum without weakening first-
+> observation adjacency; quote freshness remains separately 3,600 seconds. Local service/web
+> container build/smoke passes, but public hosting, video, X, and form/contact fields remain pending.**
 
 You are implementing the selected iExec WTF Hackathon product in this repository. This is not a
 new discovery, selection, or architecture exercise. Start by following `AGENTS.md` and the mandatory
@@ -92,8 +99,10 @@ clears the private maximum price, which is never persisted.
 ## Required implementation order
 
 Steps 1–4 below are the retained implementation contract and regression boundary; they and bounded
-operator hardening are locally implemented rather than a request to restart. Step 5's fresh product
-deployment is the next live milestone.
+operator hardening are implemented rather than a request to restart. Step 5 is partial/degraded:
+live deployment/funding/fills/LP close/successor cutover and one complete BTC resolution/redemption
+vertical are committed; ETH is a terminal immutable-policy rejection, and public release evidence
+remains pending.
 
 ### 1. Harden the verified contract slice
 
@@ -153,6 +162,12 @@ boundaries and current round guidance; do not rely on deprecated `answeredInRoun
 the selected observation is the first chronological one at or after resolution by validating its
 timestamp and an adjacent predecessor before resolution, including phase transitions. Never let a
 caller cherry-pick any later favorable round.
+
+For every future official Sepolia BTC/USD or ETH/USD deployment, enforce
+`maximumObservationDelaySeconds >= 14,400`. The first-observation/adjacent-predecessor rule remains
+unchanged, so the larger liveness bound does not create later-round choice. Keep runtime oracle quote
+freshness independently at 3,600 seconds. Existing 3,600-second market records are immutable
+history; do not edit them in place.
 
 Use the implemented deployment journal for every live bundle. It is created before the first
 write, cross-process locked, and bound to the exact plan/operator/chain/output paths, ordered
@@ -220,12 +235,23 @@ authorization`, not chat and not one-tap wagering. An API/agent interface is sec
 
 ### 5. Verify the complete user path
 
-Run clean unit, property, adversarial, integration, recovery, and browser tests. Then verify a fresh
-live path over one BTC/USD 4h and one ETH/USD 4h bundle that includes real funding/onboarding,
-order creation, browser closure, worker evaluation, one atomic FPMM fill, position display,
-objective resolution, and redemption. Safely fund the operator first; deploy or resume through the
-journal, activate the catalog, and provision the hosted worker/funding processes. Use the final
-cadence/check-budget guards, not the permissive Gate C deployment configuration.
+**Current checkpoint:** the BTC NO, BTC YES, and ETH YES artifacts already prove signed funding
+where needed, direct Gateway input, real order creation, browser closure, browser-off FPMM fill, and
+fresh-browser `Filled` reconstruction on the original bundles. Both predecessor LP removals and the
+paired revision-5 successor cutover are committed. BTC resolution plus winning-user and builder-LP
+redemption are also committed. ETH's accountless selector proved its first observation was 24
+seconds beyond the immutable one-hour bound and stopped before a write. Do not rerun those writes or
+invent an ETH settlement merely to make the evidence symmetric.
+
+The complete acceptance path spans real funding/onboarding, order creation, browser closure, worker
+evaluation, atomic FPMM fill, position display, objective resolution, and redemption. BTC now covers
+that entire path. ETH is terminally unavailable for this condition: do not poll or call the retired
+resolver again, substitute a later round, or claim the rejected price as a winner. Revision `5`
+remains the current routing, but both active successors carry the disclosed one-hour liveness risk;
+any release replacement must use the existing resolver-first cutover with the enforced four-hour
+minimum. Run the clean unit, property, adversarial, integration, recovery, browser, and root checks
+again at the submission commit. Public hosting remains unverified despite passing local container
+build/check/smoke.
 
 Browser assertions must prove card Trade actions cause no Gateway/wallet request before explicit
 review, design fixtures never ship as live responses, scroll changes focus without changing the
@@ -244,3 +270,5 @@ implementation bugs or post-hackathon hardening items.
 
 When complete, update the canonical architecture only where executable evidence required a change,
 then reconcile `CURRENT.md`, routing files, source manifest, verification memo, and handoff together.
+Do not replace public frontend/service, repository, video, X, organizer-form, or contact placeholders
+until each value is externally verified.

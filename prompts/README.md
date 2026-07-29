@@ -13,15 +13,16 @@ architecture from scratch. The canonical architecture now includes the DeepBook-
 multi-asset terminal, the adopted mobile Market Stream + desktop stream-rail discovery contract,
 and post-gate Opus corrections. The user explicitly advanced the
 polished-build checkpoint on 2026-07-28; Prompt 4 is authorized and active. Its contracts,
-protocol, catalog, service, and web layers now exist locally, and bounded operator hardening is
-complete. The final 2026-07-29 local snapshot is contracts `62`, protocol `14`, catalog `6`,
-service `63`, and web `30` passing (`175` package tests total); Playwright records `42` passing,
-`18` intentional project/viewport skips, and zero failures. Root compile/type-check/test/build and
-the current 1440px/390px responsive baselines pass. The read-only
-Sepolia smoke correctly reports a degraded empty catalog. The active route is Prompt 4 Phase 6:
-safely fund the operator, deploy or resume one BTC/USD 4h and one ETH/USD 4h bundle through their
-journals, activate the catalog, provision the hosted worker/funding path, and record the full live
-create-to-redeem proof. External Sepolia gas funding and live credentials/processes remain pending.
+protocol, catalog, service, and web layers now exist, and bounded operator hardening is complete.
+The 2026-07-29 12:08Z snapshot records contracts `77`, protocol `14`, catalog `6`, service `65`, and
+web `61` passing (`223` package tests total); the dedicated Playwright snapshot records `45`
+passing, `21` intentional project/viewport skips, and zero failures. Phase 6 has committed
+deployment, three browser-off fills, paired revision-5 activation, and one full BTC browser/user/LP
+redemption vertical. ETH is a terminal no-write policy rejection: its unique first post-deadline
+observation exceeded the immutable 3,600-second bound by 24 seconds. New official Sepolia BTC/ETH
+deployments enforce a 14,400-second minimum; both active revision-5 successors predate it and retain
+disclosed risk. Local container build/smoke passes, but public hosting and submission assets remain
+pending. Prompt 4 is the active route; do not restart discovery.
 
 1. [Run docs-first product discovery](./00-docs-first-product-discovery.md)
 2. [Independently audit NoxLimit and the full corpus](./01-independent-noxlimit-audit.md)

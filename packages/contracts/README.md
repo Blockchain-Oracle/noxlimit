@@ -83,11 +83,11 @@ hardcoded placeholder addresses as deployment evidence.
 
 ## Post-hardening operator evidence
 
-The final 2026-07-29 local package snapshot passes `62` contract tests. Together with the workspace
-verification it records protocol `14`, catalog `6`, service `63`, and web `30` passing (`175`
-package tests total); Playwright records `42` passing, `18` intentional project/viewport skips, and
-zero failures. Root compile/type-check/test/build and current responsive 1440px/390px baselines are
-green.
+The fresh 2026-07-29 12:08Z package snapshot passes `77` contract tests. Together with the workspace
+verification it records protocol `14`, catalog `6`, service `65`, and web `61` passing (`223`
+package tests total), with root compile/type-check/test/build green. The fresh dedicated
+Playwright snapshot records `45` passing, `21` intentional project/viewport skips, and zero
+failures; rerun it at the submission commit.
 
 The deployment path is locally hardened around a resumable journal:
 
@@ -107,9 +107,36 @@ The deployment path is locally hardened around a resumable journal:
   issuer. The deployer mints only the exact pool-seed/funding-treasury shortfall frozen in the
   journal.
 
-These are local operator guarantees, not a fresh product deployment. Phase 6 still needs external
-Sepolia gas funding plus live credentials/processes, followed by one BTC/USD 4h and one ETH/USD 4h
-deployment, activated catalog, hosted worker/funding path, and browser-to-redemption evidence.
+## Live Phase 6 operator evidence
+
+The operator guarantees above have now been exercised on branch
+`codex/noxlimit-polished-product`. Paired cutover commit `c073643` publishes catalog revision `5` at
+[`../catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json`](../catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json),
+with catalog hash `0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`.
+The original BTC/ETH 4h bundles are `RETIRED` and both verified successors are `ACTIVE`.
+
+Three committed browser-off traces prove direct-Gateway order creation and real FPMM fills on the
+original bundles. The earlier BTC/ETH liquidity-close artifacts prove builder LP removal after
+NoxLimit close and honestly record the unresolved state at that step. BTC then completed objective
+browser resolution plus winning-user redemption in
+[`../../.thoughts/evidence/2026-07-29-phase6-btc-resolution-redemption.json`](../../.thoughts/evidence/2026-07-29-phase6-btc-resolution-redemption.json),
+and builder-LP redemption in
+[`../../.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-redemption.json`](../../.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-redemption.json),
+transaction `0x706c0c6f38518a8cd536eb4b177939a642434979153f5ee9c62f105f186c3f0c`,
+receipt block `11375232`.
+
+ETH is a terminal immutable-policy rejection, not `WAITING`. Its unique first post-deadline
+observation arrived after 3,624 seconds, 24 seconds outside the deployed 3,600-second bound. The
+accountless selector rejected before any write; resolver settlement fields and the payout remain
+unset, so ETH user/LP positions are unredeemable. Evidence is
+[`../../.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-resolution-policy-rejection.json`](../../.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-resolution-policy-rejection.json).
+Do not select a later round or claim an ETH winner.
+
+The operator now rejects future official Sepolia BTC/ETH deployments with an observation-delay
+value below 14,400 seconds while preserving unique first-observation adjacency. Runtime quote
+freshness remains independently 3,600 seconds. Both active revision-5 successors predate the guard
+and retain the known one-hour liveness risk. The exercised service reported `READY`, and local
+service/web container build/smoke passes, but no public service/frontend URL is verified.
 
 ## Commands
 

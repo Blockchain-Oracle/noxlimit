@@ -15,23 +15,40 @@ includes the user-directed DeepBook-inspired BTC/ETH/verified-SOL terminal, 1h/4
 truthful FPMM quote ladder, typed client boundary, and accepted post-gate Opus corrections. The
 user also adopted the hybrid discovery contract: a TikTok-like vertical Market Stream on mobile,
 the same stream as the desktop terminal rail, and full analysis/review before any order action.
-The polished contracts, protocol, catalog, service, and web now exist locally. The final 2026-07-29
-local snapshot records contracts `62`, protocol `14`, catalog `6`, service `63`, and web `30`
-passing tests (`175` total), plus Playwright `42` passing, `18` intentional project/viewport skips,
-and zero failures. Root compile, type-check, test, and build gates pass, and the current responsive
-1440px/390px baselines are green. Phases 0–5 and bounded
-operator hardening are locally complete. The read-only Sepolia smoke is honestly degraded with an
-empty catalog. The fresh BTC/ETH create-to-redeem deployment remains Phase 6 and still needs
-external Sepolia gas funding plus live credentials/processes; local implementation is not live
-product evidence.
+The polished contracts, protocol, catalog, service, and web now exist. The fresh 2026-07-29
+12:08Z root `pnpm check` records contracts `77`, protocol `14`, catalog `6`, service `65`, and web
+`61` passing tests (`223` total), with compile, type-check, test, and build gates green. The fresh
+dedicated Playwright snapshot records `45` passing journeys, `21` intentional project/viewport
+skips, and zero failures; rerun it at the submission commit. Phases 0–5 and bounded operator
+hardening are complete. Phase 6 has advanced through real deployment and paired rotation on branch
+`codex/noxlimit-polished-product`: commit `c073643` publishes runtime catalog revision `5` at
+`packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json`, with catalog hash
+`0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`. The original BTC/ETH
+bundles are `RETIRED`, both verified successors are `ACTIVE`, predecessor LP-close evidence is
+committed, three real browser-off order/fill flows are committed, and the exercised service was
+`READY`.
 
-The bounded operator now uses a plan-bound, cross-process-locked deployment journal with frozen
+Phase 6 settlement is partial/degraded. The retired BTC predecessor completed real browser
+resolution, winning-user redemption, and builder-LP redemption. The retired ETH predecessor cannot
+resolve under its immutable 3,600-second observation-delay policy: the exact first post-deadline
+Chainlink observation arrived at `+3,624s`, 24 seconds outside the bound. The accountless selector
+rejected before any write, the resolver and payout vector remain unset, and ETH user/LP positions
+remain unredeemable. Do not claim an ETH winner or a paired BTC/ETH complete vertical. Both active
+revision-5 successors also carry the known 3,600-second liveness risk. Public frontend/service URLs,
+the video, X post, and submission form/contact fields are pending. Local container build/smoke
+evidence is not public hosting.
+
+The bounded operator uses a plan-bound, cross-process-locked deployment journal with frozen
 ordered steps and funding, `INTENT → SUBMITTED → CONFIRMED`, attempt-bound explicit `ADOPT`/`RETRY`
 recovery, secret rejection, and hash-verified create-only outputs. It also enforces exact canonical
-horizon/question input and mints only a verified shared-collateral shortfall. The next authorized
-action is to fund the operator safely, deploy or resume one BTC/USD 4h and one ETH/USD 4h bundle,
-activate the catalog, provision hosted worker/funding processes, and capture the complete live
-browser-to-redemption proof.
+horizon/question input and mints only a verified shared-collateral shortfall. New official Sepolia
+BTC/ETH deployments enforce a 14,400-second minimum observation-delay bound while preserving the
+same unique first-observation adjacency proof; runtime oracle quote freshness remains independently
+3,600 seconds. Preserve the completed BTC evidence and terminal ETH rejection. Do not poll or write
+the retired ETH resolver again, and do not substitute a later round. Treat the active revision-5
+successors as current routing with disclosed liveness risk and keep the public release gated until
+that risk is replaced or explicitly retired. Any replacement must use the existing resolver-first,
+create-only successor workflow and the new floor.
 
 ## Working Rules
 
@@ -181,10 +198,11 @@ silently guessing from memory.
 - Do not inherit SLA Lock or either `NONE SURVIVE` verdict without reading the dated evidence. The
   newest docs-first verdict is current research state, not a selected product.
 - Do not reopen product selection or rerun Prompt 3. The bounded technical critical path is
-  live-verified, the polished product layers are implemented locally, and bounded operator
-  hardening is complete locally. What remains unverified is the live product release: safely
-  funding the operator, a non-empty activated BTC/ETH catalog, hosted worker/funding provision,
-  and the fresh browser-to-redemption trace.
+  live-verified, the polished layers and operator hardening are complete, and the committed Phase 6
+  evidence now includes a non-empty activated BTC/ETH catalog, three browser-off fills, and one
+  complete BTC browser-to-user/LP-redemption vertical. ETH is a terminal immutable-policy rejection,
+  not pending settlement or a second winner. Durable public hosting and submission assets remain
+  unverified, and the active revision-5 successors retain a disclosed one-hour liveness risk.
 - Do not create a second NoxLimit architecture. Update the canonical architecture when executable
   evidence requires a change.
 - Do not inherit the independent audit's claim that every failed evaluation needs an explicit

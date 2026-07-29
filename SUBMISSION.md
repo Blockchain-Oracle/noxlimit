@@ -1,8 +1,10 @@
 # NoxLimit submission packet
 
-Status: **DRAFT — do not submit yet.** The product, live deployments, and fresh browser-off fills
-have evidence. Public hosting, the final fresh resolution/redemption trace, video, X post, and
-registration fields are still explicitly pending below.
+Status: **DRAFT — do not submit yet.** The product, live deployments, three fresh browser-off fills,
+predecessor LP close, paired successor activation, and one complete BTC browser-resolution/user-
+redemption/LP-redemption vertical have evidence. ETH is a terminal no-write policy rejection, not a
+second winner: its first post-deadline observation was 24 seconds outside the immutable one-hour
+bound. Public hosting, video, X post, and organizer form/contact fields remain explicitly pending.
 
 ## Submission copy
 
@@ -97,17 +99,44 @@ research material and is not part of the submission source release. See `LICENSE
   `.thoughts/evidence/2026-07-29-phase6-btc-no-order.json`,
   `.thoughts/evidence/2026-07-29-phase6-btc-yes-order.json`, and
   `.thoughts/evidence/2026-07-29-phase6-eth-yes-order.json`.
-- [x] Fresh successor bundles are deployed and validated as rotation candidates (activation is
-  still pending below):
+- [x] Fresh successor bundles are deployed and validated:
   `.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-successor-deployment.json` and
   `.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-successor-deployment.json`.
-- [x] Local compile, type-check, package-test, build, responsive browser, privacy-boundary, and
-  accessibility gates exist. Re-run `pnpm check` and the Playwright suite at the final commit.
+- [x] Both predecessor LP positions were removed after NoxLimit close. The committed artifacts show
+  the state at that earlier step, including `redeemed: false`; later BTC redemption is recorded
+  separately, while ETH remains unredeemable:
+  `.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-close.json` and
+  `.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-liquidity-close.json`.
+- [x] Paired cutover commit `c073643` publishes runtime catalog revision `5` at
+  `packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json`, hash
+  `0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`; original BTC/ETH routes
+  are `RETIRED` and both successors are `ACTIVE`.
+- [x] The exercised service reported `READY`; this is runtime evidence, not proof of a durable
+  public service URL.
+- [x] BTC completed objective browser resolution and winning-user redemption:
+  `.thoughts/evidence/2026-07-29-phase6-btc-resolution-redemption.json`.
+- [x] The builder's retained BTC position redeemed in transaction
+  `0x706c0c6f38518a8cd536eb4b177939a642434979153f5ee9c62f105f186c3f0c`, receipt block `11375232`:
+  `.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-liquidity-redemption.json`.
+- [x] ETH produced a terminal, accountless policy-rejection trace. The adjacent first observation
+  arrived at `+3,624s`, 24 seconds beyond the immutable 3,600-second bound; no write, payout, or
+  winner exists, and ETH user/LP positions remain unredeemable:
+  `.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-resolution-policy-rejection.json`.
+- [x] Future official Sepolia BTC/ETH deployments enforce a 14,400-second minimum observation-
+  delay bound while preserving unique first-observation adjacency. Both active revision-5
+  successors predate this guard and retain a disclosed one-hour liveness risk.
+- [x] Service and web container builds plus local smoke checks pass. This is not public hosting.
+- [x] Fresh 2026-07-29 12:08Z `pnpm check` passes contracts `77`, protocol `14`, catalog `6`,
+  service `65`, and web `61` (`223` package tests total), including compile/type-check/test/build.
+  The dedicated Playwright suite passes `45` journeys with `21` intentional skips and zero failures.
+  Re-run it and the dedicated Playwright suite at the final submission commit.
 
 ### Pending before submission
 
-- [ ] **PENDING — final fresh objective resolution and winning-position redemption evidence.**
-- [ ] **PENDING — successor cutover/final active catalog revision reflected in public docs.**
+- [ ] **PENDING — release handling for both active revision-5 successors' disclosed 3,600-second
+  liveness risk.** Any replacement must use the existing resolver-first workflow, the enforced
+  14,400-second minimum, immutable verification, and a new hash-linked catalog cutover. Do not edit
+  revision `5` in place.
 - [ ] **PENDING — public hosted frontend URL:** `[HOSTED_FRONTEND_URL]`.
 - [ ] **PENDING — public hosted service health URL:** `[HOSTED_SERVICE_URL]/v1/health`.
 - [ ] **PENDING — final public repository/default-branch URL:** `[PUBLIC_REPOSITORY_URL]`.
@@ -119,9 +148,9 @@ research material and is not part of the submission source release. See `LICENSE
 
 ## Demo script (target 3:35)
 
-Record this only after the pending resolution/redemption and hosted paths are verified. Use real
-Sepolia state and transaction evidence; jump cuts may remove chain waiting, but must not replace it
-with mock state.
+Record this only after the hosted paths and release routing are verified. Use the completed BTC
+Sepolia resolution/redemption evidence and disclose the ETH terminal rejection; jump cuts may remove
+chain waiting, but must not replace it with mock state or a fabricated paired success.
 
 ### 0:00–0:20 — The problem
 
@@ -159,10 +188,12 @@ displaying the raw resting maximum. Reopen the public URL in a fresh browser and
 
 ### 2:25–3:05 — Objective settlement and redemption
 
-Open the position's resolution evidence. Show the strike, resolution timestamp, first valid
-post-deadline Chainlink observation and adjacent predecessor, resolved YES/NO outcome, then submit
-the real redemption transaction. Show the winning shares decrease and Test USDC return. Use the
-fresh final evidence transaction; do not substitute the earlier Gate C fill.
+Open the BTC position's resolution evidence. Show the strike, resolution timestamp, first valid
+post-deadline Chainlink observation and adjacent predecessor, resolved YES outcome, real user
+redemption, and builder-LP redemption. Show the winning shares decrease and Test USDC return. Then
+show the ETH rejection artifact briefly: the unique first observation was 24 seconds outside its
+immutable bound, so no transaction or winner exists. Do not substitute a later ETH round or imply a
+paired successful vertical.
 
 ### 3:05–3:35 — Why Nox is indispensable
 
@@ -171,8 +202,9 @@ Show the architecture line:
 `direct Gateway input → persisted encrypted handle → Nox compare/select → public proof → one-shot FPMM buy`
 
 Close with: “NoxLimit adds a private resting order primitive to an unchanged public protocol. The
-market, assets, liquidity, trades, oracle settlement, and redemption are all real on Ethereum
-Sepolia.” Display repository, hosted app, and `@iEx_ec`.
+BTC market, assets, liquidity, trade, oracle settlement, and redemption are real on Ethereum
+Sepolia; the ETH liveness failure is disclosed and future deployments enforce a four-hour floor.”
+Display repository, hosted app, and `@iEx_ec`.
 
 ## X post draft
 
@@ -192,7 +224,7 @@ the short demo, and retain the resulting post URL.
 - Hosted frontend: **PENDING** `[HOSTED_FRONTEND_URL]`
 - Demo video: **PENDING** `[DEMO_VIDEO_URL]`
 - X post: **PENDING** `[X_POST_URL]`
-- Ethereum Sepolia deployment/evidence index: **PENDING final resolution/redemption reconciliation**
+- Ethereum Sepolia deployment/evidence index: **VERIFIED LOCALLY — publish with the hosted release**
 - iExec Hello World wallet address used for registration: **PENDING** `[HELLO_WORLD_WALLET_ADDRESS]`
 - Contact email: **PENDING** `[CONTACT_EMAIL]`
 - Telegram handle: **PENDING** `[TELEGRAM_HANDLE]`

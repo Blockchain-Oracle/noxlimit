@@ -12,15 +12,28 @@ adapter pass locally, and the bounded recovered Gate C trace passes on Ethereum 
 filled the encrypted order and forwarded real outcome shares with zero adapter dust or allowance.
 Prompt 4 is active. The polished workspace now contains the hardened contracts, shared protocol,
 deterministic catalog, restart-safe Fastify service, and responsive Next product while `spike/**`
-remains immutable evidence. The final 2026-07-29 local snapshot records contracts `62`, protocol
-`14`, catalog `6`, service `63`, and web `30` passing tests (`175` total); the root compile,
-type-check, test, and build gates are green. Playwright records `42` passing journeys, `18`
-intentional project/viewport skips, and zero failures, with current 1440px and 390px responsive
-baselines. Phases 0–5 and the bounded
-operator hardening are locally complete. This is not fresh product-deployment evidence: the
-read-only Sepolia service smoke correctly reports degraded health with an empty catalog, and the
-fresh BTC/ETH proof still needs external Sepolia gas funding plus the live credentials/processes.
-No live inventory is fabricated. Product stories, the exhaustive
+remains immutable evidence. On branch `codex/noxlimit-polished-product`, paired cutover commit
+`c073643` publishes runtime catalog revision `5` at
+[`packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json`](./packages/catalog/sepolia/markets-2026-07-29-btc-eth-4h-rotated.json),
+hash `0x8aa65b0b5a91025ed1fd0e1487b9c9058b44ca05889632e9f85baf3bb3885899`.
+The original BTC/ETH bundles are retired, their verified revision-5 successors are active, LP close
+evidence for both predecessors is committed, and three real browser-off order/fill flows are
+committed. The retired BTC predecessor then completed real browser resolution, winning-user
+redemption, and builder-LP redemption. The retired ETH predecessor cannot resolve: its unique first
+post-deadline Chainlink observation arrived after 3,624 seconds, 24 seconds beyond the immutable
+3,600-second bound. The accountless selector rejected before any write, no ETH winner/payout exists,
+and its user/LP positions remain unredeemable. Both active successors carry the same known one-hour
+liveness risk. The exercised service reported `READY`; that local/live runtime is not a public
+hosting claim.
+
+The fresh 2026-07-29 12:08Z root `pnpm check` passes contracts `77`, protocol `14`, catalog `6`,
+service `65`, and web `61` tests (`223` total), including compile, type-check, test, and build. The
+fresh dedicated Playwright baseline records `45` passing journeys, `21` intentional skips, and
+zero failures; both gates still need a final submission-commit rerun. New official Sepolia BTC/ETH
+deployments now enforce a 14,400-second minimum observation-delay bound without changing the unique
+first-observation rule; runtime quote freshness remains separately 3,600 seconds. Reproducible
+service/web container builds and local smoke checks pass. Public frontend/service URLs, video, X
+post, and form/contact fields are pending. No live inventory is fabricated. Product stories, the exhaustive
 screen/state map, and the designer handoff form the UX contract, and the
 [research-backed implementation plan](./.thoughts/plans/2026-07-28-noxlimit-polished-product-plan.md)
 is the active execution contract. The architecture that was previously
@@ -178,11 +191,13 @@ as evidence. The public live record is
 implementation must inherit the canonical architecture rather than reopening discovery.
 The authorized implementation handoff is
 [`prompts/04-polished-product-implementation.md`](./prompts/04-polished-product-implementation.md);
-the user advanced its checkpoint on 2026-07-28. The immediate boundary is operator/live-readiness
-execution: safely fund the operator, then deploy or resume through the plan-bound journal one
-fresh BTC/USD 4h bundle and one ETH/USD 4h bundle, activate the verified catalog, provision the
-hosted worker and funding path, and record the complete browser → Nox → FPMM → objective resolution
-→ redemption trace. The user controls pacing; historical project
+the user advanced its checkpoint on 2026-07-28. Deployment, funding, real browser-off fills,
+predecessor LP close, paired successor activation, and one complete BTC browser/user/LP redemption
+vertical are now committed. ETH is a terminal policy rejection, not `WAITING`: do not keep polling
+or write its retired resolver, infer a winner, or substitute a later round. Revision `5` remains
+current routing, but both active successors have the disclosed one-hour risk; any release
+replacement must use the enforced four-hour floor and the existing resolver-first cutover. Public
+hosting and submission assets remain pending. The user controls pacing; historical project
 clocks and submission dates are not implementation authority.
 
 ## Read order for an agent
@@ -227,8 +242,9 @@ recommendations are superseded by the current decision record.
 DarkOdds's Polymarket connection was read-only discovery/display. It did not route Polymarket
 trades. A generic native Nox prediction market is therefore still a direct repeat. NoxLimit remains
 selected—with its critical path verified—as a narrower outcome-share advanced-execution product
-rather than a new native market. Its polished product is implemented locally, but a non-empty
-activated BTC/ETH catalog and fresh live create-to-redeem product proof remain pending.
+rather than a new native market. Its non-empty BTC/ETH catalog, fresh live browser-off fills, and
+one complete BTC create-to-redeem vertical are committed. ETH is an honestly recorded immutable-
+policy failure, not a second completed vertical; the publicly hosted release remains pending.
 
 ## Source policy
 
