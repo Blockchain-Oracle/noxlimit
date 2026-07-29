@@ -428,7 +428,7 @@ async function main(): Promise<void> {
     );
     collateralMintHash = collateralMintReceipt.transactionHash;
   }
-  await runJournaledStep(
+  const seedApprovalReceipt = await runJournaledStep(
     "fpmmSeedApproval",
     "FPMM seed approval",
     () =>
@@ -439,6 +439,7 @@ async function main(): Promise<void> {
         args: [fpmmAddress, config.seedAtoms],
       }),
   );
+  const seedApprovalHash = seedApprovalReceipt.transactionHash;
   const seedReceipt = await runJournaledStep(
     "fpmmSeed",
     "FPMM seed",
@@ -691,6 +692,7 @@ async function main(): Promise<void> {
       resolver: resolverDeploymentHash,
       prepareCondition: prepareConditionHash,
       fpmm: createFpmmHash,
+      fpmmSeedApproval: seedApprovalHash,
       seedLiquidity: seedHash,
       orderBook: orderBookDeploymentHash,
       fundingTreasury: treasuryDeploymentHash ?? null,

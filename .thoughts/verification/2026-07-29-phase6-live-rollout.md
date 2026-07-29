@@ -45,6 +45,8 @@ Canonical machine-readable deployment evidence is in:
 
 - `.thoughts/evidence/2026-07-29-sepolia-btc-usd-4h-deployment.json`
 - `.thoughts/evidence/2026-07-29-sepolia-eth-usd-4h-deployment.json`
+- `.thoughts/evidence/2026-07-29-sepolia-seed-approvals.json` (supplemental receipt provenance;
+  the create-only deployment evidence remains unchanged)
 
 Both deployment journals reached `COMPLETE`. The journals are ignored operational state and are
 not committed.
