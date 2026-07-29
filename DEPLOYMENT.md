@@ -161,13 +161,14 @@ docker build -f Dockerfile.web -t noxlimit-web \
   --build-arg NEXT_PUBLIC_NOXLIMIT_API_ORIGIN=https://api.example.invalid \
   --build-arg NEXT_PUBLIC_SEPOLIA_RPC_URL=https://sepolia.example.invalid \
   --build-arg NEXT_PUBLIC_TEST_USDC_ADDRESS=0x0000000000000000000000000000000000000000 \
-  --build-arg NEXT_PUBLIC_TRADING_MIN_ETH=0.001 \
-  --build-arg NEXT_PUBLIC_TRADING_MIN_USDC=5 .
+  --build-arg NEXT_PUBLIC_TRADING_MIN_ETH=0.005 \
+  --build-arg NEXT_PUBLIC_TRADING_MIN_USDC=0.01 .
 ```
 
-The example values are placeholders, not a deployable release. Use the exact collateral from the
-activated catalog and the measured readiness floors. Inject `SEPOLIA_RPC_URL`,
-`WORKER_PRIVATE_KEY`, and other service-only values at runtime through a secret manager.
+The example origin, RPC, and collateral address are placeholders, not a deployable release. The
+`0.005` Test ETH and `0.01` Test USDC values are the tested readiness floors; use the exact
+collateral from the activated catalog. Inject `SEPOLIA_RPC_URL`, `WORKER_PRIVATE_KEY`, and other
+service-only values at runtime through a secret manager.
 
 Hosting configuration must enforce one service replica, disable autoscaling and scale-to-zero,
 use stop-before-start deployment, and allow graceful termination. A normal overlapping rolling
@@ -185,6 +186,89 @@ Recommended hosting boundaries:
   remain `READY`; also monitor worker ETH, treasury balances, RPC lag, and Gateway health;
 - redact credentials, signatures, handles/proofs, candidates, and private-input material;
 - deploy a new service process rather than overlapping two write-enabled replicas.
+
+## Cloud Run release profile after revision 8
+
+Use this profile only after the atomic revision-8 manifest is committed, independently validated,
+and selected as current routing. Revisions `6` and `7` are staging history and must never be used as
+the hosted runtime catalog.
+
+- Deploy the service in one explicit region with fixed manual scaling of one instance, CPU available
+  outside requests (`--no-cpu-throttling`), and no scale-to-zero. Set the container port to `8787`;
+  Cloud Run supplies `PORT`, while the application still requires `HOST=0.0.0.0`.
+- Deploy the web container separately with ordinary autoscaling and scale-to-zero. Its overlap is
+  harmless because it owns no signer or worker queue.
+- Do not enable automatic service deployments. The first writer deployment has no predecessor to
+  overlap, but a later rolling revision may briefly run two processes with the same signer. Until a
+  distributed lease exists, perform later service changes in a maintenance window and independently
+  prove the old writer has stopped before the replacement begins.
+- The fixed, continuously scheduled service is billable even when HTTP traffic is idle. It is not a
+  zero-cost hosting claim; verify the account budget and alerts before publishing the URL.
+
+Break the web/service origin cycle without weakening CORS:
+
+1. build and deploy an unadvertised bootstrap web revision with a nonfunctional placeholder API
+   origin, then read its stable HTTPS origin;
+2. deploy the write-enabled service once with `WEB_ORIGIN` equal to that exact web origin;
+3. read the service HTTPS origin, rebuild the web image with that value in
+   `NEXT_PUBLIC_NOXLIMIT_API_ORIGIN`, and deploy the final web revision;
+4. publish neither URL until the JSON readiness and catalog assertions below pass.
+
+The service runtime boundary is:
+
+```text
+# Non-secret runtime configuration
+NODE_ENV=production
+HOST=0.0.0.0
+WEB_ORIGIN=https://<exact-web-origin>
+CATALOG_MANIFEST_PATH=packages/catalog/sepolia/<committed-revision-8-manifest>.json
+FUNDING_TREASURY_ADDRESS=0x6b4Ce61906E7402e198Bd6D2bc73CEd24A721b78
+POLL_INTERVAL_MS=5000
+LOG_LEVEL=info
+
+# Secret Manager references, injected only at runtime
+WORKER_PRIVATE_KEY=<dedicated-worker-secret-version>
+SEPOLIA_RPC_URL=<reliable-sepolia-rpc-secret-version>
+```
+
+`CATALOG_MANIFEST_PATH` is deliberately relative to `/app` inside `Dockerfile.service`, where the
+committed `packages/catalog/sepolia/` directory is copied. Do not set
+`CATALOG_RELOAD_POINTER_PATH` on an ephemeral Cloud Run filesystem. Omit `NOX_COMPUTE_ADDRESS`,
+`NOX_GATEWAY_URL`, and `NOX_SUBGRAPH_URL` to use the released Ethereum Sepolia defaults unless a
+separately verified override is required.
+
+The final web build receives public values only:
+
+```text
+NEXT_PUBLIC_NOXLIMIT_API_ORIGIN=https://<exact-service-origin>
+NEXT_PUBLIC_SEPOLIA_RPC_URL=https://<browser-safe-sepolia-rpc>
+NEXT_PUBLIC_TEST_USDC_ADDRESS=0x2B0F8B156a2870E53621802A618C3d0427A163A6
+NEXT_PUBLIC_TRADING_MIN_ETH=0.005
+NEXT_PUBLIC_TRADING_MIN_USDC=0.01
+```
+
+The browser RPC must be intentionally public and safe to expose. Never put a provider secret,
+private key, credential-bearing RPC URL, or other server-only value in `NEXT_PUBLIC_*`.
+
+Cloud Run's HTTP probe can establish process liveness, but `/v1/health` intentionally returns a
+structured body even when a subsystem is degraded. Gate the release on the body, not HTTP 200
+alone:
+
+```bash
+curl --fail --silent "https://<service-origin>/v1/health" | \
+  jq -e '
+    .status == "READY" and
+    .evaluator.status == "READY" and
+    .funding.status == "READY"
+  '
+curl --fail --silent "https://<service-origin>/v1/markets"
+curl --fail --silent "https://<web-origin>/"
+```
+
+Also compare the returned `catalogRevision` with the committed revision-8 hash and confirm that
+exactly one service revision receives traffic. Without a durable reload pointer and signal control,
+future catalog rotation requires a controlled image/service replacement and inherits the same
+single-writer rollout caveat.
 
 ## Deploy and rotate market bundles
 
