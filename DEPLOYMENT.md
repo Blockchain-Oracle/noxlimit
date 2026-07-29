@@ -281,7 +281,7 @@ curl --fail --silent "https://<web-origin>/"
 ```
 
 Also require the returned `catalogRevision` to equal
-`0x577593192efb7cf139267b3d076eb5e846fd15d1ab080611f9d504b716b4b427` and confirm that exactly one
+`0x21083cbce01a121d253ff1114b77c9d12035e596ce89c9ad58411f3e06711a6e` and confirm that exactly one
 service revision receives traffic. Without a durable reload pointer and signal control,
 future catalog rotation requires a controlled image/service replacement and inherits the same
 single-writer rollout caveat.
